@@ -1,0 +1,30 @@
+[gd_scene load_steps=6 format=4 uid="uid://5i1gc6aeesew"]
+
+[ext_resource type="PackedScene" uid="uid://d3k8we2ar0x7d" path="res://scripts/interaction/interaction_area/interaction_area.tscn" id="1_3uc43"]
+[ext_resource type="Script" uid="uid://d3umj0exgik2f" path="res://scenes/objects/farm/farm.gd" id="1_strq6"]
+[ext_resource type="Resource" uid="uid://bqtways0vx4mv" path="res://scripts/crops/tomato.tres" id="2_u0blw"]
+[ext_resource type="TileSet" uid="uid://dcgyw0duh4tw8" path="res://tilesets/game_tile_set.tres" id="3_gqm2h"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_a27cg"]
+size = Vector2(48, 80)
+
+[node name="Farm" type="Node2D"]
+script = ExtResource("1_strq6")
+crop_data = ExtResource("2_u0blw")
+
+[node name="Tilled_Dirt" type="TileMapLayer" parent="."]
+tile_map_data = PackedByteArray("AAACAAQAAgACAAIAAAACAAMAAgACAAEAAAACAAIAAgACAAEAAAACAAEAAgACAAEAAAACAAAAAgACAAAAAAABAAQAAgABAAIAAAABAAMAAgABAAEAAAABAAIAAgABAAEAAAABAAEAAgABAAEAAAABAAAAAgABAAAAAAAAAAQAAgAAAAIAAAAAAAMAAgAAAAEAAAAAAAIAAgAAAAEAAAAAAAEAAgAAAAEAAAAAAAAAAgAAAAAAAAA=")
+tile_set = ExtResource("3_gqm2h")
+
+[node name="Crops" type="TileMapLayer" parent="."]
+tile_map_data = PackedByteArray("AAAAAAAAAwAAAAIAAAAAAAEAAwAAAAIAAAAAAAIAAwAAAAIAAAAAAAMAAwAAAAIAAAAAAAQAAwAAAAIAAAABAAAAAwAAAAIAAAABAAEAAwAAAAIAAAABAAIAAwAAAAIAAAABAAMAAwAAAAIAAAABAAQAAwAAAAIAAAACAAAAAwAAAAIAAAACAAEAAwAAAAIAAAACAAIAAwAAAAIAAAACAAMAAwAAAAIAAAACAAQAAwAAAAIAAAA=")
+tile_set = ExtResource("3_gqm2h")
+
+[node name="InteractionArea" parent="." instance=ExtResource("1_3uc43")]
+action_name = "HARVEST"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea"]
+position = Vector2(24, 40)
+shape = SubResource("RectangleShape2D_a27cg")
+disabled = true
+debug_color = Color(0.8337021, 0.307319, 0.61901206, 0.41960785)
