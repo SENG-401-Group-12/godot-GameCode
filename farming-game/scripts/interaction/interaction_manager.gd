@@ -46,10 +46,17 @@ func _sort_by_distance_to_player(area1, area2):
 func _input(event: InputEvent) -> void:
 	# On interaction button pressed
 	if event.is_action_pressed("interact") && can_interact:
-		if active_areas.size() > 0: # If there is an active area
-			can_interact = false
-			label.hide()
-			
-			await active_areas[0].interact.call() # Call the interaction function for the area
-			
-			can_interact = true
+		try_interact()
+
+func try_interact(): # If the area is valid to interact with, call the method attatched to it
+	if not can_interact:
+		return
+	if active_areas.is_empty():
+		return
+		
+	can_interact = false
+	label.hide()
+	
+	await active_areas[0].interact.call() # Call the interaction function for the area
+	
+	can_interact = true
