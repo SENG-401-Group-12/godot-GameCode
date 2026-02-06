@@ -22,6 +22,8 @@ var growth_stage := 0
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	if Engine.is_editor_hint(): #if in the editor
+		dirt_tilemap.clear()
+		crops.clear()
 		_update_farm_preview()
 		return
 	
