@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://3nnycgfvchhk"]
+
+[ext_resource type="Texture2D" uid="uid://d3u8qkh33a7qs" path="res://icon.svg" id="1_djaja"]
+
+[node name="InteractButton" type="Node2D" unique_id=593256940]
+
+[node name="TouchScreenButton" type="TouchScreenButton" parent="." unique_id=1098820378]
+texture_normal = ExtResource("1_djaja")
+action = "interact"
+
+[connection signal="pressed" from="TouchScreenButton" to="." method="_on_touch_screen_button_pressed"]

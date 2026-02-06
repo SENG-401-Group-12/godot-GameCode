@@ -1,4 +1,4 @@
-[gd_resource type="TileSet" load_steps=11 format=3 uid="uid://dcgyw0duh4tw8"]
+[gd_resource type="TileSet" format=3 uid="uid://dcgyw0duh4tw8"]
 
 [ext_resource type="Texture2D" uid="uid://bfu17goh033dt" path="res://assets/game/tilesets/water.png" id="1_tjtrf"]
 [ext_resource type="Texture2D" uid="uid://3nne8df5hm1l" path="res://assets/game/tilesets/grass.png" id="2_tkbyn"]
