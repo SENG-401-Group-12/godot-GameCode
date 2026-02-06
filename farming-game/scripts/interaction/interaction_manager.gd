@@ -6,7 +6,7 @@ extends Node2D
 const base_text = "[E] TO "
 const LABEL_OFFSET = 36
 
-var active_areas = [] # Will hold all active interaction areas
+var active_areas: Array[Area2D] = [] # Will hold all active interaction areas
 var can_interact = true
 
 func register_area(area: InteractionArea):
@@ -20,9 +20,18 @@ func unregister_area(area: InteractionArea):
 func _process(_delta: float) -> void:
 	if active_areas.size() > 0 && can_interact: # If the player is in an interactable area
 		active_areas.sort_custom(_sort_by_distance_to_player) # prioritize the closer interaction area
-		label.text = base_text + active_areas[0].action_name
-		label.global_position = active_areas[0].global_position
-		label.global_position.y -= LABEL_OFFSET # Position label above asset
+		var area := active_areas[0]
+		label.text = base_text + area.action_name
+		
+		# prioritize centering the label around LabelAnchor if it exists
+		var anchor := area.get_node_or_null("LabelAnchor")
+		if anchor: # if LabelAnchor exists, center the label on top of it
+			label.global_position = anchor.global_position
+			label.global_position.y -= label.size.y / 2 
+		else: # it LabelAnchor doesn't exist, center the label on the area center
+			label.global_position = area.global_position
+			label.global_position.y -= LABEL_OFFSET # Position label above asset
+			
 		label.global_position.x -= label.size.x / 2 # Center text
 		label.show()
 	else:

@@ -1,0 +1,24 @@
+[gd_scene load_steps=2 format=3 uid="uid://b1k6yaiua2xk0"]
+
+[ext_resource type="PackedScene" uid="uid://dmr0fcamx7t56" path="res://addons/virtual_joystick/virtual_joystick_scene.tscn" id="1_1n8ea"]
+
+[node name="Joystick" type="Node2D"]
+scale = Vector2(0.6, 0.6)
+
+[node name="Virtual Joystick" parent="." instance=ExtResource("1_1n8ea")]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -104.0
+offset_top = -101.999985
+offset_right = 104.0
+offset_bottom = 101.999985
+grow_horizontal = 2
+grow_vertical = 2
+joystick_mode = 1
+action_left = "walk_left"
+action_right = "walk_right"
+action_up = "walk_up"
+action_down = "walk_down"
