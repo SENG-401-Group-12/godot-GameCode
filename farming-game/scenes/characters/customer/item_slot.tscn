@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://clweolvlnlq04"]
+
+[ext_resource type="Texture2D" uid="uid://dta324bcwvdm5" path="res://assets/game/sprites/CropSprites/Tomato/tomato_item.png" id="1_275ol"]
+[ext_resource type="FontFile" uid="uid://7bf452djqkbk" path="res://assets/game/ui/fonts/PixelOperator8.ttf" id="2_oflcq"]
+
+[node name="ItemSlot" type="MarginContainer" unique_id=2101353287]
+size_flags_horizontal = 4
+
+[node name="ItemContainer" type="HBoxContainer" parent="." unique_id=1420983238]
+layout_mode = 2
+theme_override_constants/separation = 1
+
+[node name="ItemTexture" type="TextureRect" parent="ItemContainer" unique_id=648277421]
+layout_mode = 2
+texture = ExtResource("1_275ol")
+stretch_mode = 4
+
+[node name="ItemAmount" type="Label" parent="ItemContainer" unique_id=162245080]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_oflcq")
+theme_override_font_sizes/font_size = 8
+text = "x3"

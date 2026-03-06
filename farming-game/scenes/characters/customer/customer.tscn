@@ -1,0 +1,166 @@
+[gd_scene format=3 uid="uid://djyk4rjek8b7y"]
+
+[ext_resource type="Script" uid="uid://ch5w7pato4u4f" path="res://scenes/characters/customer/customer.gd" id="1_b2dj7"]
+[ext_resource type="Texture2D" uid="uid://d0s2cediarbqi" path="res://assets/game/character/free_chicken_sprites.png" id="1_q6fuf"]
+[ext_resource type="Texture2D" uid="uid://c8g55sxxh8ngg" path="res://assets/game/character/free_cow_sprites.png" id="2_sg7yo"]
+[ext_resource type="Script" uid="uid://v0gqfty1t3f7" path="res://scripts/interaction/interaction_area/interaction_area.gd" id="3_rjcxx"]
+[ext_resource type="FontFile" uid="uid://7bf452djqkbk" path="res://assets/game/ui/fonts/PixelOperator8.ttf" id="5_rjcxx"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_b2dj7"]
+atlas = ExtResource("1_q6fuf")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5tdk4"]
+atlas = ExtResource("1_q6fuf")
+region = Rect2(0, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_72kqh"]
+atlas = ExtResource("1_q6fuf")
+region = Rect2(16, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jftbx"]
+atlas = ExtResource("1_q6fuf")
+region = Rect2(32, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rur42"]
+atlas = ExtResource("1_q6fuf")
+region = Rect2(48, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_el2r7"]
+atlas = ExtResource("2_sg7yo")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xksiw"]
+atlas = ExtResource("2_sg7yo")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1cxkg"]
+atlas = ExtResource("2_sg7yo")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7ky54"]
+atlas = ExtResource("2_sg7yo")
+region = Rect2(0, 32, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mn44y"]
+atlas = ExtResource("2_sg7yo")
+region = Rect2(32, 32, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_fkpgi"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_b2dj7")
+}],
+"loop": true,
+"name": &"chicken_idle",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5tdk4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_72kqh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jftbx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rur42")
+}],
+"loop": true,
+"name": &"chicken_walk",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_el2r7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xksiw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1cxkg")
+}],
+"loop": true,
+"name": &"cow_idle",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7ky54")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mn44y")
+}],
+"loop": true,
+"name": &"cow_walk",
+"speed": 3.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_gulnw"]
+radius = 32.0
+
+[node name="Customer" type="Node2D" unique_id=1656965759]
+script = ExtResource("1_b2dj7")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=229667808]
+sprite_frames = SubResource("SpriteFrames_fkpgi")
+animation = &"cow_idle"
+autoplay = "cow_idle"
+frame_progress = 0.12799722
+
+[node name="InteractionArea" type="Area2D" parent="." unique_id=1164989590]
+collision_layer = 4
+script = ExtResource("3_rjcxx")
+action_name = "GIVE"
+metadata/_custom_type_script = "uid://v0gqfty1t3f7"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea" unique_id=625960754]
+position = Vector2(0, 5)
+shape = SubResource("CircleShape2D_gulnw")
+debug_color = Color(0, 0.6447446, 0.28097555, 0.41960785)
+
+[node name="LabelAnchor" type="Node2D" parent="InteractionArea" unique_id=2013380132]
+position = Vector2(0, -5)
+
+[node name="RequestList" type="Node2D" parent="." unique_id=1308312151]
+z_index = 100
+position = Vector2(0, -16)
+
+[node name="RequestContainer" type="VBoxContainer" parent="RequestList" unique_id=1164402618]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -34.0
+offset_top = -51.0
+offset_right = 32.0
+grow_horizontal = 2
+grow_vertical = 0
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_constants/separation = 0
+alignment = 2
+
+[node name="NotEnoughLabel" type="Label" parent="." unique_id=1258608841]
+visible = false
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -54.5
+offset_right = 54.5
+offset_bottom = 11.0
+grow_horizontal = 2
+size_flags_horizontal = 4
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("5_rjcxx")
+theme_override_font_sizes/font_size = 8
+text = "Not Enough Items!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[connection signal="body_entered" from="InteractionArea" to="InteractionArea" method="_on_body_entered"]
+[connection signal="body_exited" from="InteractionArea" to="InteractionArea" method="_on_body_exited"]

@@ -3,7 +3,7 @@
 [ext_resource type="TileSet" uid="uid://dcgyw0duh4tw8" path="res://tilesets/game_tile_set.tres" id="1_5smwn"]
 [ext_resource type="PackedScene" uid="uid://u5nmmr88o4nj" path="res://scenes/characters/player/player.tscn" id="2_y51r3"]
 [ext_resource type="PackedScene" uid="uid://5i1gc6aeesew" path="res://scenes/objects/farm/farm.tscn" id="3_5sagg"]
-[ext_resource type="PackedScene" uid="uid://cexvxlcbyhk1p" path="res://scenes/test/upgrader_test.tscn" id="3_tul5n"]
+[ext_resource type="PackedScene" uid="uid://cexvxlcbyhk1p" path="res://scenes/objects/shop/shop.tscn" id="3_tul5n"]
 [ext_resource type="Resource" uid="uid://bq576umsyrlhg" path="res://scripts/crops/eggplant.tres" id="5_y51r3"]
 
 [node name="TestSceneTilemap" type="Node2D" unique_id=356975521]

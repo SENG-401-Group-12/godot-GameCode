@@ -1,21 +1,21 @@
 [gd_scene format=3 uid="uid://cexvxlcbyhk1p"]
 
-[ext_resource type="Script" uid="uid://bqd5alpfymx5j" path="res://upgrader_test.gd" id="1_jp7gm"]
-[ext_resource type="Texture2D" uid="uid://d3u8qkh33a7qs" path="res://icon.svg" id="2_3irf8"]
-[ext_resource type="Script" uid="uid://v0gqfty1t3f7" path="res://scripts/interaction/interaction_area/interaction_area.gd" id="3_bg2pr"]
+[ext_resource type="Script" uid="uid://bqd5alpfymx5j" path="res://scenes/objects/shop/shop.gd" id="1_6sfbp"]
+[ext_resource type="Texture2D" uid="uid://d3u8qkh33a7qs" path="res://icon.svg" id="2_w2wlk"]
+[ext_resource type="Script" uid="uid://v0gqfty1t3f7" path="res://scripts/interaction/interaction_area/interaction_area.gd" id="3_pleuv"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_t4yi1"]
 size = Vector2(130, 130)
 
-[node name="Upgrader_Test" type="Node2D" unique_id=797344515]
-script = ExtResource("1_jp7gm")
+[node name="Shop" type="Node2D" unique_id=797344515]
+script = ExtResource("1_6sfbp")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=280483841]
-texture = ExtResource("2_3irf8")
+texture = ExtResource("2_w2wlk")
 
 [node name="InteractionArea" type="Area2D" parent="." unique_id=1564860368]
 collision_layer = 4
-script = ExtResource("3_bg2pr")
+script = ExtResource("3_pleuv")
 metadata/_custom_type_script = "uid://v0gqfty1t3f7"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea" unique_id=1157695015]
