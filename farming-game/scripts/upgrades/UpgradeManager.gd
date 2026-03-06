@@ -3,7 +3,7 @@ extends Node
 func generate_upgrade() -> CropUpgrade:
 	var upgrade = CropUpgrade.new()
 	
-	upgrade.crop_name = Globals.game_crops.pick_random()
+	upgrade.crop_name = Globals.game_crops.pick_random().crop_name
 	
 	# Weighted tier upgrade probablitiy
 	# Tier 1 = 60% , Tier 2 = 30%, Tier 3 = 10%
