@@ -2,7 +2,7 @@ extends CharacterBody2D
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 
-const SPEED = 100
+const SPEED = Globals.player_speed
 var previous_direction := Vector2.DOWN
 
 func get_input():

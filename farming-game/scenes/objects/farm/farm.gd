@@ -3,7 +3,7 @@ extends Node2D
 
 @export var crop_data: CropData
 
-@export var farm_size: Vector2i = Vector2i(3, 5):
+@export var farm_size: Vector2i = Globals.default_farm_size:
 	set(value):
 		farm_size = value
 		_update_farm_preview()
@@ -29,6 +29,7 @@ func _ready() -> void:
 	
 	# Runtime setup
 	interaction_area.interact = Callable(self, "_on_interact") # link the "_on_interact" function
+	PlayerData.farm_size_changed.connect(_on_farm_size_changed) # link the farm size change signal
 	
 	dirt_tilemap.clear()
 	crops.clear()
@@ -47,7 +48,7 @@ func _process(delta: float) -> void:
 	if Engine.is_editor_hint(): # if in the editor, do nothing
 		return
 	growth_timer += delta 
-	if growth_timer > crop_data.growth_time_per_stage:
+	if growth_timer > (crop_data.growth_time_per_stage - PlayerData.get_growth_speed_bonus(crop_data.crop_name)):
 		# Advance to next crop stage
 		growth_stage = min(growth_stage + 1, crop_data.growth_stages - 1) 
 		growth_timer = 0
@@ -65,8 +66,14 @@ func _on_interact(): # Function called when harvesting fully grown farm
 	farm_area.disabled = true
 	place_crop()
 	# Once game is further developed, we will want to replace this with a signal to update inventory
-	# Likely will be something like signal.emit(crop_data.crop_name)
+	
+	var base_harvest = farm_size.x * farm_size.y
+	var harvest_total = roundi(base_harvest * PlayerData.get_yield_bonus(crop_data.crop_name)) # round to nearest integer to prevent decimal inventory amounts
+	PlayerData.inventory[crop_data.crop_name] = PlayerData.inventory.get(crop_data.crop_name, 0) + harvest_total # add harvest to player inventory
+	
 	print("INTERACTION") 
+	print(PlayerData.crop_upgrades)
+	print(PlayerData.inventory)
 
 func _update_farm_preview(): 
 	if !Engine.is_editor_hint(): # if not in editor, do nothing
@@ -127,3 +134,18 @@ func place_crop(): # Place crop tiles on top of dirt
 		# Get the current crop growth stage sprite and draw it on the farm
 		var crop_atlas_coords = Vector2i(growth_stage, crop_data.row_on_spritesheet)
 		crops.set_cell(cell, 3, crop_atlas_coords)
+		
+func _on_farm_size_changed(crop_name):
+	if crop_name == crop_data.crop_name:
+		update_farm_size_from_upgrade()
+
+func update_farm_size_from_upgrade():
+	dirt_tilemap.clear()
+	crops.clear()
+	
+	farm_size = Globals.default_farm_size + PlayerData.get_size_bonus(crop_data.crop_name)
+	
+	_update_collision_shape()
+	_update_label_anchor()
+	place_dirt()
+	place_crop()
