@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=4 uid="uid://5i1gc6aeesew"]
+[gd_scene format=4 uid="uid://5i1gc6aeesew"]
 
 [ext_resource type="PackedScene" uid="uid://d3k8we2ar0x7d" path="res://scripts/interaction/interaction_area/interaction_area.tscn" id="1_3uc43"]
 [ext_resource type="Script" uid="uid://d3umj0exgik2f" path="res://scenes/objects/farm/farm.gd" id="1_strq6"]
@@ -8,26 +8,26 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_a27cg"]
 size = Vector2(48, 80)
 
-[node name="Farm" type="Node2D"]
+[node name="Farm" type="Node2D" unique_id=983991534]
 script = ExtResource("1_strq6")
 crop_data = ExtResource("2_u0blw")
 
-[node name="Tilled_Dirt" type="TileMapLayer" parent="."]
+[node name="Tilled_Dirt" type="TileMapLayer" parent="." unique_id=287115389]
 tile_map_data = PackedByteArray("AAABAAQAAgABAAIAAAABAAMAAgABAAEAAAABAAIAAgABAAEAAAABAAEAAgABAAEAAAABAAAAAgABAAAAAAAAAAQAAgAAAAIAAAAAAAMAAgAAAAEAAAAAAAIAAgAAAAEAAAAAAAEAAgAAAAEAAAAAAAAAAgAAAAAAAAACAAAAAgACAAAAAAACAAEAAgACAAEAAAACAAIAAgACAAEAAAACAAMAAgACAAEAAAACAAQAAgACAAIAAAA=")
 tile_set = ExtResource("3_gqm2h")
 
-[node name="Crops" type="TileMapLayer" parent="."]
+[node name="Crops" type="TileMapLayer" parent="." unique_id=56012957]
 tile_map_data = PackedByteArray("AAAAAAAAAwAAAAIAAAAAAAEAAwAAAAIAAAAAAAIAAwAAAAIAAAAAAAMAAwAAAAIAAAAAAAQAAwAAAAIAAAABAAAAAwAAAAIAAAABAAEAAwAAAAIAAAABAAIAAwAAAAIAAAABAAMAAwAAAAIAAAABAAQAAwAAAAIAAAACAAAAAwAAAAIAAAACAAEAAwAAAAIAAAACAAIAAwAAAAIAAAACAAMAAwAAAAIAAAACAAQAAwAAAAIAAAA=")
 tile_set = ExtResource("3_gqm2h")
 
-[node name="InteractionArea" parent="." instance=ExtResource("1_3uc43")]
+[node name="InteractionArea" parent="." unique_id=1652286935 instance=ExtResource("1_3uc43")]
 action_name = "HARVEST"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea" unique_id=1327128922]
 position = Vector2(24, 40)
 shape = SubResource("RectangleShape2D_a27cg")
 disabled = true
 debug_color = Color(0.8337021, 0.307319, 0.61901206, 0.41960785)
 
-[node name="LabelAnchor" type="Node2D" parent="InteractionArea"]
+[node name="LabelAnchor" type="Node2D" parent="InteractionArea" unique_id=982582674]
 position = Vector2(24, 40)
