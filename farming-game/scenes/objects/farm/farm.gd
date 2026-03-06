@@ -3,9 +3,12 @@ extends Node2D
 
 @export var crop_data: CropData
 
-@export var farm_size: Vector2i = Globals.default_farm_size:
+var _farm_size: Vector2i
+@export var farm_size: Vector2i:
+	get:
+		return _farm_size
 	set(value):
-		farm_size = value
+		_farm_size = value
 		_update_farm_preview()
 
 var _preview_cells: Array[Vector2i] = [] # used for showing the crop area in the 2D editor
@@ -21,6 +24,9 @@ var growth_stage := 0
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	if farm_size == Vector2i.ZERO:
+		farm_size = Globals.default_farm_size
+	
 	if Engine.is_editor_hint(): #if in the editor
 		dirt_tilemap.clear()
 		crops.clear()
