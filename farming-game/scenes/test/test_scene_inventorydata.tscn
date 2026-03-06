@@ -26,4 +26,3 @@ scale = Vector2(0.5, 0.5)
 
 [node name="Farm" parent="." unique_id=983991534 instance=ExtResource("4_vq5up")]
 position = Vector2(384, 144)
-base_farm_size = Vector2i(2, 4)

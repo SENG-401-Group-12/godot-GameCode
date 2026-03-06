@@ -10,16 +10,7 @@ var _base_farm_size: Vector2i #backing variable
 	set(value):
 		_base_farm_size = value
 		_update_farm_preview()
-		
-		
-#var _farm_size: Vector2i
-#@export var farm_size: Vector2i:
-	#get:
-		#return _farm_size
-	#set(value):
-		#_farm_size = value
-		#_update_farm_preview()
-		
+
 func get_farm_size() -> Vector2i:
 	if Engine.is_editor_hint():
 		return base_farm_size
