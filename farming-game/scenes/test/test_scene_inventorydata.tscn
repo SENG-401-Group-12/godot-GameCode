@@ -4,7 +4,6 @@
 [ext_resource type="PackedScene" uid="uid://u5nmmr88o4nj" path="res://scenes/characters/player/player.tscn" id="2_7tvbx"]
 [ext_resource type="PackedScene" uid="uid://cexvxlcbyhk1p" path="res://scenes/test/upgrader_test.tscn" id="3_5lpbj"]
 [ext_resource type="PackedScene" uid="uid://5i1gc6aeesew" path="res://scenes/objects/farm/farm.tscn" id="4_vq5up"]
-[ext_resource type="Resource" uid="uid://bq576umsyrlhg" path="res://scripts/crops/eggplant.tres" id="5_vq5up"]
 
 [node name="TestSceneTilemap" type="Node2D" unique_id=356975521]
 
@@ -26,10 +25,5 @@ position = Vector2(233, 128)
 scale = Vector2(0.5, 0.5)
 
 [node name="Farm" parent="." unique_id=983991534 instance=ExtResource("4_vq5up")]
-position = Vector2(336, 128)
-farm_size = Vector2i(3, 5)
-
-[node name="Farm2" parent="." unique_id=969825596 instance=ExtResource("4_vq5up")]
-position = Vector2(448, 168)
-crop_data = ExtResource("5_vq5up")
-farm_size = Vector2i(3, 5)
+position = Vector2(384, 144)
+base_farm_size = Vector2i(2, 4)

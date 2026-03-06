@@ -3,13 +3,27 @@ extends Node2D
 
 @export var crop_data: CropData
 
-var _farm_size: Vector2i
-@export var farm_size: Vector2i:
+var _base_farm_size: Vector2i #backing variable
+@export var base_farm_size = Globals.default_farm_size:
 	get:
-		return _farm_size
+		return _base_farm_size
 	set(value):
-		_farm_size = value
+		_base_farm_size = value
 		_update_farm_preview()
+		
+		
+#var _farm_size: Vector2i
+#@export var farm_size: Vector2i:
+	#get:
+		#return _farm_size
+	#set(value):
+		#_farm_size = value
+		#_update_farm_preview()
+		
+func get_farm_size() -> Vector2i:
+	if Engine.is_editor_hint():
+		return base_farm_size
+	return base_farm_size + PlayerData.get_size_bonus(crop_data.crop_name)
 
 var _preview_cells: Array[Vector2i] = [] # used for showing the crop area in the 2D editor
 
@@ -24,8 +38,8 @@ var growth_stage := 0
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	if farm_size == Vector2i.ZERO:
-		farm_size = Globals.default_farm_size
+	if _base_farm_size == Vector2i.ZERO:
+		base_farm_size = Globals.default_farm_size
 	
 	if Engine.is_editor_hint(): #if in the editor
 		dirt_tilemap.clear()
@@ -73,7 +87,7 @@ func _on_interact(): # Function called when harvesting fully grown farm
 	place_crop()
 	# Once game is further developed, we will want to replace this with a signal to update inventory
 	
-	var base_harvest = farm_size.x * farm_size.y
+	var base_harvest = get_farm_size().x * get_farm_size().y
 	var harvest_total = roundi(base_harvest * PlayerData.get_yield_bonus(crop_data.crop_name)) # round to nearest integer to prevent decimal inventory amounts
 	PlayerData.inventory[crop_data.crop_name] = PlayerData.inventory.get(crop_data.crop_name, 0) + harvest_total # add harvest to player inventory
 	
@@ -107,15 +121,15 @@ func _update_collision_shape(): # Function to resize the InteractionArea for the
 	var shape := RectangleShape2D.new()
 
 	shape.size = Vector2(
-		farm_size.x * tile_size.x,
-		farm_size.y * tile_size.y
+		get_farm_size().x * tile_size.x,
+		get_farm_size().y * tile_size.y
 	)
 
 	farm_area.shape = shape
 	farm_area.position = shape.size * 0.5
 
 func _update_label_anchor(): # Repositions the LabelAnchor to the center of the farm area
-	label_anchor.position = Vector2((farm_size.x * 16) * 0.5, (farm_size.y * 16) * 0.5)
+	label_anchor.position = Vector2((get_farm_size().x * 16) * 0.5, (get_farm_size().y * 16) * 0.5)
 
 func get_farm_cells() -> Array[Vector2i]:
 	# Returns all TileMap cells currently occupied by the farm
@@ -123,8 +137,8 @@ func get_farm_cells() -> Array[Vector2i]:
 
 	var origin := dirt_tilemap.local_to_map(dirt_tilemap.to_local(global_position))
 
-	for x in range(farm_size.x):
-		for y in range(farm_size.y):
+	for x in range(get_farm_size().x):
+		for y in range(get_farm_size().y):
 			cells.append(origin + Vector2i(x, y))
 
 	return cells
@@ -149,7 +163,7 @@ func update_farm_size_from_upgrade():
 	dirt_tilemap.clear()
 	crops.clear()
 	
-	farm_size = Globals.default_farm_size + PlayerData.get_size_bonus(crop_data.crop_name)
+	#farm_size = Globals.default_farm_size + PlayerData.get_size_bonus(crop_data.crop_name)
 	
 	_update_collision_shape()
 	_update_label_anchor()
