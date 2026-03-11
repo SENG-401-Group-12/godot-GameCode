@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CropData" format=3 uid="uid://mkpaducc6edv"]
+
+[ext_resource type="Script" uid="uid://bpx40ij8v3u2p" path="res://scripts/crops/crop_data.gd" id="1_xbvi0"]
+[ext_resource type="Texture2D" uid="uid://cluumsv6n2rek" path="res://assets/game/objects/crop_spritesheet.png" id="2_8tder"]
+
+[resource]
+script = ExtResource("1_xbvi0")
+crop_name = "Potato"
+row_on_spritesheet = 7
+metadata/_custom_type_script = "uid://bpx40ij8v3u2p"
