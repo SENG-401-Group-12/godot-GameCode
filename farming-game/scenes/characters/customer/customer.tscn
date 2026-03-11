@@ -162,5 +162,21 @@ text = "Not Enough Items!"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="TimerLabel" type="Label" parent="." unique_id=1981201456]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -18.0
+offset_top = -63.0
+offset_right = 18.0
+offset_bottom = -52.0
+grow_horizontal = 2
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("5_rjcxx")
+theme_override_font_sizes/font_size = 8
+text = "20"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [connection signal="body_entered" from="InteractionArea" to="InteractionArea" method="_on_body_entered"]
 [connection signal="body_exited" from="InteractionArea" to="InteractionArea" method="_on_body_exited"]

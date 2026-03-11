@@ -2,7 +2,7 @@ extends CharacterBody2D
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 
-const SPEED = Globals.player_speed
+var speed := Globals.player_speed
 var previous_direction := Vector2.DOWN
 
 func play_animation(name: StringName, flipped := false) -> void:
@@ -12,7 +12,7 @@ func play_animation(name: StringName, flipped := false) -> void:
 
 func get_input():
 	var input_direction := Input.get_vector("walk_left", "walk_right", "walk_up", "walk_down")
-	velocity = input_direction * SPEED
+	velocity = input_direction * speed
 
 func play_animations():
 	if velocity.length() > 0:
