@@ -1,0 +1,174 @@
+[gd_scene format=3 uid="uid://deraramrweldn"]
+
+[ext_resource type="FontFile" uid="uid://7bf452djqkbk" path="res://assets/game/ui/fonts/PixelOperator8.ttf" id="1_455v0"]
+[ext_resource type="Script" uid="uid://dgl476s4pncfa" path="res://scenes/ui/game/in_game_ui.gd" id="1_tj78p"]
+[ext_resource type="PackedScene" uid="uid://b1k6yaiua2xk0" path="res://scenes/ui/joystick/joystick.tscn" id="3_mjylm"]
+[ext_resource type="PackedScene" uid="uid://fls0qb2aavrb" path="res://scenes/ui/interact_button/interact_button.tscn" id="4_kx3kk"]
+
+[node name="InGameUI" type="Control" unique_id=1526345901]
+z_index = 4096
+custom_minimum_size = Vector2(640, 360)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_tj78p")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=2061242372]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer" unique_id=729162807]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="StatusPanel" type="ColorRect" parent="MarginContainer/HBoxContainer" unique_id=1782126048]
+custom_minimum_size = Vector2(110, 50)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+color = Color(0, 0, 0, 0.54901963)
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HBoxContainer/StatusPanel" unique_id=1992793906]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 3
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 3
+theme_override_constants/margin_bottom = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer/StatusPanel/MarginContainer" unique_id=136324870]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="WaveLabel" type="Label" parent="MarginContainer/HBoxContainer/StatusPanel/MarginContainer/VBoxContainer" unique_id=1744397730]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("1_455v0")
+theme_override_font_sizes/font_size = 8
+text = "Wave 0"
+vertical_alignment = 1
+
+[node name="ProgressLabel" type="Label" parent="MarginContainer/HBoxContainer/StatusPanel/MarginContainer/VBoxContainer" unique_id=636518939]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("1_455v0")
+theme_override_font_sizes/font_size = 8
+text = "Fed: 0 / 12"
+vertical_alignment = 1
+
+[node name="MissedLabel" type="Label" parent="MarginContainer/HBoxContainer/StatusPanel/MarginContainer/VBoxContainer" unique_id=111435700]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("1_455v0")
+theme_override_font_sizes/font_size = 8
+text = "Missed: 0 / 3"
+vertical_alignment = 1
+
+[node name="ActiveLabel" type="Label" parent="MarginContainer/HBoxContainer/StatusPanel/MarginContainer/VBoxContainer" unique_id=502689894]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("1_455v0")
+theme_override_font_sizes/font_size = 8
+text = "Waiting Now: 0"
+vertical_alignment = 1
+
+[node name="CenterMessage" type="Label" parent="MarginContainer/HBoxContainer" unique_id=1414835192]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("1_455v0")
+theme_override_font_sizes/font_size = 8
+text = "Feed the town: click a crop, plant an empty plot, harvest it, then press E on a customer."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="CropPanel" type="ColorRect" parent="MarginContainer/HBoxContainer" unique_id=224634056]
+custom_minimum_size = Vector2(150, 275)
+layout_mode = 2
+size_flags_vertical = 0
+color = Color(0, 0, 0, 0.54901963)
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HBoxContainer/CropPanel" unique_id=1080182239]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer/CropPanel/MarginContainer" unique_id=1436311688]
+layout_mode = 2
+
+[node name="SelectedCropLabel" type="Label" parent="MarginContainer/HBoxContainer/CropPanel/MarginContainer/VBoxContainer" unique_id=977940285]
+custom_minimum_size = Vector2(142, 10)
+layout_mode = 2
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("1_455v0")
+theme_override_font_sizes/font_size = 8
+text = "Selected seed:
+Turnip
+"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="SummaryLabel" type="Label" parent="MarginContainer/HBoxContainer/CropPanel/MarginContainer/VBoxContainer" unique_id=1408825935]
+custom_minimum_size = Vector2(142, 10)
+layout_mode = 2
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("1_455v0")
+theme_override_font_sizes/font_size = 8
+text = "Stored crops: 0"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/HBoxContainer/CropPanel/MarginContainer/VBoxContainer" unique_id=1242764303]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CropButtons" type="VBoxContainer" parent="MarginContainer/HBoxContainer/CropPanel/MarginContainer/VBoxContainer/ScrollContainer" unique_id=1738848057]
+layout_mode = 2
+
+[node name="Joystick" parent="." unique_id=1514460779 instance=ExtResource("3_mjylm")]
+modulate = Color(1, 1, 1, 0.5294118)
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 75.0
+offset_top = -75.0
+offset_right = 75.0
+offset_bottom = -75.0
+grow_vertical = 0
+metadata/_edit_use_anchors_ = true
+
+[node name="InteractButton" parent="." unique_id=593256940 instance=ExtResource("4_kx3kk")]
+position = Vector2(554, 360)

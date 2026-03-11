@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://5i1gc6aeesew" path="res://scenes/objects/farm/farm.tscn" id="3_5sagg"]
 [ext_resource type="PackedScene" uid="uid://cexvxlcbyhk1p" path="res://scenes/objects/shop/shop.tscn" id="3_tul5n"]
 [ext_resource type="Resource" uid="uid://bq576umsyrlhg" path="res://scripts/crops/eggplant.tres" id="5_y51r3"]
-[ext_resource type="Script" path="res://scenes/test/test_scene_mobile_interact.gd" id="6_yu43n"]
+[ext_resource type="Script" uid="uid://dotwyon1btki4" path="res://scenes/test/test_scene_mobile_interact.gd" id="6_yu43n"]
 [ext_resource type="FontFile" uid="uid://7bf452djqkbk" path="res://assets/game/ui/fonts/PixelOperator8.ttf" id="7_lyhax"]
 
 [node name="TestSceneTilemap" type="Node2D" unique_id=356975521]
@@ -37,87 +37,92 @@ position = Vector2(448, 168)
 crop_data = ExtResource("5_y51r3")
 base_farm_size = Vector2i(2, 2)
 
-[node name="Farm3" parent="." instance=ExtResource("3_5sagg")]
+[node name="Farm3" parent="." unique_id=1135706308 instance=ExtResource("3_5sagg")]
 position = Vector2(336, 224)
 base_farm_size = Vector2i(2, 2)
 
-[node name="Farm4" parent="." instance=ExtResource("3_5sagg")]
+[node name="Farm4" parent="." unique_id=1828517604 instance=ExtResource("3_5sagg")]
 position = Vector2(448, 264)
 base_farm_size = Vector2i(2, 2)
 
-[node name="Customers" type="Node2D" parent="."]
+[node name="Customers" type="Node2D" parent="." unique_id=2083288822]
 
-[node name="ActiveCustomers" type="Node2D" parent="Customers"]
+[node name="ActiveCustomers" type="Node2D" parent="Customers" unique_id=707559100]
 
-[node name="Slot1" type="Node2D" parent="Customers"]
+[node name="Slot1" type="Node2D" parent="Customers" unique_id=1668620303]
 position = Vector2(144, 112)
 
-[node name="Slot2" type="Node2D" parent="Customers"]
+[node name="Slot2" type="Node2D" parent="Customers" unique_id=460906615]
 position = Vector2(144, 176)
 
-[node name="Slot3" type="Node2D" parent="Customers"]
+[node name="Slot3" type="Node2D" parent="Customers" unique_id=444125321]
 position = Vector2(144, 240)
 
-[node name="Slot4" type="Node2D" parent="Customers"]
+[node name="Slot4" type="Node2D" parent="Customers" unique_id=1378363647]
 position = Vector2(144, 304)
 
-[node name="HUD" type="CanvasLayer" parent="."]
+[node name="HUD" type="CanvasLayer" parent="." unique_id=1317885301]
 
-[node name="StatusPanel" type="ColorRect" parent="HUD"]
+[node name="StatusPanel" type="ColorRect" parent="HUD" unique_id=825797517]
 offset_left = 8.0
 offset_top = 8.0
-offset_right = 132.0
-offset_bottom = 70.0
+offset_right = 104.0
+offset_bottom = 64.0
 color = Color(0, 0, 0, 0.54902)
 
-[node name="WaveLabel" type="Label" parent="HUD/StatusPanel"]
-offset_left = 8.0
-offset_top = 6.0
-offset_right = 116.0
-offset_bottom = 16.0
+[node name="MarginContainer" type="MarginContainer" parent="HUD/StatusPanel" unique_id=1145105125]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 3
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 3
+theme_override_constants/margin_bottom = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HUD/StatusPanel/MarginContainer" unique_id=1048914313]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="WaveLabel" type="Label" parent="HUD/StatusPanel/MarginContainer/VBoxContainer" unique_id=1646354096]
+layout_mode = 2
 theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("7_lyhax")
 theme_override_font_sizes/font_size = 8
 text = "Wave 0"
 
-[node name="ProgressLabel" type="Label" parent="HUD/StatusPanel"]
-offset_left = 8.0
-offset_top = 20.0
-offset_right = 116.0
-offset_bottom = 30.0
+[node name="ProgressLabel" type="Label" parent="HUD/StatusPanel/MarginContainer/VBoxContainer" unique_id=88217104]
+layout_mode = 2
 theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("7_lyhax")
 theme_override_font_sizes/font_size = 8
 text = "Fed: 0 / 12"
 
-[node name="MissedLabel" type="Label" parent="HUD/StatusPanel"]
-offset_left = 8.0
-offset_top = 34.0
-offset_right = 116.0
-offset_bottom = 44.0
+[node name="MissedLabel" type="Label" parent="HUD/StatusPanel/MarginContainer/VBoxContainer" unique_id=1682033919]
+layout_mode = 2
 theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("7_lyhax")
 theme_override_font_sizes/font_size = 8
 text = "Missed: 0 / 3"
 
-[node name="ActiveLabel" type="Label" parent="HUD/StatusPanel"]
-offset_left = 8.0
-offset_top = 48.0
-offset_right = 116.0
-offset_bottom = 58.0
+[node name="ActiveLabel" type="Label" parent="HUD/StatusPanel/MarginContainer/VBoxContainer" unique_id=1324778748]
+layout_mode = 2
 theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("7_lyhax")
 theme_override_font_sizes/font_size = 8
 text = "Waiting now: 0"
 
-[node name="CropPanel" type="ColorRect" parent="HUD"]
+[node name="CropPanel" type="ColorRect" parent="HUD" unique_id=357957002]
 offset_left = 8.0
 offset_top = 296.0
 offset_right = 632.0
 offset_bottom = 352.0
 color = Color(0, 0, 0, 0.54902)
 
-[node name="SelectedCropLabel" type="Label" parent="HUD/CropPanel"]
+[node name="SelectedCropLabel" type="Label" parent="HUD/CropPanel" unique_id=1150515587]
+layout_mode = 0
 offset_left = 8.0
 offset_top = 6.0
 offset_right = 180.0
@@ -127,7 +132,8 @@ theme_override_fonts/font = ExtResource("7_lyhax")
 theme_override_font_sizes/font_size = 8
 text = "Selected seed:"
 
-[node name="SummaryLabel" type="Label" parent="HUD/CropPanel"]
+[node name="SummaryLabel" type="Label" parent="HUD/CropPanel" unique_id=1463750698]
+layout_mode = 0
 offset_left = 8.0
 offset_top = 20.0
 offset_right = 180.0
@@ -137,14 +143,15 @@ theme_override_fonts/font = ExtResource("7_lyhax")
 theme_override_font_sizes/font_size = 8
 text = "Stored crops: 0"
 
-[node name="CropButtons" type="HBoxContainer" parent="HUD/CropPanel"]
+[node name="CropButtons" type="HBoxContainer" parent="HUD/CropPanel" unique_id=982443404]
+layout_mode = 0
 offset_left = 190.0
 offset_top = 6.0
 offset_right = 612.0
 offset_bottom = 50.0
 theme_override_constants/separation = 8
 
-[node name="CenterMessage" type="Label" parent="HUD"]
+[node name="CenterMessage" type="Label" parent="HUD" unique_id=1434800039]
 modulate = Color(1, 1, 1, 0)
 offset_left = 112.0
 offset_top = 8.0

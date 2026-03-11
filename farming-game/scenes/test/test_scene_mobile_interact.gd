@@ -12,10 +12,10 @@ const MAX_MISSED := 3
 	$Customers/Slot3,
 	$Customers/Slot4
 ]
-@onready var wave_label: Label = $HUD/StatusPanel/WaveLabel
-@onready var progress_label: Label = $HUD/StatusPanel/ProgressLabel
-@onready var missed_label: Label = $HUD/StatusPanel/MissedLabel
-@onready var active_label: Label = $HUD/StatusPanel/ActiveLabel
+@onready var wave_label: Label = $HUD/StatusPanel/MarginContainer/VBoxContainer/WaveLabel
+@onready var progress_label: Label = $HUD/StatusPanel/MarginContainer/VBoxContainer/ProgressLabel
+@onready var missed_label: Label = $HUD/StatusPanel/MarginContainer/VBoxContainer/MissedLabel
+@onready var active_label: Label = $HUD/StatusPanel/MarginContainer/VBoxContainer/ActiveLabel
 @onready var selected_crop_label: Label = $HUD/CropPanel/SelectedCropLabel
 @onready var summary_label: Label = $HUD/CropPanel/SummaryLabel
 @onready var crop_buttons: HBoxContainer = $HUD/CropPanel/CropButtons
