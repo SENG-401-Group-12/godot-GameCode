@@ -3,7 +3,9 @@ extends Node
 const player_speed := 100 # movement speed
 
 const game_crops := [ # crops used in the game
+	preload("res://scripts/crops/turnip.tres"),
 	preload("res://scripts/crops/tomato.tres"), 
+	preload("res://scripts/crops/strawberry.tres"),
 	preload("res://scripts/crops/eggplant.tres")
 	] 
 const default_farm_size := Vector2i(3, 5)
