@@ -5,6 +5,11 @@ extends CharacterBody2D
 const SPEED = Globals.player_speed
 var previous_direction := Vector2.DOWN
 
+func play_animation(name: StringName, flipped := false) -> void:
+	animated_sprite.flip_h = flipped
+	if animated_sprite.animation != name or not animated_sprite.is_playing():
+		animated_sprite.play(name)
+
 func get_input():
 	var input_direction := Input.get_vector("walk_left", "walk_right", "walk_up", "walk_down")
 	velocity = input_direction * SPEED
@@ -12,27 +17,27 @@ func get_input():
 func play_animations():
 	if velocity.length() > 0:
 		if velocity.x < 0:
-			animated_sprite.play("walk_left")
+			play_animation("walk_left", true)
 			previous_direction = Vector2.LEFT
 		elif velocity.x > 0:
-			animated_sprite.play("walk_right")
+			play_animation("walk_right")
 			previous_direction = Vector2.RIGHT
 		elif velocity.y < 0:
-			animated_sprite.play("walk_up")
+			play_animation("walk_up")
 			previous_direction = Vector2.UP
 		else:
-			animated_sprite.play("walk_down")
+			play_animation("walk_down")
 			previous_direction = Vector2.DOWN
 
 	else:
 		if previous_direction == Vector2.LEFT:
-			animated_sprite.play("idle_left")
+			play_animation("idle_left", true)
 		elif previous_direction == Vector2.RIGHT:
-			animated_sprite.play("idle_right")
+			play_animation("idle_right")
 		elif previous_direction == Vector2.UP:
-			animated_sprite.play("idle_up")
+			play_animation("idle_up")
 		else:
-			animated_sprite.play("idle_down")
+			play_animation("idle_down")
 
 func _physics_process(_delta: float) -> void:
 	get_input()
