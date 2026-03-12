@@ -13,6 +13,7 @@ func _ready() -> void:
 
 func open_shop():
 	main_hud.hide()
+	get_tree().paused = true # pause the game while the shop is open
 	show()
 	populate_upgrades()
 	
@@ -36,4 +37,5 @@ func close_shop():
 	for child in card_container.get_children():
 		child.queue_free()
 	hide()
+	get_tree().paused = false
 	main_hud.show()
