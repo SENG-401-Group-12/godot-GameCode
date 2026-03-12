@@ -21,7 +21,7 @@ func generate_upgrade() -> CropUpgrade:
 	return upgrade
 	
 func generate_upgrade_choices(count := 3) -> Array[CropUpgrade]:
-	var upgrades = []
+	var upgrades: Array[CropUpgrade] = []
 	
 	while upgrades.size() < count:
 		upgrades.append(generate_upgrade())
