@@ -1,4 +1,3 @@
-class_name InGameUI
 extends Control
 
 const UI_FONT = preload("res://assets/game/ui/fonts/PixelOperator8.ttf")
@@ -26,7 +25,7 @@ func _ready() -> void:
 	PlayerData.selected_crop_changed.connect(_on_selected_crop_changed)
 	_refresh_crop_ui()
 	_on_selected_crop_changed(PlayerData.get_selected_crop_name())
-	_update_status()
+	_update_status(0, 0, 0, 0, 0, 0)
 	_show_message("Feed the town: click a crop, plant an empty plot, harvest it, then press E on a customer.")
 
 func _build_crop_buttons() -> void:
@@ -42,6 +41,9 @@ func _build_crop_buttons() -> void:
 		button.add_theme_font_override("font", UI_FONT)
 		button.add_theme_font_size_override("font_size", 8)
 		button.add_theme_constant_override("h_separation", 6)
+		var new_stylebox_normal = button.get_theme_stylebox("normal").duplicate()
+		new_stylebox_normal.bg_color = Color(0.0, 0.0, 0.0, 0.157)
+		button.add_theme_stylebox_override("normal", new_stylebox_normal)
 		button.focus_mode = Control.FOCUS_NONE
 		button.pressed.connect(_on_crop_button_pressed.bind(index))
 		crop_buttons.add_child(button)
@@ -75,9 +77,8 @@ func _show_message(text: String) -> void:
 	tween.tween_interval(2.2)
 	tween.tween_property(message_label, "modulate:a", 0.0, 0.5)
 
-func _update_status() -> void:
-	#wave_label.text = "Wave %d" % current_wave
-	#progress_label.text = "Fed: %d / %d" % [fed_count, FED_TARGET]
-	#missed_label.text = "Missed: %d / %d" % [missed_count, MAX_MISSED]
-	#active_label.text = "Waiting now: %d" % active_customer_count
-	pass
+func _update_status(current_wave, fed_count, fed_target, missed_count, allowed_misses, active_customer_count) -> void:
+	wave_label.text = "Wave %d" % current_wave
+	progress_label.text = "Fed: %d / %d" % [fed_count, fed_target]
+	missed_label.text = "Missed: %d / %d" % [missed_count, allowed_misses]
+	active_label.text = "Waiting now: %d" % active_customer_count

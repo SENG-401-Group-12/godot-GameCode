@@ -39,7 +39,7 @@ custom_minimum_size = Vector2(110, 50)
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
-color = Color(0, 0, 0, 0.54901963)
+color = Color(0, 0, 0, 0.29411766)
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HBoxContainer/StatusPanel" unique_id=1992793906]
 layout_mode = 1
@@ -109,7 +109,7 @@ autowrap_mode = 2
 custom_minimum_size = Vector2(150, 275)
 layout_mode = 2
 size_flags_vertical = 0
-color = Color(0, 0, 0, 0.54901963)
+color = Color(0, 0, 0, 0.29411766)
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HBoxContainer/CropPanel" unique_id=1080182239]
 layout_mode = 1
@@ -155,6 +155,9 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="CropButtons" type="VBoxContainer" parent="MarginContainer/HBoxContainer/CropPanel/MarginContainer/VBoxContainer/ScrollContainer" unique_id=1738848057]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="MarginContainer/HBoxContainer/CropPanel/MarginContainer/VBoxContainer/ScrollContainer/CropButtons" unique_id=1343388306]
 layout_mode = 2
 
 [node name="Joystick" parent="." unique_id=1514460779 instance=ExtResource("3_mjylm")]
