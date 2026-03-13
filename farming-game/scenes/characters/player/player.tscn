@@ -169,7 +169,7 @@ script = ExtResource("1_t61fv")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=2049766677]
 position = Vector2(0, -16)
 sprite_frames = SubResource("SpriteFrames_svuau")
-animation = &"walk_up"
+animation = &"idle_down"
 autoplay = "idle_down"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2132846001]

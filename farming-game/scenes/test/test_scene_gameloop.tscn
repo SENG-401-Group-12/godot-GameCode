@@ -27,19 +27,20 @@ tile_set = ExtResource("1_ise0d")
 position = Vector2(324, 170)
 
 [node name="Farm" parent="." unique_id=983991534 instance=ExtResource("3_ktomj")]
-position = Vector2(372, 154)
+position = Vector2(112, 176)
 
 [node name="Farm2" parent="." unique_id=1862151558 instance=ExtResource("3_ktomj")]
-position = Vector2(456, 153)
+position = Vector2(192, 176)
 
 [node name="Farm3" parent="." unique_id=1345607856 instance=ExtResource("3_ktomj")]
-position = Vector2(527, 156)
+position = Vector2(272, 176)
 
 [node name="Shop" parent="." unique_id=797344515 instance=ExtResource("4_t72c8")]
-position = Vector2(264, 152)
+position = Vector2(448, 176)
 scale = Vector2(0.5, 0.5)
 
 [node name="UserInterface" type="Control" parent="." unique_id=2123153631]
+visible = false
 custom_minimum_size = Vector2(640, 360)
 layout_mode = 3
 anchors_preset = 0
