@@ -20,6 +20,7 @@ func _ready() -> void:
 	else: # If not on mobile, remove joystick and interact button from UI
 		$Joystick.queue_free()
 		$InteractButton.queue_free()
+	get_parent().show()
 	_build_crop_buttons()
 	PlayerData.inventory_changed.connect(_refresh_crop_ui)
 	PlayerData.selected_crop_changed.connect(_on_selected_crop_changed)

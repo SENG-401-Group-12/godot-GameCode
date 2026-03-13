@@ -29,7 +29,7 @@ func try_spawn_customer(config: Dictionary) -> bool:
 	
 	var customer = CUSTOMER_SCENE.instantiate()
 	add_child(customer)
-	customer.position = Vector2(100, (slot_index * slot_spacing) + 100)
+	customer.position = Vector2((slot_index * slot_spacing) + 125, 100)
 	var varied_time_limit = randi_range(config.time_limit - 5, config.time_limit + 5)
 	print(varied_time_limit)
 	customer.z_index = 10
