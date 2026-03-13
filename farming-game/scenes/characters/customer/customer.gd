@@ -21,8 +21,11 @@ var time_remaining := 0.0
 var is_resolved := false
 
 func _ready() -> void:
+	requests = []
 	interaction_area.interact = Callable(self, "_on_interact")
 	choose_random_sprite()
+	sprite.visible = true
+	$NotEnoughLabel.hide()
 	_setup_customer()
 
 func _process(delta: float) -> void:
@@ -42,12 +45,13 @@ func configure_for_wave(wave_number: int, new_time_limit: float, request_count: 
 	time_limit = max(4.0, new_time_limit)
 	requests.clear()
 	generate_random_requests(wave_number)
+	_setup_customer()
 
 func choose_random_sprite() -> void:
 	if randi() % 2 == 0:
-		sprite.play("chicken_walk")
+		sprite.play("chicken_idle")
 	else:
-		sprite.play("cow_walk")
+		sprite.play("cow_idle")
 
 func _setup_customer() -> void:
 	if requests.is_empty():

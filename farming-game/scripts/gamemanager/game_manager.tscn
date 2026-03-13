@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://ddubkgtm0ym0u"]
+
+[ext_resource type="Script" uid="uid://164xol4l6nxi" path="res://scripts/gamemanager/game_manager.gd" id="1_cej7e"]
+[ext_resource type="PackedScene" uid="uid://6mtovd76rvbm" path="res://scenes/characters/customer/customer_spawner/customer_spawner.tscn" id="2_a2j4r"]
+
+[node name="GameManager" type="Node2D" unique_id=80123762]
+script = ExtResource("1_cej7e")
+
+[node name="CustomerSpawner" parent="." unique_id=1007147675 instance=ExtResource("2_a2j4r")]

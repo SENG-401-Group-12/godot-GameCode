@@ -107,9 +107,8 @@ script = ExtResource("1_b2dj7")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=229667808]
 sprite_frames = SubResource("SpriteFrames_fkpgi")
-animation = &"cow_idle"
+animation = &"chicken_idle"
 autoplay = "cow_idle"
-frame_progress = 0.12799722
 
 [node name="InteractionArea" type="Area2D" parent="." unique_id=1164989590]
 collision_layer = 4
@@ -123,7 +122,7 @@ shape = SubResource("CircleShape2D_gulnw")
 debug_color = Color(0, 0.6447446, 0.28097555, 0.41960785)
 
 [node name="LabelAnchor" type="Node2D" parent="InteractionArea" unique_id=2013380132]
-position = Vector2(0, -5)
+position = Vector2(0, 14)
 
 [node name="RequestList" type="Node2D" parent="." unique_id=1308312151]
 z_index = 100
@@ -147,13 +146,17 @@ alignment = 2
 
 [node name="NotEnoughLabel" type="Label" parent="." unique_id=1258608841]
 visible = false
-anchors_preset = 5
+anchors_preset = 8
 anchor_left = 0.5
+anchor_top = 0.5
 anchor_right = 0.5
+anchor_bottom = 0.5
 offset_left = -54.5
+offset_top = -5.5
 offset_right = 54.5
-offset_bottom = 11.0
+offset_bottom = 5.5
 grow_horizontal = 2
+grow_vertical = 2
 size_flags_horizontal = 4
 theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("5_rjcxx")
@@ -167,9 +170,9 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -18.0
-offset_top = -63.0
+offset_top = -16.0
 offset_right = 18.0
-offset_bottom = -52.0
+offset_bottom = -5.0
 grow_horizontal = 2
 theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("5_rjcxx")
