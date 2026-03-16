@@ -116,7 +116,9 @@ func clear_plot() -> void:
 	growth_stage = 0
 	growth_timer = 0.0
 	state = FarmState.EMPTY
+	reset_dirt()
 	crop_data = null
+	place_dirt()
 	crops.clear()
 	farm_area.disabled = false
 	_update_action_name()
@@ -190,6 +192,13 @@ func get_farm_cells() -> Array[Vector2i]:
 func place_dirt() -> void:
 	var tiles := get_farm_cells()
 	dirt_tilemap.set_cells_terrain_connect(tiles, 0, 1)
+	_update_collision_shape()
+	_update_label_anchor()
+
+func reset_dirt() -> void:
+	var tiles := get_farm_cells()
+	for tile in tiles:
+		dirt_tilemap.erase_cell(tile)
 
 func place_crop() -> void:
 	crops.clear()
