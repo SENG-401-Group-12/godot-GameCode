@@ -37,7 +37,6 @@ position = Vector2(272, 176)
 
 [node name="Shop" parent="." unique_id=797344515 instance=ExtResource("4_t72c8")]
 position = Vector2(448, 176)
-scale = Vector2(0.5, 0.5)
 
 [node name="UserInterface" type="Control" parent="." unique_id=2123153631]
 visible = false
