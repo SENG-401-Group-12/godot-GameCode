@@ -9,6 +9,7 @@ signal signup_failed(message: String)
 
 signal leaderboard_received(data)
 signal run_submitted(data)
+
 signal profile_created(data)
 signal profile_updated(data)
 
@@ -209,11 +210,69 @@ func update_profile(display_name: String) -> void:
 
 	http.request(url, headers, HTTPClient.METHOD_PATCH, body)
 
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass # Replace with function body.
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
+func submit_run(score_total: int, duration_ms: int, waves_completed: int) -> void:
+	if !is_logged_in():
+		print("Guest users cannot submit runs.")
+		return
+
+	var http := HTTPRequest.new()
+	add_child(http)
+
+	var url := SUPABASE_URL + "/rest/v1/runs"
+	var headers := [
+		"apikey: " + SUPABASE_ANON_KEY,
+		"Authorization: Bearer " + access_token,
+		"Content-Type: application/json",
+		"Prefer: return=representation"
+	]
+
+	var body_dict := {
+		"user_id": current_user_id,
+		"score_total": score_total,
+		"duration_ms": duration_ms,
+		"waves_completed": waves_completed
+	}
+	var body := JSON.stringify(body_dict)
+
+	http.request_completed.connect(func(result, response_code, response_headers, response_body):
+		var text : String = response_body.get_string_from_utf8()
+		var data = JSON.parse_string(text)
+
+		if response_code >= 200 and response_code < 300:
+			run_submitted.emit(data)
+		else:
+			print("Submit run failed: ", text)
+
+		http.queue_free()
+	)
+
+	http.request(url, headers, HTTPClient.METHOD_POST, body)
+	
+func get_top_10() -> void:
+	var http := HTTPRequest.new()
+	add_child(http)
+
+	var url := SUPABASE_URL + "/rest/v1/rpc/get_top_10"
+	var headers := [
+		"apikey: " + SUPABASE_ANON_KEY,
+		"Authorization: Bearer " + SUPABASE_ANON_KEY,
+		"Content-Type: application/json"
+	]
+
+	var body := "{}"
+
+	http.request_completed.connect(func(result, response_code, response_headers, response_body):
+		var text : String = response_body.get_string_from_utf8()
+		var data = JSON.parse_string(text)
+
+		if response_code >= 200 and response_code < 300:
+			leaderboard_received.emit(data)
+		else:
+			print("Get top 10 failed: ", text)
+
+		http.queue_free()
+	)
+
+	http.request(url, headers, HTTPClient.METHOD_POST, body)
