@@ -137,6 +137,77 @@ func login(email: String, password: String) -> void:
 	)
 
 	http.request(url, headers, HTTPClient.METHOD_POST, body)
+	
+func create_profile(display_name: String) -> void:
+	if !is_logged_in():
+		print("User must be logged in to create a profile.")
+		return
+
+	var http := HTTPRequest.new()
+	add_child(http)
+
+	var url := SUPABASE_URL + "/rest/v1/profiles"
+	var headers := [
+		"apikey: " + SUPABASE_ANON_KEY,
+		"Authorization: Bearer " + access_token,
+		"Content-Type: application/json",
+		"Prefer: return=representation"
+	]
+
+	var body_dict := {
+		"id": current_user_id,
+		"display_name": display_name
+	}
+	var body := JSON.stringify(body_dict)
+
+	http.request_completed.connect(func(result, response_code, response_headers, response_body):
+		var text : String = response_body.get_string_from_utf8()
+		var data = JSON.parse_string(text)
+
+		if response_code >= 200 and response_code < 300:
+			profile_created.emit(data)
+		else:
+			print("Create profile failed: ", text)
+
+		http.queue_free()
+	)
+
+	http.request(url, headers, HTTPClient.METHOD_POST, body)
+
+func update_profile(display_name: String) -> void:
+	if !is_logged_in():
+		print("User must be logged in to update a profile.")
+		return
+
+	var http := HTTPRequest.new()
+	add_child(http)
+
+	var url := SUPABASE_URL + "/rest/v1/profiles?id=eq." + current_user_id
+	var headers := [
+		"apikey: " + SUPABASE_ANON_KEY,
+		"Authorization: Bearer " + access_token,
+		"Content-Type: application/json",
+		"Prefer: return=representation"
+	]
+
+	var body_dict := {
+		"display_name": display_name
+	}
+	var body := JSON.stringify(body_dict)
+
+	http.request_completed.connect(func(result, response_code, response_headers, response_body):
+		var text : String = response_body.get_string_from_utf8()
+		var data = JSON.parse_string(text)
+
+		if response_code >= 200 and response_code < 300:
+			profile_updated.emit(data)
+		else:
+			print("Update profile failed: ", text)
+
+		http.queue_free()
+	)
+
+	http.request(url, headers, HTTPClient.METHOD_PATCH, body)
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
