@@ -25,6 +25,7 @@ InteractionManager="*res://scripts/interaction/InteractionManager.tscn"
 PlayerData="*uid://b3gyrgym203s6"
 Globals="*uid://bmskgidfm6qpu"
 UpgradeManager="*uid://bqp4ddrcxt80g"
+Backend="*uid://cnxtxroaxxpup"
 
 [display]
 
