@@ -26,7 +26,6 @@ position = Vector2(328, 181)
 
 [node name="Upgrader_Test" parent="." unique_id=797344515 instance=ExtResource("3_tul5n")]
 position = Vector2(233, 128)
-scale = Vector2(0.5, 0.5)
 
 [node name="Farm" parent="." unique_id=983991534 instance=ExtResource("3_5sagg")]
 position = Vector2(336, 128)
