@@ -25,6 +25,7 @@ InteractionManager="*res://scripts/interaction/InteractionManager.tscn"
 PlayerData="*uid://b3gyrgym203s6"
 Globals="*uid://bmskgidfm6qpu"
 UpgradeManager="*uid://bqp4ddrcxt80g"
+Backend="*uid://cnxtxroaxxpup"
 
 [display]
 
@@ -33,6 +34,7 @@ window/size/viewport_height=360
 window/size/window_width_override=1280
 window/size/window_height_override=720
 window/stretch/mode="viewport"
+window/stretch/aspect="keep_height"
 window/stretch/scale_mode="integer"
 
 [global_group]
@@ -74,6 +76,7 @@ interact={
 [input_devices]
 
 pointing/emulate_touch_from_mouse=true
+pointing/emulate_mouse_from_touch=false
 
 [layer_names]
 
