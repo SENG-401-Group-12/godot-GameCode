@@ -9,6 +9,7 @@ signal signup_failed(message: String)
 
 signal leaderboard_received(data)
 signal run_submitted(data)
+signal personal_best_received(data)
 
 signal profile_created(data)
 signal profile_updated(data)
@@ -271,6 +272,40 @@ func get_top_10() -> void:
 			leaderboard_received.emit(data)
 		else:
 			print("Get top 10 failed: ", text)
+
+		http.queue_free()
+	)
+
+	http.request(url, headers, HTTPClient.METHOD_POST, body)
+
+func get_personal_best() -> void:
+	if !is_logged_in():
+		print("Must be logged in to get personal best.")
+		return
+
+	var http := HTTPRequest.new()
+	add_child(http)
+
+	var url := SUPABASE_URL + "/rest/v1/rpc/get_personal_best"
+	var headers := [
+		"apikey: " + SUPABASE_ANON_KEY,
+		"Authorization: Bearer " + access_token,
+		"Content-Type: application/json"
+	]
+
+	var body_dict := {
+		"p_user_id": current_user_id
+	}
+	var body := JSON.stringify(body_dict)
+
+	http.request_completed.connect(func(result, response_code, response_headers, response_body):
+		var text: String = response_body.get_string_from_utf8()
+		var data = JSON.parse_string(text)
+
+		if response_code >= 200 and response_code < 300:
+			personal_best_received.emit(data)
+		else:
+			print("Get personal best failed: ", text)
 
 		http.queue_free()
 	)
