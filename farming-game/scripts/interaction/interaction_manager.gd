@@ -3,7 +3,8 @@ extends Node2D
 @onready var player = get_tree().get_first_node_in_group("Player")
 @onready var label = $Label
 
-const base_text = "[E] TO "
+var base_text = "[INTERACT] TO " if OS.get_name() == "Android" or OS.get_name() == "iOS" or OS.has_feature("mobile") else "[E] TO "
+
 const LABEL_OFFSET = 36
 
 var active_areas: Array[Area2D] = [] # Will hold all active interaction areas
