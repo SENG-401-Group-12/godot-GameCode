@@ -11,6 +11,8 @@ const UI_FONT = preload("res://assets/game/ui/fonts/PixelOperator8.ttf")
 @onready var crop_buttons: VBoxContainer = $MarginContainer/HBoxContainer/CropPanel/MarginContainer/VBoxContainer/ScrollContainer/CropButtons
 @onready var message_label: Label = $MarginContainer/HBoxContainer/CenterMessage
 
+var _message_tween: Tween = null
+
 var crop_button_nodes: Array[Button] = []
 
 # Called when the node enters the scene tree for the first time.
@@ -71,12 +73,14 @@ func _on_selected_crop_changed(crop_name: String) -> void:
 	selected_crop_label.text = "Selected seed:\n%s" % crop_name
 	_refresh_crop_ui()
 
-func _show_message(text: String) -> void:
+func _show_message(text: String, display_time: float = 2.2) -> void:
+	if _message_tween:
+		_message_tween.kill()
 	message_label.text = text
 	message_label.modulate = Color(1, 1, 1, 1)
-	var tween = create_tween()
-	tween.tween_interval(2.2)
-	tween.tween_property(message_label, "modulate:a", 0.0, 0.5)
+	_message_tween = create_tween()
+	_message_tween.tween_interval(display_time)
+	_message_tween.tween_property(message_label, "modulate:a", 0.0, 0.5)
 
 func _update_status(current_wave, fed_count, fed_target, missed_count, allowed_misses, active_customer_count) -> void:
 	wave_label.text = "Wave %d" % current_wave
