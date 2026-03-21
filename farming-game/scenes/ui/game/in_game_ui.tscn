@@ -174,4 +174,4 @@ grow_vertical = 0
 metadata/_edit_use_anchors_ = true
 
 [node name="InteractButton" parent="." unique_id=593256940 instance=ExtResource("4_kx3kk")]
-position = Vector2(554, 360)
+position = Vector2(555, 323)
