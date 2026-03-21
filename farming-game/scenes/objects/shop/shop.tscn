@@ -1,19 +1,19 @@
 [gd_scene format=3 uid="uid://cexvxlcbyhk1p"]
 
 [ext_resource type="Script" uid="uid://bqd5alpfymx5j" path="res://scenes/objects/shop/shop.gd" id="1_6sfbp"]
-[ext_resource type="Texture2D" path="res://assets/game/objects/chest.png" id="2_w2wlk"]
+[ext_resource type="Texture2D" uid="uid://bw8x4ynham3dn" path="res://assets/game/objects/shop_stand.png" id="2_6sfbp"]
 [ext_resource type="Script" uid="uid://v0gqfty1t3f7" path="res://scripts/interaction/interaction_area/interaction_area.gd" id="3_pleuv"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_t4yi1"]
-size = Vector2(40, 32)
+size = Vector2(40, 40)
 
 [node name="Shop" type="Node2D" unique_id=797344515]
 script = ExtResource("1_6sfbp")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=280483841]
-texture = ExtResource("2_w2wlk")
+texture = ExtResource("2_6sfbp")
 region_enabled = true
-region_rect = Rect2(0, 0, 48, 48)
+region_rect = Rect2(0, 0, 40, 40)
 
 [node name="InteractionArea" type="Area2D" parent="." unique_id=1564860368]
 collision_layer = 4
