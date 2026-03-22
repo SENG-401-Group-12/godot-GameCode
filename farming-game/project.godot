@@ -22,6 +22,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 InteractionManager="*res://scripts/interaction/InteractionManager.tscn"
+GameSettings="*res://scripts/settings/game_settings.gd"
 PlayerData="*uid://b3gyrgym203s6"
 Globals="*uid://bmskgidfm6qpu"
 UpgradeManager="*uid://bqp4ddrcxt80g"

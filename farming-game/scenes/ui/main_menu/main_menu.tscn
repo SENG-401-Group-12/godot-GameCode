@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://bqm3nmn8v0khx"]
+[gd_scene load_steps=3 format=3 uid="uid://bqm3nmn8v0khx"]
 
 [ext_resource type="Script" path="res://scenes/ui/main_menu/main_menu.gd" id="1_menu"]
+[ext_resource type="PackedScene" path="res://scenes/ui/settings/settings_window.tscn" id="2_settings"]
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -199,6 +200,11 @@ custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
 text = "Leaderboard"
 
+[node name="SettingsButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn"]
+custom_minimum_size = Vector2(220, 44)
+layout_mode = 2
+text = "Settings"
+
 [node name="QuitButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn"]
 custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
@@ -281,6 +287,8 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 10
 autowrap_mode = 2
 
+[node name="SettingsWindow" parent="." instance=ExtResource("2_settings")]
+
 [node name="LeaderboardWindow" type="Window" parent="."]
 title = "Leaderboard"
 initial_position = 2
@@ -321,6 +329,7 @@ text = "Close"
 [connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/PlayButton" to="." method="_on_play_pressed"]
 [connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/AccountButton" to="." method="_on_account_button_pressed"]
 [connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/LeaderboardButton" to="." method="_on_leaderboard_pressed"]
+[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/SettingsButton" to="." method="_on_settings_pressed"]
 [connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/QuitButton" to="." method="_on_quit_pressed"]
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/LoginButton" to="." method="_on_login_pressed"]
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/SignupButton" to="." method="_on_signup_pressed"]

@@ -2,6 +2,7 @@ extends Node
 
 ## Loads optional audio from res://assets/audio/bgm/. Each role tries harvest-for-all-* names first, then short aliases.
 ## Menu intro plays at MENU_PITCH_SCALE (1.5 = faster, loop still matches file end).
+## Output level follows GameSettings (master × music), default ~75% music × 100% master.
 
 const BGM_DIR := "res://assets/audio/bgm/"
 const MENU_PITCH_SCALE := 1.5
@@ -30,6 +31,8 @@ var _urgent_count := 0
 var _context := "menu"
 var _current_bgm_key := ""
 var _fade_tween: Tween
+var _xfade_lerp_from: float = 0.0
+var _xfade_lerp_to: float = 0.0
 
 
 func _ready() -> void:
@@ -41,21 +44,42 @@ func _ready() -> void:
 	_stinger.name = "StingerPlayer"
 	_stinger.pitch_scale = 1.0
 	add_child(_stinger)
+	GameSettings.settings_changed.connect(_on_game_settings_changed)
+
+
+func _peak_db() -> float:
+	return GameSettings.get_music_volume_db()
+
+
+func _on_game_settings_changed() -> void:
+	_stinger.volume_db = _peak_db()
+	if _fade_tween != null and _fade_tween.is_valid():
+		return
+	if _bgm.playing:
+		_bgm.volume_db = _peak_db()
+
+
+func _stop_stingers() -> void:
+	if _stinger.playing:
+		_stinger.stop()
+	_stinger.stream = null
 
 
 func play_menu() -> void:
+	_stop_stingers()
 	_context = "menu"
 	_urgent_count = 0
 	_kill_fade()
-	_bgm.volume_db = 0.0
+	_bgm.volume_db = _peak_db()
 	_crossfade_to("menu", _first_for_role("menu"))
 
 
 func enter_gameplay() -> void:
+	_stop_stingers()
 	_context = "game"
 	_urgent_count = 0
 	_kill_fade()
-	_bgm.volume_db = 0.0
+	_bgm.volume_db = _peak_db()
 	_bgm.pitch_scale = 1.0
 	_play_gameplay_bgm(false)
 
@@ -167,24 +191,33 @@ func _crossfade_to(key: String, stream: AudioStream) -> void:
 	_set_bgm_loop(stream)
 	_apply_bgm_pitch_for_key(key)
 	var duration := 0.35
+	var peak := _peak_db()
 	_kill_fade()
 	if not _bgm.playing or _bgm.stream == null:
 		_bgm.stream = stream
-		_bgm.volume_db = 0.0
+		_bgm.volume_db = peak
 		_bgm.play()
 		_current_bgm_key = key
 		return
 	_fade_tween = create_tween()
-	_fade_tween.tween_property(_bgm, "volume_db", -50.0, duration * 0.45).set_ease(Tween.EASE_IN)
+	_fade_tween.tween_property(_bgm, "volume_db", peak - 50.0, duration * 0.45).set_ease(Tween.EASE_IN)
 	_fade_tween.tween_callback(
 		func() -> void:
+			var p := _peak_db()
 			_apply_bgm_pitch_for_key(key)
 			_bgm.stream = stream
-			_bgm.volume_db = -50.0
+			_bgm.volume_db = p - 50.0
 			_bgm.play()
 			_current_bgm_key = key
+			_xfade_lerp_from = p - 50.0
+			_xfade_lerp_to = p
 	)
-	_fade_tween.tween_property(_bgm, "volume_db", 0.0, duration * 0.55).set_ease(Tween.EASE_OUT)
+	_fade_tween.tween_method(_xfade_volume_lerp, 0.0, 1.0, duration * 0.55).set_ease(Tween.EASE_OUT)
+
+
+func _xfade_volume_lerp(alpha: float) -> void:
+	var a := clampf(alpha, 0.0, 1.0)
+	_bgm.volume_db = lerpf(_xfade_lerp_from, _xfade_lerp_to, a)
 
 
 func _play_stinger_one_shot(role: String) -> void:
@@ -192,5 +225,6 @@ func _play_stinger_one_shot(role: String) -> void:
 	if s == null:
 		return
 	_set_stinger_no_loop(s)
+	_stinger.volume_db = _peak_db()
 	_stinger.stream = s
 	_stinger.play()
