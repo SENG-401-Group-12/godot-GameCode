@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://deraramrweldn" path="res://scenes/ui/game/in_game_ui.tscn" id="5_r05lj"]
 [ext_resource type="PackedScene" uid="uid://bslw2wobhrnmv" path="res://scenes/ui/game/shop/shop_ui.tscn" id="6_dcwuy"]
 [ext_resource type="Script" path="res://scripts/ui/game/user_interface.gd" id="7_ui"]
+[ext_resource type="PackedScene" uid="uid://c4pauseovrly01" path="res://scenes/ui/game/pause_overlay.tscn" id="8_pause"]
 
 [node name="TestSceneGameLoop" type="Node2D" unique_id=606019070]
 
@@ -58,4 +59,7 @@ layout_mode = 1
 [node name="ShopUI" parent="UserInterface" unique_id=110660899 instance=ExtResource("6_dcwuy")]
 visible = false
 z_index = 4096
+layout_mode = 1
+
+[node name="PauseOverlay" parent="UserInterface" instance=ExtResource("8_pause")]
 layout_mode = 1
