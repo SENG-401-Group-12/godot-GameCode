@@ -23,8 +23,7 @@ const TOMATO_ITEM: Texture2D = preload("res://assets/game/sprites/CropSprites/To
 @onready var _password: LineEdit = $AuthLayer/AuthCenter/AuthPanel/Margin/VBox/PasswordEdit
 @onready var _auth_status: Label = $AuthLayer/AuthCenter/AuthPanel/Margin/VBox/AuthStatusLabel
 @onready var _auth_title: Label = $AuthLayer/AuthCenter/AuthPanel/Margin/VBox/AuthTitle
-@onready var _menu_buttons_panel: PanelContainer = $ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel
-@onready var _account_button: Button = $ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/AccountButton
+@onready var _account_button: Button = $ContentMargin/MenuHBox/Center/MainColumn/AccountButton
 @onready var _user_line: Label = $ContentMargin/MenuHBox/Center/MainColumn/UserLine
 @onready var _title_label: Label = $ContentMargin/MenuHBox/Center/MainColumn/Title
 @onready var _subtitle_label: Label = $ContentMargin/MenuHBox/Center/MainColumn/Subtitle
@@ -50,11 +49,10 @@ func _ready() -> void:
 	Backend.leaderboard_failed.connect(_on_leaderboard_failed)
 
 	_add_menu_sparkles()
-	_add_field_furrows()
+	_add_field_soft_gradient()
 	_add_sun_disk()
 	_start_cloud_drift()
 	_style_cloud_panels()
-	_style_menu_buttons_backing()
 	_style_main_buttons()
 	_soften_title_labels()
 	_build_mascot_farmer()
@@ -74,10 +72,10 @@ func _fix_key_font_sizes() -> void:
 	_email.add_theme_font_size_override("font_size", 16)
 	_password.add_theme_font_size_override("font_size", 16)
 	for p in [
-		$ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/PlayButton,
-		$ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/AccountButton,
-		$ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/LeaderboardButton,
-		$ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/QuitButton,
+		$ContentMargin/MenuHBox/Center/MainColumn/PlayButton,
+		$ContentMargin/MenuHBox/Center/MainColumn/AccountButton,
+		$ContentMargin/MenuHBox/Center/MainColumn/LeaderboardButton,
+		$ContentMargin/MenuHBox/Center/MainColumn/QuitButton,
 		$AuthLayer/AuthCenter/AuthPanel/Margin/VBox/LoginButton,
 		$AuthLayer/AuthCenter/AuthPanel/Margin/VBox/SignupButton,
 		$AuthLayer/AuthCenter/AuthPanel/Margin/VBox/CloseAuthButton
@@ -100,9 +98,9 @@ func _style_cloud_panels() -> void:
 	for cloud: Panel in [_cloud_left, _cloud_right, _cloud_high]:
 		var sb := StyleBoxFlat.new()
 		sb.set_corner_radius_all(999)
-		sb.shadow_size = 12
-		sb.shadow_offset = Vector2(2, 4)
-		sb.shadow_color = Color(0.85, 0.45, 0.38, 0.14)
+		sb.shadow_size = 3
+		sb.shadow_offset = Vector2(0, 2)
+		sb.shadow_color = Color(0.75, 0.4, 0.35, 0.06)
 		match cloud.name:
 			"CloudLeft":
 				sb.bg_color = Color(1, 1, 1, 0.2)
@@ -111,20 +109,6 @@ func _style_cloud_panels() -> void:
 			_:
 				sb.bg_color = Color(1, 0.95, 0.88, 0.14)
 		cloud.add_theme_stylebox_override("panel", sb)
-
-
-func _style_menu_buttons_backing() -> void:
-	var plate := StyleBoxFlat.new()
-	plate.bg_color = Color(0.07, 0.055, 0.1, 1.0)
-	plate.set_corner_radius_all(22)
-	plate.set_border_width_all(0)
-	plate.shadow_size = 0
-	plate.anti_aliasing = true
-	plate.content_margin_left = 12
-	plate.content_margin_top = 12
-	plate.content_margin_right = 12
-	plate.content_margin_bottom = 12
-	_menu_buttons_panel.add_theme_stylebox_override("panel", plate)
 
 
 func _make_menu_button_stylebox(bg: Color) -> StyleBoxFlat:
@@ -143,10 +127,10 @@ func _make_menu_button_stylebox(bg: Color) -> StyleBoxFlat:
 
 func _style_main_buttons() -> void:
 	for b: Button in [
-		$ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/PlayButton,
-		$ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/AccountButton,
-		$ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/LeaderboardButton,
-		$ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/QuitButton,
+		$ContentMargin/MenuHBox/Center/MainColumn/PlayButton,
+		$ContentMargin/MenuHBox/Center/MainColumn/AccountButton,
+		$ContentMargin/MenuHBox/Center/MainColumn/LeaderboardButton,
+		$ContentMargin/MenuHBox/Center/MainColumn/QuitButton,
 	]:
 		var n := _make_menu_button_stylebox(Color(0.19, 0.15, 0.26, 1.0))
 		var h := _make_menu_button_stylebox(Color(0.28, 0.22, 0.38, 1.0))
@@ -186,19 +170,22 @@ func _add_menu_sparkles() -> void:
 		ft.tween_property(f, "modulate:a", 0.65, slow)
 
 
-func _add_field_furrows() -> void:
-	for i in 11:
-		var strip := ColorRect.new()
-		strip.layout_mode = 0
-		var wave := sin(float(i) * 0.65 + 0.2) * 5.0
-		strip.position = Vector2(wave, 10 + i * 17)
-		strip.size = Vector2(656.0, 6.0)
-		strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		if i % 2 == 0:
-			strip.color = Color(0.12, 0.38, 0.24, 0.38)
-		else:
-			strip.color = Color(0.38, 0.78, 0.5, 0.1)
-		_field_band.add_child(strip)
+func _add_field_soft_gradient() -> void:
+	var tr := TextureRect.new()
+	tr.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tr.stretch_mode = TextureRect.STRETCH_SCALE
+	var g := Gradient.new()
+	g.set_color(0, Color(0.4, 0.58, 0.38, 1.0))
+	g.set_color(1, Color(0.13, 0.38, 0.26, 1.0))
+	var gt := GradientTexture2D.new()
+	gt.gradient = g
+	gt.width = 8
+	gt.height = 96
+	gt.fill_from = Vector2(0.5, 0.0)
+	gt.fill_to = Vector2(0.5, 1.0)
+	tr.texture = gt
+	_field_band.add_child(tr)
 
 
 func _add_sun_disk() -> void:
