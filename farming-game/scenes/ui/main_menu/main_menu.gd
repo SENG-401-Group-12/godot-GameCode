@@ -3,6 +3,8 @@ extends Control
 const GAME_SCENE := preload("res://scenes/test/test_scene_gameloop.tscn")
 const UI_FONT := preload("res://assets/game/ui/fonts/PixelOperator8.ttf")
 
+@onready var _content_margin: MarginContainer = $ContentMargin
+@onready var _auth_backdrop: ColorRect = $AuthLayer/AuthBackdrop
 @onready var _auth_panel: PanelContainer = $AuthLayer/AuthCenter/AuthPanel
 @onready var _email: LineEdit = $AuthLayer/AuthCenter/AuthPanel/Margin/VBox/EmailEdit
 @onready var _password: LineEdit = $AuthLayer/AuthCenter/AuthPanel/Margin/VBox/PasswordEdit
@@ -17,7 +19,7 @@ const UI_FONT := preload("res://assets/game/ui/fonts/PixelOperator8.ttf")
 
 func _ready() -> void:
 	_apply_font_recursive(self)
-	_auth_panel.visible = false
+	_set_auth_open(false)
 	_leaderboard_window.hide()
 	_refresh_user_line()
 
@@ -36,6 +38,15 @@ func _apply_font_recursive(node: Node) -> void:
 			c.add_theme_font_size_override("font_size", 10)
 	for child in node.get_children():
 		_apply_font_recursive(child)
+
+
+func _set_auth_open(open: bool) -> void:
+	_auth_backdrop.visible = open
+	_auth_panel.visible = open
+	_content_margin.visible = not open
+	if open:
+		_auth_status.text = ""
+		_email.grab_focus()
 
 
 func _refresh_user_line() -> void:
@@ -59,14 +70,16 @@ func _on_account_button_pressed() -> void:
 	if Backend.is_logged_in():
 		Backend.logout()
 		_refresh_user_line()
-		_auth_panel.visible = false
+		_set_auth_open(false)
 		return
-	_auth_panel.visible = !_auth_panel.visible
-	_auth_status.text = ""
+	if _auth_panel.visible:
+		_set_auth_open(false)
+	else:
+		_set_auth_open(true)
 
 
 func _on_close_auth_pressed() -> void:
-	_auth_panel.visible = false
+	_set_auth_open(false)
 
 
 func _on_login_pressed() -> void:
@@ -79,15 +92,10 @@ func _on_signup_pressed() -> void:
 	Backend.signup(_email.text.strip_edges(), _password.text)
 
 
-func _on_guest_pressed() -> void:
-	Backend.continue_as_guest()
-	_refresh_user_line()
-	_auth_panel.visible = false
-
-
 func _on_login_succeeded(_user_id: String) -> void:
 	_auth_status.text = "Welcome back!"
 	_refresh_user_line()
+	_set_auth_open(false)
 
 
 func _on_login_failed(message: String) -> void:
@@ -97,6 +105,8 @@ func _on_login_failed(message: String) -> void:
 func _on_signup_succeeded(message: String) -> void:
 	_auth_status.text = message
 	_refresh_user_line()
+	if Backend.is_logged_in():
+		_set_auth_open(false)
 
 
 func _on_signup_failed(message: String) -> void:

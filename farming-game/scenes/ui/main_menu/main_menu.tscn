@@ -12,6 +12,16 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_menu")
 
+[node name="BaseColor" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.12, 0.28, 0.18, 1)
+
 [node name="Background" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
@@ -19,6 +29,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 texture = ExtResource("2_bg")
 expand_mode = 1
 stretch_mode = 6
@@ -30,6 +41,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0, 0, 0, 0.45)
 
 [node name="ContentMargin" type="MarginContainer" parent="."]
@@ -39,6 +51,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 0
 theme_override_constants/margin_left = 24
 theme_override_constants/margin_top = 24
 theme_override_constants/margin_right = 24
@@ -86,16 +99,28 @@ text = "Quit"
 [node name="AuthLayer" type="CanvasLayer" parent="."]
 layer = 20
 
+[node name="AuthBackdrop" type="ColorRect" parent="AuthLayer"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0, 0, 0, 0.82)
+
 [node name="AuthCenter" type="CenterContainer" parent="AuthLayer"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
 [node name="AuthPanel" type="PanelContainer" parent="AuthLayer/AuthCenter"]
 visible = false
 layout_mode = 2
+mouse_filter = 0
 
 [node name="Margin" type="MarginContainer" parent="AuthLayer/AuthCenter/AuthPanel"]
 layout_mode = 2
@@ -110,7 +135,7 @@ theme_override_constants/separation = 8
 
 [node name="AuthTitle" type="Label" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
 layout_mode = 2
-text = "Supabase account"
+text = "Sign in"
 
 [node name="EmailEdit" type="LineEdit" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
 layout_mode = 2
@@ -129,13 +154,9 @@ text = "Log in"
 layout_mode = 2
 text = "Sign up"
 
-[node name="GuestButton" type="Button" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
-layout_mode = 2
-text = "Continue as guest"
-
 [node name="CloseAuthButton" type="Button" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
 layout_mode = 2
-text = "Close"
+text = "Back"
 
 [node name="AuthStatusLabel" type="Label" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
 layout_mode = 2
@@ -184,6 +205,5 @@ text = "Close"
 [connection signal="pressed" from="ContentMargin/Center/MainColumn/QuitButton" to="." method="_on_quit_pressed"]
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/LoginButton" to="." method="_on_login_pressed"]
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/SignupButton" to="." method="_on_signup_pressed"]
-[connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/GuestButton" to="." method="_on_guest_pressed"]
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/CloseAuthButton" to="." method="_on_close_auth_pressed"]
 [connection signal="pressed" from="LeaderboardWindow/Margin/VBox/CloseLeaderboardButton" to="." method="_on_close_leaderboard_pressed"]
