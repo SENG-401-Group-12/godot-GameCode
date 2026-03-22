@@ -52,7 +52,7 @@ func configure_for_wave(wave_number: int, new_time_limit: float, request_count: 
 	max_request = max(min_requests, request_count)
 	min_amount = max(1, amount_min)
 	max_amount = max(min_amount, amount_max)
-	time_limit = max(4.0, new_time_limit)
+	time_limit = maxf(10.0, new_time_limit)
 	requests.clear()
 	generate_random_requests(wave_number)
 	_setup_customer()

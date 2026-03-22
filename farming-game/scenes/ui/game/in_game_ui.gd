@@ -35,7 +35,7 @@ func _ready() -> void:
 	_refresh_crop_ui()
 	_on_selected_crop_changed(PlayerData.get_selected_crop_name())
 	_update_status(0, 0, 0, 0, 0, 0)
-	_show_message("Feed the town: click a crop, plant an empty plot, harvest it, then press E on a customer.")
+	_show_message("Tip: pick a crop → plant a plot → harvest → stand by a customer and press E to feed them.")
 
 func _build_crop_buttons() -> void:
 	for child in crop_buttons.get_children():

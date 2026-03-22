@@ -212,6 +212,12 @@ layout_mode = 2
 size_flags_vertical = 0
 text = "Play"
 
+[node name="HowToPlayButton" type="Button" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn"]
+custom_minimum_size = Vector2(196, 36)
+layout_mode = 2
+size_flags_vertical = 0
+text = "How to play"
+
 [node name="AccountButton" type="Button" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn"]
 custom_minimum_size = Vector2(196, 36)
 layout_mode = 2
@@ -362,6 +368,7 @@ layout_mode = 2
 text = "Close"
 
 [connection signal="pressed" from="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/PlayButton" to="." method="_on_play_pressed"]
+[connection signal="pressed" from="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/HowToPlayButton" to="." method="_on_how_to_play_pressed"]
 [connection signal="pressed" from="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/AccountButton" to="." method="_on_account_button_pressed"]
 [connection signal="pressed" from="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/LeaderboardButton" to="." method="_on_leaderboard_pressed"]
 [connection signal="pressed" from="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/SettingsButton" to="." method="_on_settings_pressed"]

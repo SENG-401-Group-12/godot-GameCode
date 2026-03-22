@@ -1,7 +1,7 @@
 extends Control
 
 # Kenney UI tiles live under res://assets/vendor/kenney_ui-pack-pixel-adventure/ for future button/panel themes.
-const GAME_SCENE := preload("res://scenes/test/test_scene_gameloop.tscn")
+const RUN_SETUP_SCENE := "res://scenes/ui/run_setup/run_setup.tscn"
 const UI_FONT := preload("res://assets/game/ui/fonts/PixelOperator8.ttf")
 const MENU_BG_PATHS: PackedStringArray = [
 	"res://assets/game/ui/main_menu_background.jpg",
@@ -94,6 +94,7 @@ func _fix_key_font_sizes() -> void:
 	_password.add_theme_font_size_override("font_size", 14)
 	for p in [
 		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/PlayButton,
+		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/HowToPlayButton,
 		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/AccountButton,
 		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/LeaderboardButton,
 		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/SettingsButton,
@@ -136,6 +137,7 @@ func _make_menu_button_stylebox(bg: Color) -> StyleBoxFlat:
 func _style_main_buttons() -> void:
 	for b: Button in [
 		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/PlayButton,
+		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/HowToPlayButton,
 		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/AccountButton,
 		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/LeaderboardButton,
 		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/SettingsButton,
@@ -241,7 +243,12 @@ func _refresh_user_line() -> void:
 
 
 func _on_play_pressed() -> void:
-	get_tree().change_scene_to_packed(GAME_SCENE)
+	get_tree().change_scene_to_file(RUN_SETUP_SCENE)
+
+
+func _on_how_to_play_pressed() -> void:
+	GameProgress.open_tutorial_replay_from_menu = true
+	get_tree().change_scene_to_file(RUN_SETUP_SCENE)
 
 
 func _on_quit_pressed() -> void:

@@ -4,9 +4,23 @@ signal farm_size_changed(crop_name)
 signal inventory_changed
 signal selected_crop_changed(crop_name)
 
+## Soft caps per run so the shop cannot stack the same bonus forever.
+const MAX_YIELD_MULTIPLIER := 2.2
+const MAX_GROWTH_SPEED_BONUS := 2.5
+const MAX_FARM_SIZE_BONUS_PER_AXIS := 2
+
 var inventory := {}
 var crop_upgrades := {}
 var selected_crop_index := 0
+## 0..n — tint presets applied to the player sprite (same art, different palette feel).
+var character_preset_index: int = 0
+const CHARACTER_PRESET_MODULATES: Array[Color] = [
+	Color(1.0, 1.0, 1.0, 1.0),
+	Color(1.0, 0.92, 0.85, 1.0),
+	Color(0.9, 0.95, 1.0, 1.0),
+	Color(0.88, 1.0, 0.9, 1.0),
+]
+const CHARACTER_PRESET_NAMES: PackedStringArray = ["Classic", "Warm", "Cool", "Meadow"]
 
 func _make_default_upgrade_state() -> Dictionary:
 	return {
@@ -88,3 +102,33 @@ func get_yield_bonus(crop_name: String) -> float:
 func get_size_bonus(crop_name: String) -> Vector2i:
 	_ensure_crop_registered(crop_name)
 	return crop_upgrades.get(crop_name).size_bonus
+
+
+func set_character_preset(index: int) -> void:
+	character_preset_index = clampi(index, 0, maxi(0, CHARACTER_PRESET_MODULATES.size() - 1))
+
+
+func get_character_modulate() -> Color:
+	return CHARACTER_PRESET_MODULATES[character_preset_index]
+
+
+func can_apply_upgrade(u: CropUpgrade) -> bool:
+	if u == null:
+		return false
+	_ensure_crop_registered(u.crop_name)
+	var st: Dictionary = crop_upgrades[u.crop_name]
+	match u.upgrade_type:
+		CropUpgrade.UpgradeType.YIELD:
+			var next_mult: float = st.yield_multiplier + Globals.base_yield_upgrade * u.tier
+			return next_mult <= MAX_YIELD_MULTIPLIER + 0.001
+		CropUpgrade.UpgradeType.GROWTH_SPEED:
+			var next_bonus: float = st.growth_speed_bonus + Globals.base_growth_upgrade * u.tier
+			return next_bonus <= MAX_GROWTH_SPEED_BONUS + 0.001
+		CropUpgrade.UpgradeType.FARM_SIZE:
+			var b: Vector2i = st.size_bonus
+			return b.x < MAX_FARM_SIZE_BONUS_PER_AXIS and b.y < MAX_FARM_SIZE_BONUS_PER_AXIS
+	return false
+
+
+func upgrade_fingerprint(u: CropUpgrade) -> String:
+	return "%s:%d" % [u.crop_name, u.upgrade_type]
