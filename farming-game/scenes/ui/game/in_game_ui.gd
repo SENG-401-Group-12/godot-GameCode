@@ -111,4 +111,5 @@ func _on_game_over_menu_pressed() -> void:
 	get_tree().paused = false
 	process_mode = Node.PROCESS_MODE_INHERIT
 	game_over_layer.visible = false
+	Music.play_menu()
 	get_tree().change_scene_to_file("res://scenes/ui/main_menu/main_menu.tscn")

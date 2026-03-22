@@ -26,6 +26,7 @@ func _ready() -> void:
 	Backend.run_submitted.connect(_on_run_submitted)
 	randomize()
 	PlayerData.reset_run_state()
+	Music.enter_gameplay()
 	call_deferred("_start_game") # wait until all _ready() calls are finished before starting
 	
 func _start_game() -> void:
@@ -76,6 +77,7 @@ func _check_wave_complete():
 
 	if customer_spawner.get_remaining_count() == 0 and !game_finished:
 		waiting_for_next_wave = true
+		Music.play_wave_win_sting()
 		var wave_countdown = time_between_waves
 		game_ui._show_message("Wave Complete! %ds until next wave." % [wave_countdown], 5.0)
 		for i in range(wave_countdown):
@@ -109,6 +111,7 @@ func _finalize_loss() -> void:
 	if _loss_finalized:
 		return
 	_loss_finalized = true
+	Music.play_run_loss_sting()
 	var duration_ms := int(Time.get_ticks_msec() - run_start_msec) if run_start_msec > 0 else 0
 	var waves_cleared: int = max(0, current_wave - 1)
 	var score := _compute_score()

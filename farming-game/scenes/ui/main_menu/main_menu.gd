@@ -63,6 +63,8 @@ func _ready() -> void:
 	tw.tween_property(_title_label, "modulate", Color(1.0, 0.95, 0.65), 1.25)
 	tw.tween_property(_title_label, "modulate", Color(1.0, 1.0, 1.0), 1.25)
 
+	Music.play_menu()
+
 
 func _fix_key_font_sizes() -> void:
 	_title_label.add_theme_font_size_override("font_size", 32)
