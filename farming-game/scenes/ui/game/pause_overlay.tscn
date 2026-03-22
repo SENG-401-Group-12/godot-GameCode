@@ -1,0 +1,130 @@
+[gd_scene load_steps=3 format=3 uid="uid://2231yplnj32w"]
+
+[ext_resource type="Script" path="res://scenes/ui/game/pause_overlay.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/ui/settings/settings_window.tscn" id="2_settings"]
+
+[node name="PauseOverlay" type="CanvasLayer"]
+layer = 50
+script = ExtResource("1_script")
+
+[node name="PauseRoot" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="Dim" type="ColorRect" parent="PauseRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0, 0, 0, 0.62)
+
+[node name="Center" type="CenterContainer" parent="PauseRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="PauseRoot/Center"]
+layout_mode = 2
+mouse_filter = 0
+
+[node name="Margin" type="MarginContainer" parent="PauseRoot/Center/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 18
+
+[node name="VBox" type="VBoxContainer" parent="PauseRoot/Center/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="PauseRoot/Center/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Paused"
+horizontal_alignment = 1
+
+[node name="ResumeButton" type="Button" parent="PauseRoot/Center/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(260, 40)
+layout_mode = 2
+text = "Resume"
+
+[node name="SettingsButton" type="Button" parent="PauseRoot/Center/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(260, 40)
+layout_mode = 2
+text = "Settings"
+
+[node name="LeaderboardButton" type="Button" parent="PauseRoot/Center/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(260, 40)
+layout_mode = 2
+text = "Leaderboard"
+
+[node name="QuitToMenuButton" type="Button" parent="PauseRoot/Center/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(260, 40)
+layout_mode = 2
+text = "Quit to main menu"
+
+[node name="Hint" type="Label" parent="PauseRoot/Center/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Press Esc to resume"
+horizontal_alignment = 1
+
+[node name="LeaderboardWindow" type="Window" parent="PauseRoot"]
+title = "Leaderboard"
+initial_position = 2
+size = Vector2i(520, 360)
+visible = false
+
+[node name="Margin" type="MarginContainer" parent="PauseRoot/LeaderboardWindow"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBox" type="VBoxContainer" parent="PauseRoot/LeaderboardWindow/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LeaderboardStatus" type="Label" parent="PauseRoot/LeaderboardWindow/Margin/VBox"]
+layout_mode = 2
+text = "Loading..."
+
+[node name="LeaderboardList" type="ItemList" parent="PauseRoot/LeaderboardWindow/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CloseLeaderboardButton" type="Button" parent="PauseRoot/LeaderboardWindow/Margin/VBox"]
+layout_mode = 2
+text = "Close"
+
+[node name="SettingsUILayer" type="CanvasLayer" parent="."]
+layer = 120
+
+[node name="SettingsWindow" parent="SettingsUILayer" instance=ExtResource("2_settings")]
+
+[connection signal="pressed" from="PauseRoot/Center/Panel/Margin/VBox/ResumeButton" to="." method="_on_resume_pressed"]
+[connection signal="pressed" from="PauseRoot/Center/Panel/Margin/VBox/SettingsButton" to="." method="_on_settings_pressed"]
+[connection signal="pressed" from="PauseRoot/Center/Panel/Margin/VBox/LeaderboardButton" to="." method="_on_leaderboard_pressed"]
+[connection signal="pressed" from="PauseRoot/Center/Panel/Margin/VBox/QuitToMenuButton" to="." method="_on_quit_to_menu_pressed"]
+[connection signal="pressed" from="PauseRoot/LeaderboardWindow/Margin/VBox/CloseLeaderboardButton" to="." method="_on_close_leaderboard_pressed"]
