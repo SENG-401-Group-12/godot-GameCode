@@ -1,3 +1,6 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+# Source archives (extract to assets/vendor/… when needed; do not commit zips)
+assets/game/*.zip
