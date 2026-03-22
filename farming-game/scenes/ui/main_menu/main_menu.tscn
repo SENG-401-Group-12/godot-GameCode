@@ -143,76 +143,85 @@ alignment = 1
 [node name="LeftMascotSlot" type="Control" parent="ContentMargin/MenuHBox"]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 3
-
-[node name="Center" type="CenterContainer" parent="ContentMargin/MenuHBox"]
-layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+size_flags_stretch_ratio = 1.0
 
-[node name="MainColumn" type="VBoxContainer" parent="ContentMargin/MenuHBox/Center"]
+[node name="MainColumn" type="VBoxContainer" parent="ContentMargin/MenuHBox"]
 layout_mode = 2
-theme_override_constants/separation = 12
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_constants/separation = 10
 alignment = 1
 
 [node name="RightFarmSlot" type="Control" parent="ContentMargin/MenuHBox"]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
-size_flags_horizontal = 0
+size_flags_horizontal = 3
 size_flags_vertical = 3
+size_flags_stretch_ratio = 1.0
 
-[node name="Title" type="Label" parent="ContentMargin/MenuHBox/Center/MainColumn"]
+[node name="Title" type="Label" parent="ContentMargin/MenuHBox/MainColumn"]
 layout_mode = 2
+size_flags_vertical = 0
 theme_override_colors/font_outline_color = Color(0.1, 0.06, 0.16, 0.9)
 theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 28
 text = "Harvest For All"
 horizontal_alignment = 1
 
-[node name="Subtitle" type="Label" parent="ContentMargin/MenuHBox/Center/MainColumn"]
+[node name="Subtitle" type="Label" parent="ContentMargin/MenuHBox/MainColumn"]
 layout_mode = 2
+size_flags_vertical = 0
 theme_override_font_sizes/font_size = 10
 theme_override_colors/font_outline_color = Color(0.12, 0.08, 0.2, 0.85)
 theme_override_constants/outline_size = 3
 text = "A cozy town is counting on you!"
 horizontal_alignment = 1
 
-[node name="UserLine" type="Label" parent="ContentMargin/MenuHBox/Center/MainColumn"]
+[node name="UserLine" type="Label" parent="ContentMargin/MenuHBox/MainColumn"]
+custom_minimum_size = Vector2(240, 0)
 layout_mode = 2
+size_flags_vertical = 0
 theme_override_font_sizes/font_size = 10
 text = "Playing as guest"
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="PlayButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn"]
+[node name="PlayButton" type="Button" parent="ContentMargin/MenuHBox/MainColumn"]
 custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
+size_flags_vertical = 0
 text = "Play"
 
-[node name="AccountButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn"]
+[node name="AccountButton" type="Button" parent="ContentMargin/MenuHBox/MainColumn"]
 custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
+size_flags_vertical = 0
 text = "Account"
 
-[node name="LeaderboardButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn"]
+[node name="LeaderboardButton" type="Button" parent="ContentMargin/MenuHBox/MainColumn"]
 custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
+size_flags_vertical = 0
 text = "Leaderboard"
 
-[node name="SettingsButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn"]
+[node name="SettingsButton" type="Button" parent="ContentMargin/MenuHBox/MainColumn"]
 custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
+size_flags_vertical = 0
 text = "Settings"
 
-[node name="QuitButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn"]
+[node name="QuitButton" type="Button" parent="ContentMargin/MenuHBox/MainColumn"]
 custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
+size_flags_vertical = 0
 text = "Quit"
 
-[node name="BottomBreather" type="Control" parent="ContentMargin/MenuHBox/Center/MainColumn"]
-custom_minimum_size = Vector2(0, 28)
+[node name="BottomBreather" type="Control" parent="ContentMargin/MenuHBox/MainColumn"]
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
+size_flags_vertical = 0
 
 [node name="AuthLayer" type="CanvasLayer" parent="."]
 layer = 20
@@ -333,11 +342,11 @@ size_flags_vertical = 3
 layout_mode = 2
 text = "Close"
 
-[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/PlayButton" to="." method="_on_play_pressed"]
-[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/AccountButton" to="." method="_on_account_button_pressed"]
-[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/LeaderboardButton" to="." method="_on_leaderboard_pressed"]
-[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/SettingsButton" to="." method="_on_settings_pressed"]
-[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/QuitButton" to="." method="_on_quit_pressed"]
+[connection signal="pressed" from="ContentMargin/MenuHBox/MainColumn/PlayButton" to="." method="_on_play_pressed"]
+[connection signal="pressed" from="ContentMargin/MenuHBox/MainColumn/AccountButton" to="." method="_on_account_button_pressed"]
+[connection signal="pressed" from="ContentMargin/MenuHBox/MainColumn/LeaderboardButton" to="." method="_on_leaderboard_pressed"]
+[connection signal="pressed" from="ContentMargin/MenuHBox/MainColumn/SettingsButton" to="." method="_on_settings_pressed"]
+[connection signal="pressed" from="ContentMargin/MenuHBox/MainColumn/QuitButton" to="." method="_on_quit_pressed"]
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/LoginButton" to="." method="_on_login_pressed"]
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/SignupButton" to="." method="_on_signup_pressed"]
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/CloseAuthButton" to="." method="_on_close_auth_pressed"]

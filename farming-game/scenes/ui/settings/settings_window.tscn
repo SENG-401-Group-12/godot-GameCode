@@ -6,7 +6,8 @@
 process_mode = 4
 title = "Settings"
 initial_position = 2
-size = Vector2i(480, 420)
+size = Vector2i(520, 500)
+min_size = Vector2i(360, 320)
 visible = false
 exclusive = true
 unresizable = false
@@ -16,132 +17,141 @@ script = ExtResource("1_set")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = -8.0
-offset_bottom = -8.0
+offset_left = 6.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = -6.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 10
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
 
-[node name="VBox" type="VBoxContainer" parent="Margin"]
+[node name="RootVBox" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Scroll" type="ScrollContainer" parent="Margin/RootVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 2
+follow_focus = true
+
+[node name="ScrollVBox" type="VBoxContainer" parent="Margin/RootVBox/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 12
 
-[node name="Title" type="Label" parent="Margin/VBox"]
-unique_name_in_owner = true
+[node name="Title" type="Label" parent="Margin/RootVBox/Scroll/ScrollVBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "Settings"
 horizontal_alignment = 1
 
-[node name="MasterRow" type="HBoxContainer" parent="Margin/VBox"]
+[node name="MasterRow" type="HBoxContainer" parent="Margin/RootVBox/Scroll/ScrollVBox"]
 layout_mode = 2
 
-[node name="Lbl" type="Label" parent="Margin/VBox/MasterRow"]
-custom_minimum_size = Vector2(120, 0)
+[node name="Lbl" type="Label" parent="Margin/RootVBox/Scroll/ScrollVBox/MasterRow"]
+custom_minimum_size = Vector2(112, 0)
 layout_mode = 2
 text = "Master"
 
-[node name="MasterSlider" type="HSlider" parent="Margin/VBox/MasterRow"]
+[node name="MasterSlider" type="HSlider" parent="Margin/RootVBox/Scroll/ScrollVBox/MasterRow"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 28)
+custom_minimum_size = Vector2(120, 32)
 size_flags_horizontal = 3
 min_value = 0.0
 max_value = 100.0
 step = 1.0
 value = 100.0
 
-[node name="MasterValue" type="Label" parent="Margin/VBox/MasterRow"]
-unique_name_in_owner = true
+[node name="MasterValue" type="Label" parent="Margin/RootVBox/Scroll/ScrollVBox/MasterRow"]
 custom_minimum_size = Vector2(44, 0)
 layout_mode = 2
 text = "100%"
 
-[node name="MusicRow" type="HBoxContainer" parent="Margin/VBox"]
+[node name="MusicRow" type="HBoxContainer" parent="Margin/RootVBox/Scroll/ScrollVBox"]
 layout_mode = 2
 
-[node name="Lbl2" type="Label" parent="Margin/VBox/MusicRow"]
-custom_minimum_size = Vector2(120, 0)
+[node name="Lbl2" type="Label" parent="Margin/RootVBox/Scroll/ScrollVBox/MusicRow"]
+custom_minimum_size = Vector2(112, 0)
 layout_mode = 2
 text = "Music"
 
-[node name="MusicSlider" type="HSlider" parent="Margin/VBox/MusicRow"]
+[node name="MusicSlider" type="HSlider" parent="Margin/RootVBox/Scroll/ScrollVBox/MusicRow"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 28)
+custom_minimum_size = Vector2(120, 32)
 size_flags_horizontal = 3
 min_value = 0.0
 max_value = 100.0
 step = 1.0
 value = 75.0
 
-[node name="MusicValue" type="Label" parent="Margin/VBox/MusicRow"]
-unique_name_in_owner = true
+[node name="MusicValue" type="Label" parent="Margin/RootVBox/Scroll/ScrollVBox/MusicRow"]
 custom_minimum_size = Vector2(44, 0)
 layout_mode = 2
 text = "75%"
 
-[node name="SfxRow" type="HBoxContainer" parent="Margin/VBox"]
+[node name="SfxRow" type="HBoxContainer" parent="Margin/RootVBox/Scroll/ScrollVBox"]
 layout_mode = 2
 
-[node name="Lbl3" type="Label" parent="Margin/VBox/SfxRow"]
-custom_minimum_size = Vector2(120, 0)
+[node name="Lbl3" type="Label" parent="Margin/RootVBox/Scroll/ScrollVBox/SfxRow"]
+custom_minimum_size = Vector2(112, 0)
 layout_mode = 2
 text = "Sound effects"
 
-[node name="SfxSlider" type="HSlider" parent="Margin/VBox/SfxRow"]
+[node name="SfxSlider" type="HSlider" parent="Margin/RootVBox/Scroll/ScrollVBox/SfxRow"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 28)
+custom_minimum_size = Vector2(120, 32)
 size_flags_horizontal = 3
 min_value = 0.0
 max_value = 100.0
 step = 1.0
 value = 75.0
 
-[node name="SfxValue" type="Label" parent="Margin/VBox/SfxRow"]
-unique_name_in_owner = true
+[node name="SfxValue" type="Label" parent="Margin/RootVBox/Scroll/ScrollVBox/SfxRow"]
 custom_minimum_size = Vector2(44, 0)
 layout_mode = 2
 text = "75%"
 
-[node name="SfxHint" type="Label" parent="Margin/VBox"]
-unique_name_in_owner = true
+[node name="SfxHint" type="Label" parent="Margin/RootVBox/Scroll/ScrollVBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 8
 text = "SFX volume is saved for when gameplay sounds are added."
 autowrap_mode = 2
 
-[node name="FullscreenCheck" type="CheckButton" parent="Margin/VBox"]
-unique_name_in_owner = true
+[node name="FullscreenCheck" type="CheckButton" parent="Margin/RootVBox/Scroll/ScrollVBox"]
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 text = "Fullscreen"
 
-[node name="VsyncCheck" type="CheckButton" parent="Margin/VBox"]
-unique_name_in_owner = true
+[node name="VsyncCheck" type="CheckButton" parent="Margin/RootVBox/Scroll/ScrollVBox"]
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 text = "VSync"
 
-[node name="HintF11" type="Label" parent="Margin/VBox"]
+[node name="HintF11" type="Label" parent="Margin/RootVBox/Scroll/ScrollVBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 8
-text = "Tip: F11 still toggles fullscreen in-game."
+text = "Tip: F11 toggles fullscreen anytime."
 autowrap_mode = 2
 
-[node name="BtnRow" type="HBoxContainer" parent="Margin/VBox"]
+[node name="Footer" type="HBoxContainer" parent="Margin/RootVBox"]
 layout_mode = 2
-alignment = 1
 theme_override_constants/separation = 12
+alignment = 1
 
-[node name="ResetButton" type="Button" parent="Margin/VBox/BtnRow"]
+[node name="ResetButton" type="Button" parent="Margin/RootVBox/Footer"]
+custom_minimum_size = Vector2(160, 40)
 layout_mode = 2
 text = "Reset to defaults"
 
-[node name="CloseButton" type="Button" parent="Margin/VBox/BtnRow"]
+[node name="CloseButton" type="Button" parent="Margin/RootVBox/Footer"]
+custom_minimum_size = Vector2(120, 40)
 layout_mode = 2
 text = "Close"
 
-[connection signal="pressed" from="Margin/VBox/BtnRow/ResetButton" to="." method="_on_reset_pressed"]
-[connection signal="pressed" from="Margin/VBox/BtnRow/CloseButton" to="." method="_on_close_pressed"]
+[connection signal="pressed" from="Margin/RootVBox/Footer/ResetButton" to="." method="_on_reset_pressed"]
+[connection signal="pressed" from="Margin/RootVBox/Footer/CloseButton" to="." method="_on_close_pressed"]

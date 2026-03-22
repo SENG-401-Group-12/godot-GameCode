@@ -24,10 +24,10 @@ const TOMATO_ITEM: Texture2D = preload("res://assets/game/sprites/CropSprites/To
 @onready var _password: LineEdit = $AuthLayer/AuthCenter/AuthPanel/Margin/VBox/PasswordEdit
 @onready var _auth_status: Label = $AuthLayer/AuthCenter/AuthPanel/Margin/VBox/AuthStatusLabel
 @onready var _auth_title: Label = $AuthLayer/AuthCenter/AuthPanel/Margin/VBox/AuthTitle
-@onready var _account_button: Button = $ContentMargin/MenuHBox/Center/MainColumn/AccountButton
-@onready var _user_line: Label = $ContentMargin/MenuHBox/Center/MainColumn/UserLine
-@onready var _title_label: Label = $ContentMargin/MenuHBox/Center/MainColumn/Title
-@onready var _subtitle_label: Label = $ContentMargin/MenuHBox/Center/MainColumn/Subtitle
+@onready var _account_button: Button = $ContentMargin/MenuHBox/MainColumn/AccountButton
+@onready var _user_line: Label = $ContentMargin/MenuHBox/MainColumn/UserLine
+@onready var _title_label: Label = $ContentMargin/MenuHBox/MainColumn/Title
+@onready var _subtitle_label: Label = $ContentMargin/MenuHBox/MainColumn/Subtitle
 
 @onready var _settings_window: Window = $SettingsUILayer/SettingsWindow
 @onready var _leaderboard_window: Window = $LeaderboardWindow
@@ -76,11 +76,11 @@ func _fix_key_font_sizes() -> void:
 	_email.add_theme_font_size_override("font_size", 16)
 	_password.add_theme_font_size_override("font_size", 16)
 	for p in [
-		$ContentMargin/MenuHBox/Center/MainColumn/PlayButton,
-		$ContentMargin/MenuHBox/Center/MainColumn/AccountButton,
-		$ContentMargin/MenuHBox/Center/MainColumn/LeaderboardButton,
-		$ContentMargin/MenuHBox/Center/MainColumn/SettingsButton,
-		$ContentMargin/MenuHBox/Center/MainColumn/QuitButton,
+		$ContentMargin/MenuHBox/MainColumn/PlayButton,
+		$ContentMargin/MenuHBox/MainColumn/AccountButton,
+		$ContentMargin/MenuHBox/MainColumn/LeaderboardButton,
+		$ContentMargin/MenuHBox/MainColumn/SettingsButton,
+		$ContentMargin/MenuHBox/MainColumn/QuitButton,
 		$AuthLayer/AuthCenter/AuthPanel/Margin/VBox/LoginButton,
 		$AuthLayer/AuthCenter/AuthPanel/Margin/VBox/SignupButton,
 		$AuthLayer/AuthCenter/AuthPanel/Margin/VBox/CloseAuthButton
@@ -132,11 +132,11 @@ func _make_menu_button_stylebox(bg: Color) -> StyleBoxFlat:
 
 func _style_main_buttons() -> void:
 	for b: Button in [
-		$ContentMargin/MenuHBox/Center/MainColumn/PlayButton,
-		$ContentMargin/MenuHBox/Center/MainColumn/AccountButton,
-		$ContentMargin/MenuHBox/Center/MainColumn/LeaderboardButton,
-		$ContentMargin/MenuHBox/Center/MainColumn/SettingsButton,
-		$ContentMargin/MenuHBox/Center/MainColumn/QuitButton,
+		$ContentMargin/MenuHBox/MainColumn/PlayButton,
+		$ContentMargin/MenuHBox/MainColumn/AccountButton,
+		$ContentMargin/MenuHBox/MainColumn/LeaderboardButton,
+		$ContentMargin/MenuHBox/MainColumn/SettingsButton,
+		$ContentMargin/MenuHBox/MainColumn/QuitButton,
 	]:
 		var n := _make_menu_button_stylebox(Color(0.19, 0.15, 0.26, 1.0))
 		var h := _make_menu_button_stylebox(Color(0.28, 0.22, 0.38, 1.0))
