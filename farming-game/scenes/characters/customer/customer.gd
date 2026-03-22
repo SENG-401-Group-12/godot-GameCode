@@ -73,7 +73,9 @@ func _setup_customer() -> void:
 	populate_display()
 	time_remaining = time_limit
 	is_resolved = false
-	_in_urgent_band = false
+	if _in_urgent_band:
+		_in_urgent_band = false
+		Music.unregister_customer_urgency()
 	interaction_area.monitorable = true
 	interaction_area.monitoring = true
 	_update_timer_label()
