@@ -19,17 +19,73 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.15, 0.42, 0.32, 1)
+color = Color(0.22, 0.1, 0.32, 1)
 
 [node name="SkyBand" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_bottom = 150.0
+offset_bottom = 228.0
 grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
-color = Color(0.29, 0.56, 0.85, 1)
+color = Color(0.98, 0.52, 0.38, 1)
+
+[node name="AuroraSheen" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.35, 0.75, 0.92, 0.1)
+
+[node name="HorizonBloom" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -32.0
+offset_bottom = 36.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(1, 0.42, 0.55, 0.2)
+
+[node name="BgDecorHost" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="CloudLeft" type="Panel" parent="."]
+layout_mode = 0
+offset_left = -40.0
+offset_top = 36.0
+offset_right = 210.0
+offset_bottom = 108.0
+mouse_filter = 2
+
+[node name="CloudRight" type="Panel" parent="."]
+layout_mode = 0
+offset_left = 430.0
+offset_top = 62.0
+offset_right = 670.0
+offset_bottom = 128.0
+mouse_filter = 2
+
+[node name="CloudHigh" type="Panel" parent="."]
+layout_mode = 0
+offset_left = 200.0
+offset_top = 12.0
+offset_right = 420.0
+offset_bottom = 52.0
+mouse_filter = 2
 
 [node name="FieldBand" type="ColorRect" parent="."]
 layout_mode = 1
@@ -37,11 +93,21 @@ anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -200.0
+offset_top = -210.0
 grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
-color = Color(0.12, 0.52, 0.3, 1)
+color = Color(0.2, 0.52, 0.34, 1)
+
+[node name="FxLayer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+z_index = 1
 
 [node name="Dim" type="ColorRect" parent="."]
 layout_mode = 1
@@ -51,7 +117,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0, 0, 0, 0.35)
+z_index = 2
+color = Color(0, 0, 0, 0.07)
 
 [node name="ContentMargin" type="MarginContainer" parent="."]
 layout_mode = 1
@@ -61,60 +128,78 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
+z_index = 5
 theme_override_constants/margin_left = 24
 theme_override_constants/margin_top = 24
 theme_override_constants/margin_right = 24
-theme_override_constants/margin_bottom = 24
+theme_override_constants/margin_bottom = 20
 
-[node name="Center" type="CenterContainer" parent="ContentMargin"]
+[node name="MenuHBox" type="HBoxContainer" parent="ContentMargin"]
 layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-
-[node name="MainColumn" type="VBoxContainer" parent="ContentMargin/Center"]
-layout_mode = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 8
 alignment = 1
 
-[node name="Title" type="Label" parent="ContentMargin/Center/MainColumn"]
+[node name="LeftMascotSlot" type="Control" parent="ContentMargin/MenuHBox"]
+custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 8
+size_flags_horizontal = 0
+size_flags_vertical = 3
+
+[node name="Center" type="CenterContainer" parent="ContentMargin/MenuHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MainColumn" type="VBoxContainer" parent="ContentMargin/MenuHBox/Center"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="RightFarmSlot" type="Control" parent="ContentMargin/MenuHBox"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 3
+
+[node name="Title" type="Label" parent="ContentMargin/MenuHBox/Center/MainColumn"]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0.1, 0.06, 0.16, 0.9)
+theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 28
 text = "Harvest For All"
 horizontal_alignment = 1
 
-[node name="Subtitle" type="Label" parent="ContentMargin/Center/MainColumn"]
+[node name="Subtitle" type="Label" parent="ContentMargin/MenuHBox/Center/MainColumn"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 10
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 4
-text = "Feed the town — survive the waves!"
+theme_override_colors/font_outline_color = Color(0.12, 0.08, 0.2, 0.85)
+theme_override_constants/outline_size = 3
+text = "A cozy town is counting on you!"
 horizontal_alignment = 1
 
-[node name="UserLine" type="Label" parent="ContentMargin/Center/MainColumn"]
+[node name="UserLine" type="Label" parent="ContentMargin/MenuHBox/Center/MainColumn"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 10
 text = "Playing as guest"
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="PlayButton" type="Button" parent="ContentMargin/Center/MainColumn"]
+[node name="PlayButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn"]
 custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
 text = "Play"
 
-[node name="AccountButton" type="Button" parent="ContentMargin/Center/MainColumn"]
+[node name="AccountButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn"]
 custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
 text = "Account"
 
-[node name="LeaderboardButton" type="Button" parent="ContentMargin/Center/MainColumn"]
+[node name="LeaderboardButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn"]
 custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
 text = "Leaderboard"
 
-[node name="QuitButton" type="Button" parent="ContentMargin/Center/MainColumn"]
+[node name="QuitButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn"]
 custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
 text = "Quit"
@@ -233,10 +318,10 @@ size_flags_vertical = 3
 layout_mode = 2
 text = "Close"
 
-[connection signal="pressed" from="ContentMargin/Center/MainColumn/PlayButton" to="." method="_on_play_pressed"]
-[connection signal="pressed" from="ContentMargin/Center/MainColumn/AccountButton" to="." method="_on_account_button_pressed"]
-[connection signal="pressed" from="ContentMargin/Center/MainColumn/LeaderboardButton" to="." method="_on_leaderboard_pressed"]
-[connection signal="pressed" from="ContentMargin/Center/MainColumn/QuitButton" to="." method="_on_quit_pressed"]
+[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/PlayButton" to="." method="_on_play_pressed"]
+[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/AccountButton" to="." method="_on_account_button_pressed"]
+[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/LeaderboardButton" to="." method="_on_leaderboard_pressed"]
+[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/QuitButton" to="." method="_on_quit_pressed"]
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/LoginButton" to="." method="_on_login_pressed"]
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/SignupButton" to="." method="_on_signup_pressed"]
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/CloseAuthButton" to="." method="_on_close_auth_pressed"]
