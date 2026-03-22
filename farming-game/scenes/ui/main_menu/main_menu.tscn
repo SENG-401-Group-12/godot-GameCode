@@ -133,7 +133,7 @@ z_index = 5
 theme_override_constants/margin_left = 24
 theme_override_constants/margin_top = 24
 theme_override_constants/margin_right = 24
-theme_override_constants/margin_bottom = 20
+theme_override_constants/margin_bottom = 64
 
 [node name="MenuHBox" type="HBoxContainer" parent="ContentMargin"]
 layout_mode = 2
@@ -209,6 +209,10 @@ text = "Settings"
 custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
 text = "Quit"
+
+[node name="BottomBreather" type="Control" parent="ContentMargin/MenuHBox/Center/MainColumn"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
 
 [node name="AuthLayer" type="CanvasLayer" parent="."]
 layer = 20
@@ -287,7 +291,10 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 10
 autowrap_mode = 2
 
-[node name="SettingsWindow" parent="." instance=ExtResource("2_settings")]
+[node name="SettingsUILayer" type="CanvasLayer" parent="."]
+layer = 25
+
+[node name="SettingsWindow" parent="SettingsUILayer" instance=ExtResource("2_settings")]
 
 [node name="LeaderboardWindow" type="Window" parent="."]
 title = "Leaderboard"

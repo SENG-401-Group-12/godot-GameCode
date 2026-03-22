@@ -29,7 +29,7 @@ const TOMATO_ITEM: Texture2D = preload("res://assets/game/sprites/CropSprites/To
 @onready var _title_label: Label = $ContentMargin/MenuHBox/Center/MainColumn/Title
 @onready var _subtitle_label: Label = $ContentMargin/MenuHBox/Center/MainColumn/Subtitle
 
-@onready var _settings_window: Window = $SettingsWindow
+@onready var _settings_window: Window = $SettingsUILayer/SettingsWindow
 @onready var _leaderboard_window: Window = $LeaderboardWindow
 @onready var _leaderboard_list: ItemList = $LeaderboardWindow/Margin/VBox/LeaderboardList
 @onready var _leaderboard_status: Label = $LeaderboardWindow/Margin/VBox/LeaderboardStatus
