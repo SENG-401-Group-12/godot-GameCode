@@ -1,9 +1,28 @@
 extends Node
 
-## Optional streams under res://assets/audio/bgm/ — use any extension Godot imports (e.g. .mp3, .ogg, .wav).
-## BGM loops: menu, gameplay, tension. One-shots: wave_win, run_loss.
+## Loads optional audio from res://assets/audio/bgm/. Each role tries harvest-for-all-* names first, then short aliases.
+## Menu intro plays at MENU_PITCH_SCALE (1.5 = faster, loop still matches file end).
 
 const BGM_DIR := "res://assets/audio/bgm/"
+const MENU_PITCH_SCALE := 1.5
+
+
+func _bases_for_role(role: String) -> PackedStringArray:
+	match role:
+		"menu":
+			return PackedStringArray(["harvest-for-all-intro", "menu"])
+		"gameplay":
+			return PackedStringArray(["harvest-for-all-game-loop", "gameplay"])
+		"tension":
+			return PackedStringArray(["harvest-for-all-tension", "tension"])
+		"wave_win":
+			return PackedStringArray(["harvest-for-all-round-win", "wave_win"])
+		"run_loss":
+			return PackedStringArray(["harvest-for-all-round-loss", "run_loss"])
+		"max_win":
+			return PackedStringArray(["harvest-for-all-game-win-max", "game_win_max", "max_win"])
+		_:
+			return PackedStringArray([role])
 
 var _bgm: AudioStreamPlayer
 var _stinger: AudioStreamPlayer
@@ -20,6 +39,7 @@ func _ready() -> void:
 	add_child(_bgm)
 	_stinger = AudioStreamPlayer.new()
 	_stinger.name = "StingerPlayer"
+	_stinger.pitch_scale = 1.0
 	add_child(_stinger)
 
 
@@ -28,7 +48,7 @@ func play_menu() -> void:
 	_urgent_count = 0
 	_kill_fade()
 	_bgm.volume_db = 0.0
-	_crossfade_to("menu", _first_existing("menu"))
+	_crossfade_to("menu", _first_for_role("menu"))
 
 
 func enter_gameplay() -> void:
@@ -36,6 +56,7 @@ func enter_gameplay() -> void:
 	_urgent_count = 0
 	_kill_fade()
 	_bgm.volume_db = 0.0
+	_bgm.pitch_scale = 1.0
 	_play_gameplay_bgm(false)
 
 
@@ -59,6 +80,18 @@ func play_wave_win_sting() -> void:
 	_play_stinger_one_shot("wave_win")
 
 
+func play_max_win_sting() -> void:
+	_play_stinger_one_shot("max_win")
+	_kill_fade()
+	_fade_tween = create_tween()
+	_fade_tween.tween_property(_bgm, "volume_db", -80.0, 0.4)
+	_fade_tween.tween_callback(
+		func() -> void:
+			_bgm.stop()
+			_current_bgm_key = ""
+	)
+
+
 func play_run_loss_sting() -> void:
 	_play_stinger_one_shot("run_loss")
 	_kill_fade()
@@ -79,10 +112,10 @@ func _kill_fade() -> void:
 
 func _play_gameplay_bgm(tension: bool) -> void:
 	var key := "tension" if tension else "gameplay"
-	var stream: AudioStream = _first_existing(key)
+	var stream: AudioStream = _first_for_role(key)
 	if stream == null and tension:
 		key = "gameplay"
-		stream = _first_existing("gameplay")
+		stream = _first_for_role("gameplay")
 	if stream == null:
 		_bgm.stop()
 		_current_bgm_key = ""
@@ -90,11 +123,13 @@ func _play_gameplay_bgm(tension: bool) -> void:
 	_crossfade_to(key, stream)
 
 
-func _first_existing(base: String) -> AudioStream:
-	for ext: String in ["mp3", "ogg", "wav"]:
-		var path := BGM_DIR + base + "." + ext
-		if ResourceLoader.exists(path):
-			return load(path) as AudioStream
+func _first_for_role(role: String) -> AudioStream:
+	var bases := _bases_for_role(role)
+	for base in bases:
+		for ext: String in ["mp3", "ogg", "wav"]:
+			var path := BGM_DIR + str(base) + "." + ext
+			if ResourceLoader.exists(path):
+				return load(path) as AudioStream
 	return null
 
 
@@ -120,12 +155,17 @@ func _set_stinger_no_loop(s: AudioStream) -> void:
 		(s as AudioStreamWAV).loop_mode = AudioStreamWAV.LOOP_DISABLED
 
 
+func _apply_bgm_pitch_for_key(key: String) -> void:
+	_bgm.pitch_scale = MENU_PITCH_SCALE if key == "menu" else 1.0
+
+
 func _crossfade_to(key: String, stream: AudioStream) -> void:
 	if stream == null:
 		return
 	if key == _current_bgm_key and _bgm.playing:
 		return
 	_set_bgm_loop(stream)
+	_apply_bgm_pitch_for_key(key)
 	var duration := 0.35
 	_kill_fade()
 	if not _bgm.playing or _bgm.stream == null:
@@ -138,6 +178,7 @@ func _crossfade_to(key: String, stream: AudioStream) -> void:
 	_fade_tween.tween_property(_bgm, "volume_db", -50.0, duration * 0.45).set_ease(Tween.EASE_IN)
 	_fade_tween.tween_callback(
 		func() -> void:
+			_apply_bgm_pitch_for_key(key)
 			_bgm.stream = stream
 			_bgm.volume_db = -50.0
 			_bgm.play()
@@ -146,8 +187,8 @@ func _crossfade_to(key: String, stream: AudioStream) -> void:
 	_fade_tween.tween_property(_bgm, "volume_db", 0.0, duration * 0.55).set_ease(Tween.EASE_OUT)
 
 
-func _play_stinger_one_shot(base: String) -> void:
-	var s := _first_existing(base)
+func _play_stinger_one_shot(role: String) -> void:
+	var s := _first_for_role(role)
 	if s == null:
 		return
 	_set_stinger_no_loop(s)

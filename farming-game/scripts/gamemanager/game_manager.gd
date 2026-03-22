@@ -2,6 +2,8 @@ extends Node2D
 
 @export var start_time_buffer := 18 # seconds before the first wave (slightly gentler intro)
 @export var time_between_waves := 6
+## After successfully clearing this many waves, the run ends in a full victory (0 = endless).
+@export var victory_after_wave: int = 12
 
 @onready var customer_spawner: Node2D = $CustomerSpawner
 @onready var game_ui = $"../UserInterface/InGameUI"
@@ -18,6 +20,7 @@ var waiting_for_next_wave := false
 var game_finished := false
 var run_start_msec: int = 0
 var _loss_finalized := false
+var _win_finalized := false
 
 func _ready() -> void:
 	customer_spawner.customer_served.connect(_on_customer_served)
@@ -77,6 +80,10 @@ func _check_wave_complete():
 
 	if customer_spawner.get_remaining_count() == 0 and !game_finished:
 		waiting_for_next_wave = true
+		if victory_after_wave > 0 and current_wave >= victory_after_wave:
+			game_finished = true
+			_finalize_victory()
+			return
 		Music.play_wave_win_sting()
 		var wave_countdown = time_between_waves
 		game_ui._show_message("Wave Complete! %ds until next wave." % [wave_countdown], 5.0)
@@ -107,8 +114,28 @@ func _compute_score() -> int:
 	return total_fed_count * 100 + max(0, current_wave - 1) * 50
 
 
+func _finalize_victory() -> void:
+	if _win_finalized or _loss_finalized:
+		return
+	_win_finalized = true
+	Music.play_max_win_sting()
+	var duration_ms := int(Time.get_ticks_msec() - run_start_msec) if run_start_msec > 0 else 0
+	var waves_cleared: int = current_wave
+	var score := _compute_score()
+	var body := "You fed the whole town — victory!\n\nFed (total): %d\nMissed (total): %d\nWaves cleared: %d\nScore: %d" % [
+		total_fed_count, total_missed_count, waves_cleared, score
+	]
+	var status := ""
+	if Backend.is_logged_in():
+		status = "Saving score to leaderboard..."
+		Backend.submit_run(score, duration_ms, waves_cleared)
+	else:
+		status = "Sign in from the main menu to upload scores."
+	game_ui.show_game_over(body, status)
+
+
 func _finalize_loss() -> void:
-	if _loss_finalized:
+	if _loss_finalized or _win_finalized:
 		return
 	_loss_finalized = true
 	Music.play_run_loss_sting()
