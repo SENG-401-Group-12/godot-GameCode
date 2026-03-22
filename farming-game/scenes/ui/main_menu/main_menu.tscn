@@ -184,22 +184,30 @@ text = "Playing as guest"
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="PlayButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn"]
+[node name="MenuButtonsPanel" type="PanelContainer" parent="ContentMargin/MenuHBox/Center/MainColumn"]
+layout_mode = 2
+
+[node name="MenuButtonsVBox" type="VBoxContainer" parent="ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="PlayButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox"]
 custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
 text = "Play"
 
-[node name="AccountButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn"]
+[node name="AccountButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox"]
 custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
 text = "Account"
 
-[node name="LeaderboardButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn"]
+[node name="LeaderboardButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox"]
 custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
 text = "Leaderboard"
 
-[node name="QuitButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn"]
+[node name="QuitButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox"]
 custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
 text = "Quit"
@@ -318,10 +326,10 @@ size_flags_vertical = 3
 layout_mode = 2
 text = "Close"
 
-[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/PlayButton" to="." method="_on_play_pressed"]
-[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/AccountButton" to="." method="_on_account_button_pressed"]
-[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/LeaderboardButton" to="." method="_on_leaderboard_pressed"]
-[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/QuitButton" to="." method="_on_quit_pressed"]
+[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/PlayButton" to="." method="_on_play_pressed"]
+[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/AccountButton" to="." method="_on_account_button_pressed"]
+[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/LeaderboardButton" to="." method="_on_leaderboard_pressed"]
+[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/QuitButton" to="." method="_on_quit_pressed"]
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/LoginButton" to="." method="_on_login_pressed"]
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/SignupButton" to="." method="_on_signup_pressed"]
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/CloseAuthButton" to="." method="_on_close_auth_pressed"]
