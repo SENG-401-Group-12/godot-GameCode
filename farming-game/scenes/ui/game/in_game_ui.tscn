@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://fls0qb2aavrb" path="res://scenes/ui/interact_button/interact_button.tscn" id="4_kx3kk"]
 
 [node name="InGameUI" type="Control" unique_id=1526345901]
-z_index = 4096
+z_index = 128
 custom_minimum_size = Vector2(640, 360)
 layout_mode = 3
 anchors_preset = 15
@@ -178,7 +178,7 @@ position = Vector2(555, 323)
 
 [node name="GameOverLayer" type="ColorRect" parent="."]
 visible = false
-z_index = 8192
+z_index = 256
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
