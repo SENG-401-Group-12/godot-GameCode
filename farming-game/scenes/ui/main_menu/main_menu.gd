@@ -23,7 +23,8 @@ const TOMATO_ITEM: Texture2D = preload("res://assets/game/sprites/CropSprites/To
 @onready var _password: LineEdit = $AuthLayer/AuthCenter/AuthPanel/Margin/VBox/PasswordEdit
 @onready var _auth_status: Label = $AuthLayer/AuthCenter/AuthPanel/Margin/VBox/AuthStatusLabel
 @onready var _auth_title: Label = $AuthLayer/AuthCenter/AuthPanel/Margin/VBox/AuthTitle
-@onready var _account_button: Button = $ContentMargin/MenuHBox/Center/MainColumn/AccountButton
+@onready var _menu_buttons_panel: PanelContainer = $ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel
+@onready var _account_button: Button = $ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/AccountButton
 @onready var _user_line: Label = $ContentMargin/MenuHBox/Center/MainColumn/UserLine
 @onready var _title_label: Label = $ContentMargin/MenuHBox/Center/MainColumn/Title
 @onready var _subtitle_label: Label = $ContentMargin/MenuHBox/Center/MainColumn/Subtitle
@@ -53,6 +54,7 @@ func _ready() -> void:
 	_add_sun_disk()
 	_start_cloud_drift()
 	_style_cloud_panels()
+	_style_menu_buttons_backing()
 	_style_main_buttons()
 	_soften_title_labels()
 	_build_mascot_farmer()
@@ -72,10 +74,10 @@ func _fix_key_font_sizes() -> void:
 	_email.add_theme_font_size_override("font_size", 16)
 	_password.add_theme_font_size_override("font_size", 16)
 	for p in [
-		$ContentMargin/MenuHBox/Center/MainColumn/PlayButton,
-		$ContentMargin/MenuHBox/Center/MainColumn/AccountButton,
-		$ContentMargin/MenuHBox/Center/MainColumn/LeaderboardButton,
-		$ContentMargin/MenuHBox/Center/MainColumn/QuitButton,
+		$ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/PlayButton,
+		$ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/AccountButton,
+		$ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/LeaderboardButton,
+		$ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/QuitButton,
 		$AuthLayer/AuthCenter/AuthPanel/Margin/VBox/LoginButton,
 		$AuthLayer/AuthCenter/AuthPanel/Margin/VBox/SignupButton,
 		$AuthLayer/AuthCenter/AuthPanel/Margin/VBox/CloseAuthButton
@@ -111,31 +113,44 @@ func _style_cloud_panels() -> void:
 		cloud.add_theme_stylebox_override("panel", sb)
 
 
+func _style_menu_buttons_backing() -> void:
+	var plate := StyleBoxFlat.new()
+	plate.bg_color = Color(0.07, 0.055, 0.1, 1.0)
+	plate.set_corner_radius_all(22)
+	plate.set_border_width_all(0)
+	plate.shadow_size = 0
+	plate.anti_aliasing = true
+	plate.content_margin_left = 12
+	plate.content_margin_top = 12
+	plate.content_margin_right = 12
+	plate.content_margin_bottom = 12
+	_menu_buttons_panel.add_theme_stylebox_override("panel", plate)
+
+
 func _make_menu_button_stylebox(bg: Color) -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
 	s.bg_color = bg
-	s.set_corner_radius_all(14)
-	s.set_border_width_all(1)
-	s.border_color = Color(bg.r * 1.25 + 0.04, bg.g * 1.25 + 0.04, bg.b * 1.25 + 0.04, 0.4)
+	s.set_corner_radius_all(22)
+	s.set_border_width_all(0)
+	s.shadow_size = 0
+	s.anti_aliasing = true
 	s.content_margin_left = 14
 	s.content_margin_right = 14
 	s.content_margin_top = 10
 	s.content_margin_bottom = 10
-	s.shadow_size = 0
-	s.anti_aliasing = true
 	return s
 
 
 func _style_main_buttons() -> void:
 	for b: Button in [
-		$ContentMargin/MenuHBox/Center/MainColumn/PlayButton,
-		$ContentMargin/MenuHBox/Center/MainColumn/AccountButton,
-		$ContentMargin/MenuHBox/Center/MainColumn/LeaderboardButton,
-		$ContentMargin/MenuHBox/Center/MainColumn/QuitButton,
+		$ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/PlayButton,
+		$ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/AccountButton,
+		$ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/LeaderboardButton,
+		$ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/QuitButton,
 	]:
-		var n := _make_menu_button_stylebox(Color(0.16, 0.13, 0.2, 0.94))
-		var h := _make_menu_button_stylebox(Color(0.24, 0.2, 0.32, 0.96))
-		var p := _make_menu_button_stylebox(Color(0.11, 0.09, 0.14, 0.98))
+		var n := _make_menu_button_stylebox(Color(0.19, 0.15, 0.26, 1.0))
+		var h := _make_menu_button_stylebox(Color(0.28, 0.22, 0.38, 1.0))
+		var p := _make_menu_button_stylebox(Color(0.14, 0.11, 0.2, 1.0))
 		b.add_theme_stylebox_override("normal", n)
 		b.add_theme_stylebox_override("hover", h)
 		b.add_theme_stylebox_override("pressed", p)
