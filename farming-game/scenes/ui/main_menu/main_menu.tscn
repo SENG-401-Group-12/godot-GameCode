@@ -39,7 +39,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.35, 0.75, 0.92, 0.1)
+color = Color(0.35, 0.75, 0.92, 0.06)
 
 [node name="HorizonBloom" type="ColorRect" parent="."]
 layout_mode = 1
@@ -47,12 +47,12 @@ anchors_preset = 14
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_top = -32.0
-offset_bottom = 36.0
+offset_top = -44.0
+offset_bottom = 52.0
 grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
-color = Color(1, 0.42, 0.55, 0.2)
+color = Color(1, 0.48, 0.58, 0.11)
 
 [node name="BgDecorHost" type="Control" parent="."]
 layout_mode = 1
@@ -97,7 +97,7 @@ offset_top = -210.0
 grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
-color = Color(0.2, 0.52, 0.34, 1)
+color = Color(0.16, 0.45, 0.30, 1)
 
 [node name="FxLayer" type="Control" parent="."]
 layout_mode = 1
@@ -184,30 +184,22 @@ text = "Playing as guest"
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="MenuButtonsPanel" type="PanelContainer" parent="ContentMargin/MenuHBox/Center/MainColumn"]
-layout_mode = 2
-
-[node name="MenuButtonsVBox" type="VBoxContainer" parent="ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel"]
-layout_mode = 2
-theme_override_constants/separation = 10
-alignment = 1
-
-[node name="PlayButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox"]
+[node name="PlayButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn"]
 custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
 text = "Play"
 
-[node name="AccountButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox"]
+[node name="AccountButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn"]
 custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
 text = "Account"
 
-[node name="LeaderboardButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox"]
+[node name="LeaderboardButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn"]
 custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
 text = "Leaderboard"
 
-[node name="QuitButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox"]
+[node name="QuitButton" type="Button" parent="ContentMargin/MenuHBox/Center/MainColumn"]
 custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
 text = "Quit"
@@ -326,10 +318,10 @@ size_flags_vertical = 3
 layout_mode = 2
 text = "Close"
 
-[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/PlayButton" to="." method="_on_play_pressed"]
-[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/AccountButton" to="." method="_on_account_button_pressed"]
-[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/LeaderboardButton" to="." method="_on_leaderboard_pressed"]
-[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/MenuButtonsPanel/MenuButtonsVBox/QuitButton" to="." method="_on_quit_pressed"]
+[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/PlayButton" to="." method="_on_play_pressed"]
+[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/AccountButton" to="." method="_on_account_button_pressed"]
+[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/LeaderboardButton" to="." method="_on_leaderboard_pressed"]
+[connection signal="pressed" from="ContentMargin/MenuHBox/Center/MainColumn/QuitButton" to="." method="_on_quit_pressed"]
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/LoginButton" to="." method="_on_login_pressed"]
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/SignupButton" to="." method="_on_signup_pressed"]
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/CloseAuthButton" to="." method="_on_close_auth_pressed"]
