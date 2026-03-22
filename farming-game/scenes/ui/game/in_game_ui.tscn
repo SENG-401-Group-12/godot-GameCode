@@ -175,3 +175,70 @@ metadata/_edit_use_anchors_ = true
 
 [node name="InteractButton" parent="." unique_id=593256940 instance=ExtResource("4_kx3kk")]
 position = Vector2(555, 323)
+
+[node name="GameOverLayer" type="ColorRect" parent="."]
+visible = false
+z_index = 8192
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0, 0, 0, 0.7)
+
+[node name="CenterContainer" type="CenterContainer" parent="GameOverLayer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="GameOverLayer/CenterContainer"]
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="GameOverLayer/CenterContainer/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="GameOverLayer/CenterContainer/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TitleLabel" type="Label" parent="GameOverLayer/CenterContainer/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_455v0")
+theme_override_font_sizes/font_size = 12
+theme_override_constants/outline_size = 4
+text = "Run over"
+horizontal_alignment = 1
+
+[node name="BodyLabel" type="Label" parent="GameOverLayer/CenterContainer/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_455v0")
+theme_override_font_sizes/font_size = 9
+theme_override_constants/outline_size = 3
+text = "Stats"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="SubmitStatusLabel" type="Label" parent="GameOverLayer/CenterContainer/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_455v0")
+theme_override_font_sizes/font_size = 8
+theme_override_constants/outline_size = 3
+text = ""
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="MenuButton" type="Button" parent="GameOverLayer/CenterContainer/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_455v0")
+theme_override_font_sizes/font_size = 10
+text = "Back to main menu"

@@ -15,7 +15,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Harvest For All"
-run/main_scene="uid://rt1etabbgvj4"
+run/main_scene="uid://bqm3nmn8v0khx"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
