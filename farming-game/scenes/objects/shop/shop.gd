@@ -10,7 +10,7 @@ const CLOSED_REGION := Rect2(0, 0, 48, 48)
 const OPEN_REGION := Rect2(192, 0, 48, 48)
 
 var is_open := false
-@export var shop_timer := 20.0
+@export var shop_timer := 22.0
 @onready var timer_count := shop_timer
 
 func _ready() -> void:

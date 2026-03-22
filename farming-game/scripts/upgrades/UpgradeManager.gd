@@ -22,8 +22,16 @@ func generate_upgrade() -> CropUpgrade:
 	
 func generate_upgrade_choices(count := 3) -> Array[CropUpgrade]:
 	var upgrades: Array[CropUpgrade] = []
-	
-	while upgrades.size() < count:
-		upgrades.append(generate_upgrade())
-	
+	var seen: Dictionary = {}
+	var guard := 0
+	while upgrades.size() < count and guard < 100:
+		guard += 1
+		var u := generate_upgrade()
+		if not PlayerData.can_apply_upgrade(u):
+			continue
+		var fp := PlayerData.upgrade_fingerprint(u)
+		if seen.has(fp):
+			continue
+		seen[fp] = true
+		upgrades.append(u)
 	return upgrades

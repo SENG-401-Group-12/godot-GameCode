@@ -31,7 +31,9 @@ func populate_upgrades():
 		card.upgrade_selected.connect(_on_upgrade_selected)
 		
 func _on_upgrade_selected(upgrade: CropUpgrade):
-	upgrade.apply_upgrade()
+	if not upgrade.apply_upgrade():
+		populate_upgrades()
+		return
 	close_shop()
 	
 func close_shop():

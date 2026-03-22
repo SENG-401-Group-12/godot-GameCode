@@ -42,7 +42,7 @@ position = Vector2(272, 176)
 
 [node name="Shop" parent="." unique_id=797344515 instance=ExtResource("4_t72c8")]
 position = Vector2(432, 176)
-shop_timer = 5.0
+shop_timer = 22.0
 
 [node name="UserInterface" type="Control" parent="." unique_id=2123153631]
 visible = false

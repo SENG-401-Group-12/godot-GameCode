@@ -23,6 +23,7 @@ config/icon="res://icon.svg"
 
 InteractionManager="*res://scripts/interaction/InteractionManager.tscn"
 GameSettings="*res://scripts/settings/game_settings.gd"
+GameProgress="*res://scripts/game_progress.gd"
 PlayerData="*uid://b3gyrgym203s6"
 Globals="*uid://bmskgidfm6qpu"
 UpgradeManager="*uid://bqp4ddrcxt80g"

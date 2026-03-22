@@ -21,6 +21,8 @@ var game_finished := false
 var run_start_msec: int = 0
 var _loss_finalized := false
 var _win_finalized := false
+## Prevents overlapping wave countdowns / double-advance when many signals fire in one frame.
+var _wave_advance_in_progress := false
 
 func _ready() -> void:
 	customer_spawner.customer_served.connect(_on_customer_served)
@@ -50,16 +52,20 @@ func _start_next_wave() -> void:
 	wave_fed_count = 0
 	wave_missed_count = 0
 	
-	wave_customer_count = randi_range(max(2, current_wave), max(4, current_wave + 2))
-	allowed_misses = int(floor(wave_customer_count / 3.0))
+	var cust_lo := clampi(2 + (current_wave - 1) / 3, 2, 4)
+	var cust_hi := clampi(3 + (current_wave - 1) / 2, cust_lo, 6)
+	wave_customer_count = randi_range(cust_lo, cust_hi)
+	# How many customers may leave hungry and still clear the wave (0 = no misses allowed).
+	allowed_misses = clampi(wave_customer_count / 3, 0, maxi(0, wave_customer_count - 1))
 	if current_wave == 1:
 		run_start_msec = Time.get_ticks_msec()
+	var req_hi := mini(3, 1 + (current_wave + 1) / 2)
 	var config = {
 		"wave": current_wave,
-		"request_count": randi_range(1, min(3, current_wave + 1)), # generate 1-3 requests
-		"time_limit": max(12.0, 26.0 - float(current_wave - 1) * 1.35),
-		"min_amount": roundi(2 + (current_wave - 1) / 3.0),
-		"max_amount": roundi(4 + (current_wave - 1) / 2.0)
+		"request_count": randi_range(1, maxi(1, req_hi)),
+		"time_limit": maxf(16.0, 28.0 - float(current_wave - 1) * 1.15),
+		"min_amount": maxi(1, roundi(1.0 + float(current_wave - 1) * 0.35)),
+		"max_amount": maxi(2, roundi(3.0 + float(current_wave - 1) * 0.45))
 	}
 	
 	var configs: Array = []
@@ -67,31 +73,45 @@ func _start_next_wave() -> void:
 		configs.append(config.duplicate())
 		
 	customer_spawner.queue_customers(configs)
+	_wave_advance_in_progress = false
 
 	game_ui._update_status(current_wave, wave_fed_count, wave_customer_count, wave_missed_count, allowed_misses, customer_spawner.get_active_customer_count())
 	game_ui._show_message("Wave %d started. %d hungry customers are waiting." % [current_wave, wave_customer_count], 3.0)
 
 func _check_wave_complete():
-	if allowed_misses > 0 and wave_missed_count >= allowed_misses:
+	if game_finished or _wave_advance_in_progress:
+		return
+	# allowed_misses = 0 → any miss fails the wave (fixes waves clearing with everyone starving).
+	if wave_missed_count > allowed_misses:
 		game_finished = true
-		game_ui._show_message("Wave Failed. Too many customers left hungry.", 5.0)
+		game_ui._show_message("Wave failed — too many hungry customers left.", 5.0)
 		_finalize_loss()
 		return
 
-	if customer_spawner.get_remaining_count() == 0 and !game_finished:
-		waiting_for_next_wave = true
-		if victory_after_wave > 0 and current_wave >= victory_after_wave:
-			game_finished = true
-			_finalize_victory()
-			return
-		Music.play_wave_win_sting()
-		var wave_countdown = time_between_waves
-		game_ui._show_message("Wave Complete! %ds until next wave." % [wave_countdown], 5.0)
-		for i in range(wave_countdown):
-			await get_tree().create_timer(1.0, false).timeout
-			wave_countdown -= 1
-			game_ui._show_message("Wave Complete! %ds until next wave." % [wave_countdown], 1.0)
-			
+	if customer_spawner.get_remaining_count() != 0:
+		return
+	# Everyone for this wave has left the queue; must not count as a win unless misses are within budget.
+	if wave_fed_count + wave_missed_count < wave_customer_count:
+		return
+
+	_wave_advance_in_progress = true
+	waiting_for_next_wave = true
+	if victory_after_wave > 0 and current_wave >= victory_after_wave:
+		game_finished = true
+		_finalize_victory()
+		_wave_advance_in_progress = false
+		return
+	Music.play_wave_win_sting()
+	var wave_countdown := time_between_waves
+	game_ui._show_message("Wave complete! Next wave in %ds." % [wave_countdown], 5.0)
+	for _i in range(wave_countdown):
+		await get_tree().create_timer(1.0, false).timeout
+		wave_countdown -= 1
+		if wave_countdown > 0:
+			game_ui._show_message("Wave complete! Next wave in %ds." % [wave_countdown], 1.0)
+
+	_wave_advance_in_progress = false
+	if not game_finished:
 		_start_next_wave()
 
 func _on_customer_served():

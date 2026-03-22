@@ -3,6 +3,10 @@ extends CharacterBody2D
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 
 var speed := Globals.player_speed
+
+
+func _ready() -> void:
+	animated_sprite.modulate = PlayerData.get_character_modulate()
 var previous_direction := Vector2.DOWN
 
 func play_animation(animation_name: StringName, flipped := false) -> void:
