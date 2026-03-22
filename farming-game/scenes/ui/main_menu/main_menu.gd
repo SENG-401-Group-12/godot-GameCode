@@ -6,6 +6,7 @@ const UI_FONT := preload("res://assets/game/ui/fonts/PixelOperator8.ttf")
 const FARMER_ATLAS: Texture2D = preload("res://assets/game/character/mana_seed_farmer.png")
 const CROP_SHEET: Texture2D = preload("res://assets/game/objects/crop_spritesheet.png")
 const TILLED_TEX: Texture2D = preload("res://assets/game/tilesets/tilled_dirt_wide.png")
+const GRASS_TILE: Texture2D = preload("res://assets/game/tilesets/grass.png")
 const TOMATO_ITEM: Texture2D = preload("res://assets/game/sprites/CropSprites/Tomato/tomato_item.png")
 
 @onready var _content_margin: MarginContainer = $ContentMargin
@@ -49,7 +50,7 @@ func _ready() -> void:
 	Backend.leaderboard_failed.connect(_on_leaderboard_failed)
 
 	_add_menu_sparkles()
-	_add_field_soft_gradient()
+	call_deferred("_build_field_background")
 	_add_sun_disk()
 	_start_cloud_drift()
 	_style_cloud_panels()
@@ -160,7 +161,12 @@ func _add_menu_sparkles() -> void:
 		var f := ColorRect.new()
 		var fsz := randf_range(2.0, 3.5)
 		f.size = Vector2(fsz, fsz)
-		f.position = Vector2(randf_range(16.0, 600.0), randf_range(200.0, 340.0))
+		var fx := randf_range(16.0, 600.0)
+		var tries := 0
+		while tries < 14 and fx > 228.0 and fx < 412.0:
+			fx = randf_range(16.0, 600.0)
+			tries += 1
+		f.position = Vector2(fx, randf_range(200.0, 340.0))
 		f.color = Color(1.0, 0.92, 0.45, randf_range(0.25, 0.55))
 		f.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_fx_layer.add_child(f)
@@ -170,22 +176,37 @@ func _add_menu_sparkles() -> void:
 		ft.tween_property(f, "modulate:a", 0.65, slow)
 
 
-func _add_field_soft_gradient() -> void:
-	var tr := TextureRect.new()
-	tr.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	tr.stretch_mode = TextureRect.STRETCH_SCALE
-	var g := Gradient.new()
-	g.set_color(0, Color(0.4, 0.58, 0.38, 1.0))
-	g.set_color(1, Color(0.13, 0.38, 0.26, 1.0))
-	var gt := GradientTexture2D.new()
-	gt.gradient = g
-	gt.width = 8
-	gt.height = 96
-	gt.fill_from = Vector2(0.5, 0.0)
-	gt.fill_to = Vector2(0.5, 1.0)
-	tr.texture = gt
-	_field_band.add_child(tr)
+func _build_field_background() -> void:
+	for ch in _field_band.get_children():
+		ch.queue_free()
+	var sz := _field_band.size
+	var w := maxi(1, ceili(sz.x))
+	var h := maxi(1, ceili(sz.y))
+	var top_c := Color(0.42, 0.6, 0.4, 1.0)
+	var bot_c := Color(0.12, 0.36, 0.25, 1.0)
+	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	var hm1 := maxi(h - 1, 1)
+	for y in h:
+		var t := float(y) / float(hm1)
+		var c := top_c.lerp(bot_c, t)
+		for x in w:
+			img.set_pixel(x, y, c)
+	var grad_tex := ImageTexture.create_from_image(img)
+	var grad_tr := TextureRect.new()
+	grad_tr.texture = grad_tex
+	grad_tr.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	grad_tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	grad_tr.stretch_mode = TextureRect.STRETCH_SCALE
+	grad_tr.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	_field_band.add_child(grad_tr)
+	var grass := TextureRect.new()
+	grass.texture = GRASS_TILE
+	grass.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	grass.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	grass.stretch_mode = TextureRect.STRETCH_TILE
+	grass.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	grass.modulate = Color(1.0, 1.0, 1.0, 0.3)
+	_field_band.add_child(grass)
 
 
 func _add_sun_disk() -> void:
