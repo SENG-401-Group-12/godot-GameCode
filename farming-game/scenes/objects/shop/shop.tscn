@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://bqd5alpfymx5j" path="res://scenes/objects/shop/shop.gd" id="1_6sfbp"]
 [ext_resource type="Texture2D" uid="uid://bw8x4ynham3dn" path="res://assets/game/objects/shop_stand.png" id="2_6sfbp"]
 [ext_resource type="Script" uid="uid://v0gqfty1t3f7" path="res://scripts/interaction/interaction_area/interaction_area.gd" id="3_pleuv"]
+[ext_resource type="FontFile" uid="uid://7bf452djqkbk" path="res://assets/game/ui/fonts/PixelOperator8.ttf" id="4_w2wlk"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_t4yi1"]
 size = Vector2(40, 40)
@@ -25,7 +26,45 @@ metadata/_custom_type_script = "uid://v0gqfty1t3f7"
 shape = SubResource("RectangleShape2D_t4yi1")
 
 [node name="LabelAnchor" type="Node2D" parent="InteractionArea" unique_id=1610577128]
-position = Vector2(0, -28)
+
+[node name="TimerLabel" type="Label" parent="." unique_id=526981901]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -10.5
+offset_top = -28.0
+offset_right = 10.5
+offset_bottom = -17.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("4_w2wlk")
+theme_override_font_sizes/font_size = 8
+text = "20"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NotAvailableLabel" type="Label" parent="." unique_id=2100044293]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -47.0
+offset_top = -54.5
+offset_right = 47.0
+offset_bottom = -31.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("4_w2wlk")
+theme_override_font_sizes/font_size = 8
+text = "Upgrade Shop on Cooldown!"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
 
 [connection signal="body_entered" from="InteractionArea" to="InteractionArea" method="_on_body_entered"]
 [connection signal="body_exited" from="InteractionArea" to="InteractionArea" method="_on_body_exited"]
