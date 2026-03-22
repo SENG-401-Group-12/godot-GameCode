@@ -150,9 +150,9 @@ grow_vertical = 2
 mouse_filter = 0
 z_index = 5
 theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 28
+theme_override_constants/margin_top = 48
 theme_override_constants/margin_right = 24
-theme_override_constants/margin_bottom = 56
+theme_override_constants/margin_bottom = 48
 
 [node name="MenuVBox" type="VBoxContainer" parent="ContentMargin"]
 layout_mode = 2
@@ -161,7 +161,7 @@ theme_override_constants/separation = 0
 [node name="MenuTopSpacer" type="Control" parent="ContentMargin/MenuVBox"]
 layout_mode = 2
 size_flags_vertical = 3
-size_flags_stretch_ratio = 2.6
+size_flags_stretch_ratio = 3.6
 
 [node name="MenuCenterContainer" type="CenterContainer" parent="ContentMargin/MenuVBox"]
 layout_mode = 2
@@ -175,62 +175,63 @@ size_flags_stretch_ratio = 1.0
 
 [node name="MainColumn" type="VBoxContainer" parent="ContentMargin/MenuVBox/MenuCenterContainer"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 7
 alignment = 1
+scale = Vector2(0.88, 0.88)
 
 [node name="Title" type="Label" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn"]
 layout_mode = 2
 size_flags_vertical = 0
 theme_override_colors/font_outline_color = Color(0.1, 0.06, 0.16, 0.9)
-theme_override_constants/outline_size = 5
-theme_override_font_sizes/font_size = 28
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 22
 text = "Harvest For All"
 horizontal_alignment = 1
 
 [node name="Subtitle" type="Label" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn"]
 layout_mode = 2
 size_flags_vertical = 0
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 9
 theme_override_colors/font_outline_color = Color(0.12, 0.08, 0.2, 0.85)
-theme_override_constants/outline_size = 3
+theme_override_constants/outline_size = 2
 text = "A cozy town is counting on you!"
 horizontal_alignment = 1
 
 [node name="UserLine" type="Label" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn"]
-custom_minimum_size = Vector2(240, 0)
+custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 size_flags_vertical = 0
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 9
 text = "Playing as guest"
 horizontal_alignment = 1
 autowrap_mode = 2
 
 [node name="PlayButton" type="Button" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn"]
-custom_minimum_size = Vector2(220, 44)
+custom_minimum_size = Vector2(196, 36)
 layout_mode = 2
 size_flags_vertical = 0
 text = "Play"
 
 [node name="AccountButton" type="Button" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn"]
-custom_minimum_size = Vector2(220, 44)
+custom_minimum_size = Vector2(196, 36)
 layout_mode = 2
 size_flags_vertical = 0
 text = "Account"
 
 [node name="LeaderboardButton" type="Button" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn"]
-custom_minimum_size = Vector2(220, 44)
+custom_minimum_size = Vector2(196, 36)
 layout_mode = 2
 size_flags_vertical = 0
 text = "Leaderboard"
 
 [node name="SettingsButton" type="Button" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn"]
-custom_minimum_size = Vector2(220, 44)
+custom_minimum_size = Vector2(196, 36)
 layout_mode = 2
 size_flags_vertical = 0
 text = "Settings"
 
 [node name="QuitButton" type="Button" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn"]
-custom_minimum_size = Vector2(220, 44)
+custom_minimum_size = Vector2(196, 36)
 layout_mode = 2
 size_flags_vertical = 0
 text = "Quit"
@@ -258,58 +259,64 @@ mouse_filter = 2
 
 [node name="AuthPanel" type="PanelContainer" parent="AuthLayer/AuthCenter"]
 visible = false
-custom_minimum_size = Vector2(520, 0)
+custom_minimum_size = Vector2(360, 0)
 layout_mode = 2
 mouse_filter = 0
 
 [node name="Margin" type="MarginContainer" parent="AuthLayer/AuthCenter/AuthPanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 20
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
 
 [node name="VBox" type="VBoxContainer" parent="AuthLayer/AuthCenter/AuthPanel/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 10
 
 [node name="AuthTitle" type="Label" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 16
 text = "Sign in"
 horizontal_alignment = 1
 
 [node name="EmailEdit" type="LineEdit" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
-custom_minimum_size = Vector2(440, 52)
+custom_minimum_size = Vector2(120, 34)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
 placeholder_text = "you@example.com"
 
 [node name="PasswordEdit" type="LineEdit" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
-custom_minimum_size = Vector2(440, 52)
+custom_minimum_size = Vector2(120, 34)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
 secret = true
 placeholder_text = "Password"
 
 [node name="LoginButton" type="Button" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
-custom_minimum_size = Vector2(0, 44)
+custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
+size_flags_horizontal = 3
 text = "Log in"
 
 [node name="SignupButton" type="Button" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
-custom_minimum_size = Vector2(0, 44)
+custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
+size_flags_horizontal = 3
 text = "Sign up"
 
 [node name="CloseAuthButton" type="Button" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
-custom_minimum_size = Vector2(0, 40)
+custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
+size_flags_horizontal = 3
 text = "Back"
 
 [node name="AuthStatusLabel" type="Label" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 10
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 9
 autowrap_mode = 2
 
 [node name="SettingsUILayer" type="CanvasLayer" parent="."]

@@ -3,6 +3,7 @@ extends Node
 ## Loads optional audio from res://assets/audio/bgm/. Each role tries harvest-for-all-* names first, then short aliases.
 ## Menu intro plays at MENU_PITCH_SCALE (1.5 = faster, loop still matches file end).
 ## Output level follows GameSettings (master × music), default ~75% music × 100% master.
+## BGM and one-shot stingers never overlap: wave jingles pause BGM until the sting ends; run end stops BGM before the sting.
 
 const BGM_DIR := "res://assets/audio/bgm/"
 const MENU_PITCH_SCALE := 1.5
@@ -33,6 +34,10 @@ var _current_bgm_key := ""
 var _fade_tween: Tween
 var _xfade_lerp_from: float = 0.0
 var _xfade_lerp_to: float = 0.0
+## BGM was paused so a one-shot stinger is the only music heard.
+var _bgm_paused_for_stinger := false
+## When the current stinger ends, unpause BGM (wave clears). False for victory/loss/menu.
+var _resume_bgm_after_stinger := false
 
 
 func _ready() -> void:
@@ -44,6 +49,7 @@ func _ready() -> void:
 	_stinger.name = "StingerPlayer"
 	_stinger.pitch_scale = 1.0
 	add_child(_stinger)
+	_stinger.finished.connect(_on_stinger_finished)
 	GameSettings.settings_changed.connect(_on_game_settings_changed)
 
 
@@ -63,6 +69,7 @@ func _stop_stingers() -> void:
 	if _stinger.playing:
 		_stinger.stop()
 	_stinger.stream = null
+	_resume_bgm_after_stinger = false
 
 
 func play_menu() -> void:
@@ -101,31 +108,25 @@ func unregister_customer_urgency() -> void:
 
 
 func play_wave_win_sting() -> void:
-	_play_stinger_one_shot("wave_win")
+	_play_stinger_one_shot("wave_win", true)
 
 
 func play_max_win_sting() -> void:
-	_play_stinger_one_shot("max_win")
 	_kill_fade()
-	_fade_tween = create_tween()
-	_fade_tween.tween_property(_bgm, "volume_db", -80.0, 0.4)
-	_fade_tween.tween_callback(
-		func() -> void:
-			_bgm.stop()
-			_current_bgm_key = ""
-	)
+	_bgm.stop()
+	_current_bgm_key = ""
+	_bgm.stream_paused = false
+	_bgm_paused_for_stinger = false
+	_play_stinger_one_shot("max_win", false)
 
 
 func play_run_loss_sting() -> void:
-	_play_stinger_one_shot("run_loss")
 	_kill_fade()
-	_fade_tween = create_tween()
-	_fade_tween.tween_property(_bgm, "volume_db", -80.0, 0.4)
-	_fade_tween.tween_callback(
-		func() -> void:
-			_bgm.stop()
-			_current_bgm_key = ""
-	)
+	_bgm.stop()
+	_current_bgm_key = ""
+	_bgm.stream_paused = false
+	_bgm_paused_for_stinger = false
+	_play_stinger_one_shot("run_loss", false)
 
 
 func _kill_fade() -> void:
@@ -186,6 +187,9 @@ func _apply_bgm_pitch_for_key(key: String) -> void:
 func _crossfade_to(key: String, stream: AudioStream) -> void:
 	if stream == null:
 		return
+	# Avoid swapping/unpausing BGM while the wave-clear jingle plays (would overlap audio).
+	if _stinger.playing and _resume_bgm_after_stinger:
+		return
 	if key == _current_bgm_key and _bgm.playing:
 		return
 	_set_bgm_loop(stream)
@@ -196,6 +200,8 @@ func _crossfade_to(key: String, stream: AudioStream) -> void:
 	if not _bgm.playing or _bgm.stream == null:
 		_bgm.stream = stream
 		_bgm.volume_db = peak
+		_bgm.stream_paused = false
+		_bgm_paused_for_stinger = false
 		_bgm.play()
 		_current_bgm_key = key
 		return
@@ -207,6 +213,8 @@ func _crossfade_to(key: String, stream: AudioStream) -> void:
 			_apply_bgm_pitch_for_key(key)
 			_bgm.stream = stream
 			_bgm.volume_db = p - 50.0
+			_bgm.stream_paused = false
+			_bgm_paused_for_stinger = false
 			_bgm.play()
 			_current_bgm_key = key
 			_xfade_lerp_from = p - 50.0
@@ -220,10 +228,44 @@ func _xfade_volume_lerp(alpha: float) -> void:
 	_bgm.volume_db = lerpf(_xfade_lerp_from, _xfade_lerp_to, a)
 
 
-func _play_stinger_one_shot(role: String) -> void:
+func _silence_bgm_for_exclusive_stinger() -> void:
+	if not _bgm.playing:
+		return
+	if _bgm_paused_for_stinger:
+		return
+	_bgm.stream_paused = true
+	_bgm_paused_for_stinger = true
+
+
+func _release_bgm_from_stinger_pause() -> void:
+	if not _bgm_paused_for_stinger:
+		return
+	_bgm.stream_paused = false
+	_bgm.volume_db = _peak_db()
+	_bgm_paused_for_stinger = false
+
+
+func _on_stinger_finished() -> void:
+	var should_resume := _resume_bgm_after_stinger
+	_resume_bgm_after_stinger = false
+	if should_resume and _context == "game":
+		_release_bgm_from_stinger_pause()
+		# Crossfades are blocked while the wave jingle plays; catch up with urgency state.
+		_play_gameplay_bgm(_urgent_count > 0)
+	else:
+		_bgm_paused_for_stinger = false
+
+
+func _play_stinger_one_shot(role: String, resume_bgm_after: bool) -> void:
 	var s := _first_for_role(role)
 	if s == null:
 		return
+	_kill_fade()
+	if _stinger.playing:
+		_stinger.stop()
+	_resume_bgm_after_stinger = false
+	_silence_bgm_for_exclusive_stinger()
+	_resume_bgm_after_stinger = resume_bgm_after
 	_set_stinger_no_loop(s)
 	_stinger.volume_db = _peak_db()
 	_stinger.stream = s

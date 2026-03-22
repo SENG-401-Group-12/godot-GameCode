@@ -10,6 +10,7 @@ const MENU_BG_PATHS: PackedStringArray = [
 
 @onready var _menu_background: TextureRect = $MenuBackground
 @onready var _content_margin: MarginContainer = $ContentMargin
+@onready var _main_column: VBoxContainer = $ContentMargin/MenuVBox/MenuCenterContainer/MainColumn
 @onready var _fx_layer: Control = $FxLayer
 @onready var _auth_backdrop: ColorRect = $AuthLayer/AuthBackdrop
 @onready var _auth_panel: PanelContainer = $AuthLayer/AuthCenter/AuthPanel
@@ -47,6 +48,7 @@ func _ready() -> void:
 	_add_menu_sparkles()
 	_style_main_buttons()
 	_soften_title_labels()
+	call_deferred("_finalize_menu_column_layout")
 
 	var tw := create_tween().set_loops().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	tw.tween_property(_title_label, "modulate", Color(1.0, 0.95, 0.65), 1.25)
@@ -77,29 +79,37 @@ func _load_menu_background_texture() -> void:
 		return
 
 
+func _finalize_menu_column_layout() -> void:
+	await get_tree().process_frame
+	_main_column.pivot_offset = Vector2(_main_column.size.x * 0.5, 0.0)
+
+
 func _fix_key_font_sizes() -> void:
-	_title_label.add_theme_font_size_override("font_size", 32)
-	_subtitle_label.add_theme_font_size_override("font_size", 10)
-	_user_line.add_theme_font_size_override("font_size", 10)
-	_auth_title.add_theme_font_size_override("font_size", 20)
-	_auth_status.add_theme_font_size_override("font_size", 10)
-	_email.add_theme_font_size_override("font_size", 16)
-	_password.add_theme_font_size_override("font_size", 16)
+	_title_label.add_theme_font_size_override("font_size", 24)
+	_subtitle_label.add_theme_font_size_override("font_size", 9)
+	_user_line.add_theme_font_size_override("font_size", 9)
+	_auth_title.add_theme_font_size_override("font_size", 16)
+	_auth_status.add_theme_font_size_override("font_size", 9)
+	_email.add_theme_font_size_override("font_size", 14)
+	_password.add_theme_font_size_override("font_size", 14)
 	for p in [
 		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/PlayButton,
 		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/AccountButton,
 		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/LeaderboardButton,
 		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/SettingsButton,
 		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/QuitButton,
+	]:
+		(p as Button).add_theme_font_size_override("font_size", 11)
+	for p in [
 		$AuthLayer/AuthCenter/AuthPanel/Margin/VBox/LoginButton,
 		$AuthLayer/AuthCenter/AuthPanel/Margin/VBox/SignupButton,
-		$AuthLayer/AuthCenter/AuthPanel/Margin/VBox/CloseAuthButton
+		$AuthLayer/AuthCenter/AuthPanel/Margin/VBox/CloseAuthButton,
 	]:
-		(p as Button).add_theme_font_size_override("font_size", 12)
+		(p as Button).add_theme_font_size_override("font_size", 10)
 
 
 func _soften_title_labels() -> void:
-	_title_label.add_theme_constant_override("outline_size", 5)
+	_title_label.add_theme_constant_override("outline_size", 4)
 	_title_label.add_theme_color_override("font_outline_color", Color(0.12, 0.06, 0.2, 0.92))
 	_title_label.add_theme_color_override("font_shadow_color", Color(0.25, 0.12, 0.35, 0.55))
 	_title_label.add_theme_constant_override("shadow_offset_x", 2)
@@ -112,14 +122,14 @@ func _soften_title_labels() -> void:
 func _make_menu_button_stylebox(bg: Color) -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
 	s.bg_color = bg
-	s.set_corner_radius_all(22)
+	s.set_corner_radius_all(18)
 	s.set_border_width_all(0)
 	s.shadow_size = 0
 	s.anti_aliasing = true
-	s.content_margin_left = 14
-	s.content_margin_right = 14
-	s.content_margin_top = 10
-	s.content_margin_bottom = 10
+	s.content_margin_left = 12
+	s.content_margin_right = 12
+	s.content_margin_top = 8
+	s.content_margin_bottom = 8
 	return s
 
 
@@ -204,12 +214,21 @@ func _email_is_valid_format(raw: String) -> bool:
 
 
 func _set_auth_open(open: bool) -> void:
+	if open:
+		_fit_auth_panel_to_screen()
 	_auth_backdrop.visible = open
 	_auth_panel.visible = open
 	_content_margin.visible = not open
 	if open:
 		_auth_status.text = ""
 		_email.grab_focus()
+
+
+func _fit_auth_panel_to_screen() -> void:
+	var vp: Vector2 = get_tree().root.get_viewport().get_visible_rect().size
+	var max_w: int = maxi(260, int(vp.x) - 56)
+	var panel_w: int = clampi(360, 280, max_w)
+	_auth_panel.custom_minimum_size.x = panel_w
 
 
 func _refresh_user_line() -> void:

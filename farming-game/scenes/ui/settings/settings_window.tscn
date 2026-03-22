@@ -3,11 +3,10 @@
 [ext_resource type="Script" path="res://scenes/ui/settings/settings_window.gd" id="1_set"]
 
 [node name="SettingsWindow" type="Window"]
-process_mode = 4
 title = "Settings"
 initial_position = 2
-size = Vector2i(520, 500)
-min_size = Vector2i(360, 320)
+size = Vector2i(400, 360)
+min_size = Vector2i(300, 260)
 visible = false
 exclusive = true
 unresizable = false
@@ -46,7 +45,7 @@ theme_override_constants/separation = 12
 
 [node name="Title" type="Label" parent="Margin/RootVBox/Scroll/ScrollVBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 14
 text = "Settings"
 horizontal_alignment = 1
 
@@ -54,13 +53,13 @@ horizontal_alignment = 1
 layout_mode = 2
 
 [node name="Lbl" type="Label" parent="Margin/RootVBox/Scroll/ScrollVBox/MasterRow"]
-custom_minimum_size = Vector2(112, 0)
+custom_minimum_size = Vector2(96, 0)
 layout_mode = 2
 text = "Master"
 
 [node name="MasterSlider" type="HSlider" parent="Margin/RootVBox/Scroll/ScrollVBox/MasterRow"]
 layout_mode = 2
-custom_minimum_size = Vector2(120, 32)
+custom_minimum_size = Vector2(100, 22)
 size_flags_horizontal = 3
 min_value = 0.0
 max_value = 100.0
@@ -76,13 +75,13 @@ text = "100%"
 layout_mode = 2
 
 [node name="Lbl2" type="Label" parent="Margin/RootVBox/Scroll/ScrollVBox/MusicRow"]
-custom_minimum_size = Vector2(112, 0)
+custom_minimum_size = Vector2(96, 0)
 layout_mode = 2
 text = "Music"
 
 [node name="MusicSlider" type="HSlider" parent="Margin/RootVBox/Scroll/ScrollVBox/MusicRow"]
 layout_mode = 2
-custom_minimum_size = Vector2(120, 32)
+custom_minimum_size = Vector2(100, 22)
 size_flags_horizontal = 3
 min_value = 0.0
 max_value = 100.0
@@ -98,13 +97,13 @@ text = "75%"
 layout_mode = 2
 
 [node name="Lbl3" type="Label" parent="Margin/RootVBox/Scroll/ScrollVBox/SfxRow"]
-custom_minimum_size = Vector2(112, 0)
+custom_minimum_size = Vector2(96, 0)
 layout_mode = 2
 text = "Sound effects"
 
 [node name="SfxSlider" type="HSlider" parent="Margin/RootVBox/Scroll/ScrollVBox/SfxRow"]
 layout_mode = 2
-custom_minimum_size = Vector2(120, 32)
+custom_minimum_size = Vector2(100, 22)
 size_flags_horizontal = 3
 min_value = 0.0
 max_value = 100.0
@@ -123,12 +122,12 @@ text = "SFX volume is saved for when gameplay sounds are added."
 autowrap_mode = 2
 
 [node name="FullscreenCheck" type="CheckButton" parent="Margin/RootVBox/Scroll/ScrollVBox"]
-custom_minimum_size = Vector2(0, 36)
+custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 text = "Fullscreen"
 
 [node name="VsyncCheck" type="CheckButton" parent="Margin/RootVBox/Scroll/ScrollVBox"]
-custom_minimum_size = Vector2(0, 36)
+custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 text = "VSync"
 
@@ -144,12 +143,12 @@ theme_override_constants/separation = 12
 alignment = 1
 
 [node name="ResetButton" type="Button" parent="Margin/RootVBox/Footer"]
-custom_minimum_size = Vector2(160, 40)
+custom_minimum_size = Vector2(140, 30)
 layout_mode = 2
 text = "Reset to defaults"
 
 [node name="CloseButton" type="Button" parent="Margin/RootVBox/Footer"]
-custom_minimum_size = Vector2(120, 40)
+custom_minimum_size = Vector2(100, 30)
 layout_mode = 2
 text = "Close"
 
