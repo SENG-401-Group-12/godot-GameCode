@@ -29,7 +29,7 @@ func _start_game() -> void:
 	game_finished = false
 	game_ui._show_message("Hungry customers will be coming in %d seconds! Prepare your crops before they show up!" % [start_time_buffer])
 	while start_time_buffer >= 0:
-		await get_tree().create_timer(1.0).timeout
+		await get_tree().create_timer(1.0, false).timeout
 		start_time_buffer -= 1
 		game_ui._show_message("Hungry customers will be coming in %d seconds! Prepare your crops before they show up!" % [start_time_buffer], 1.0)
 	
@@ -72,7 +72,7 @@ func _check_wave_complete():
 		var wave_countdown = time_between_waves
 		game_ui._show_message("Wave Complete! %ds until next wave." % [wave_countdown], 5.0)
 		for i in range(wave_countdown):
-			await get_tree().create_timer(1.0).timeout
+			await get_tree().create_timer(1.0, false).timeout
 			wave_countdown -= 1
 			game_ui._show_message("Wave Complete! %ds until next wave." % [wave_countdown], 1.0)
 			

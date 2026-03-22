@@ -20,7 +20,7 @@ func _fill_slots() -> void:
 		var config = customer_queue.pop_front()
 		try_spawn_customer(config)
 		customer_spawned.emit()
-		await get_tree().create_timer(2).timeout # wait 2s between customer spawns
+		await get_tree().create_timer(2, false).timeout # wait 2s between customer spawns
 
 func try_spawn_customer(config: Dictionary) -> bool:
 	var slot_index = _get_free_slot()
@@ -54,7 +54,7 @@ func _get_free_slot() -> int:
 	
 func _on_customer_done(_customer, slot_index: int):
 	customer_slots[slot_index] = null
-	await get_tree().create_timer(0.5).timeout # wait a short time before filling the slot
+	await get_tree().create_timer(0.5, false).timeout # wait a short time before filling the slot
 	_fill_slots() # try to fill the free slot
 	
 func get_active_customer_count() -> int:
