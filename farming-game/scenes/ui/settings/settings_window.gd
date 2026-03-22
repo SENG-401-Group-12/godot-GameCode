@@ -2,15 +2,15 @@ extends Window
 
 const UI_FONT = preload("res://assets/game/ui/fonts/PixelOperator8.ttf")
 
-@onready var _master_slider: HSlider = $Margin/VBox/MasterRow/MasterSlider
-@onready var _music_slider: HSlider = $Margin/VBox/MusicRow/MusicSlider
-@onready var _sfx_slider: HSlider = $Margin/VBox/SfxRow/SfxSlider
-@onready var _master_value: Label = $Margin/VBox/MasterRow/MasterValue
-@onready var _music_value: Label = $Margin/VBox/MusicRow/MusicValue
-@onready var _sfx_value: Label = $Margin/VBox/SfxRow/SfxValue
-@onready var _fullscreen: CheckButton = $Margin/VBox/FullscreenCheck
-@onready var _vsync: CheckButton = $Margin/VBox/VsyncCheck
-@onready var _sfx_hint: Label = $Margin/VBox/SfxHint
+@onready var _master_slider: HSlider = $Margin/RootVBox/Scroll/ScrollVBox/MasterRow/MasterSlider
+@onready var _music_slider: HSlider = $Margin/RootVBox/Scroll/ScrollVBox/MusicRow/MusicSlider
+@onready var _sfx_slider: HSlider = $Margin/RootVBox/Scroll/ScrollVBox/SfxRow/SfxSlider
+@onready var _master_value: Label = $Margin/RootVBox/Scroll/ScrollVBox/MasterRow/MasterValue
+@onready var _music_value: Label = $Margin/RootVBox/Scroll/ScrollVBox/MusicRow/MusicValue
+@onready var _sfx_value: Label = $Margin/RootVBox/Scroll/ScrollVBox/SfxRow/SfxValue
+@onready var _fullscreen: CheckButton = $Margin/RootVBox/Scroll/ScrollVBox/FullscreenCheck
+@onready var _vsync: CheckButton = $Margin/RootVBox/Scroll/ScrollVBox/VsyncCheck
+@onready var _sfx_hint: Label = $Margin/RootVBox/Scroll/ScrollVBox/SfxHint
 
 
 func _ready() -> void:
@@ -28,7 +28,11 @@ func _ready() -> void:
 
 func open_settings() -> void:
 	_sync_from_settings()
-	popup_centered_ratio(0.72)
+	var vs := get_viewport().get_visible_rect().size
+	var win_w := clampi(520, 400, max(400, int(vs.x) - 48))
+	var win_h := clampi(500, 360, max(360, int(vs.y) - 48))
+	size = Vector2i(win_w, win_h)
+	popup_centered()
 
 
 func _sync_from_settings() -> void:
@@ -100,12 +104,10 @@ func _apply_fonts(node: Node) -> void:
 		var c := node as Control
 		if c is Button or c is Label:
 			c.add_theme_font_override("font", UI_FONT)
-			if not c.name.ends_with("Title"):
+			if c.name != "Title":
 				c.add_theme_font_size_override("font_size", 10)
 		elif c is LineEdit:
 			c.add_theme_font_override("font", UI_FONT)
 			c.add_theme_font_size_override("font_size", 12)
-		elif c is HSlider:
-			pass
 	for ch in node.get_children():
 		_apply_fonts(ch)
