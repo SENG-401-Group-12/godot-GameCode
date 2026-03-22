@@ -1,7 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://bqm3nmn8v0khx"]
+[gd_scene load_steps=2 format=3 uid="uid://bqm3nmn8v0khx"]
 
 [ext_resource type="Script" path="res://scenes/ui/main_menu/main_menu.gd" id="1_menu"]
-[ext_resource type="Texture2D" uid="uid://budifo7dmnua3" path="res://assets/game/ui/menu3.jpg" id="2_bg"]
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -20,19 +19,29 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.12, 0.28, 0.18, 1)
+color = Color(0.15, 0.42, 0.32, 1)
 
-[node name="Background" type="TextureRect" parent="."]
+[node name="SkyBand" type="ColorRect" parent="."]
 layout_mode = 1
-anchors_preset = 15
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0.29, 0.56, 0.85, 1)
+
+[node name="FieldBand" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = -200.0
 grow_horizontal = 2
-grow_vertical = 2
+grow_vertical = 0
 mouse_filter = 2
-texture = ExtResource("2_bg")
-expand_mode = 1
-stretch_mode = 6
+color = Color(0.12, 0.52, 0.3, 1)
 
 [node name="Dim" type="ColorRect" parent="."]
 layout_mode = 1
@@ -42,7 +51,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0, 0, 0, 0.45)
+color = Color(0, 0, 0, 0.35)
 
 [node name="ContentMargin" type="MarginContainer" parent="."]
 layout_mode = 1
@@ -64,35 +73,49 @@ size_flags_vertical = 4
 
 [node name="MainColumn" type="VBoxContainer" parent="ContentMargin/Center"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 14
 alignment = 1
 
 [node name="Title" type="Label" parent="ContentMargin/Center/MainColumn"]
 layout_mode = 2
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 6
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 28
 text = "Harvest For All"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="ContentMargin/Center/MainColumn"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+text = "Feed the town — survive the waves!"
 horizontal_alignment = 1
 
 [node name="UserLine" type="Label" parent="ContentMargin/Center/MainColumn"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 10
 text = "Playing as guest"
 horizontal_alignment = 1
 autowrap_mode = 2
 
 [node name="PlayButton" type="Button" parent="ContentMargin/Center/MainColumn"]
+custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
 text = "Play"
 
 [node name="AccountButton" type="Button" parent="ContentMargin/Center/MainColumn"]
+custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
 text = "Account"
 
 [node name="LeaderboardButton" type="Button" parent="ContentMargin/Center/MainColumn"]
+custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
 text = "Leaderboard"
 
 [node name="QuitButton" type="Button" parent="ContentMargin/Center/MainColumn"]
+custom_minimum_size = Vector2(220, 44)
 layout_mode = 2
 text = "Quit"
 
@@ -107,7 +130,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
-color = Color(0, 0, 0, 0.82)
+color = Color(0, 0, 0, 0.88)
 
 [node name="AuthCenter" type="CenterContainer" parent="AuthLayer"]
 anchors_preset = 15
@@ -119,47 +142,58 @@ mouse_filter = 2
 
 [node name="AuthPanel" type="PanelContainer" parent="AuthLayer/AuthCenter"]
 visible = false
+custom_minimum_size = Vector2(520, 0)
 layout_mode = 2
 mouse_filter = 0
 
 [node name="Margin" type="MarginContainer" parent="AuthLayer/AuthCenter/AuthPanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 12
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
 
 [node name="VBox" type="VBoxContainer" parent="AuthLayer/AuthCenter/AuthPanel/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 14
 
 [node name="AuthTitle" type="Label" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 20
 text = "Sign in"
+horizontal_alignment = 1
 
 [node name="EmailEdit" type="LineEdit" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
+custom_minimum_size = Vector2(440, 52)
 layout_mode = 2
-placeholder_text = "Email"
+theme_override_font_sizes/font_size = 16
+placeholder_text = "you@example.com"
 
 [node name="PasswordEdit" type="LineEdit" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
+custom_minimum_size = Vector2(440, 52)
 layout_mode = 2
+theme_override_font_sizes/font_size = 16
 secret = true
 placeholder_text = "Password"
 
 [node name="LoginButton" type="Button" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 text = "Log in"
 
 [node name="SignupButton" type="Button" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 text = "Sign up"
 
 [node name="CloseAuthButton" type="Button" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 text = "Back"
 
 [node name="AuthStatusLabel" type="Label" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 10
 autowrap_mode = 2
 
 [node name="LeaderboardWindow" type="Window" parent="."]
