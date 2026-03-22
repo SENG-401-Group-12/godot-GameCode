@@ -26,6 +26,7 @@ PlayerData="*uid://b3gyrgym203s6"
 Globals="*uid://bmskgidfm6qpu"
 UpgradeManager="*uid://bqp4ddrcxt80g"
 Backend="*uid://cnxtxroaxxpup"
+Music="*res://scripts/audio/music_controller.gd"
 
 [display]
 

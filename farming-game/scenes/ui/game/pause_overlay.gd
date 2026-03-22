@@ -71,6 +71,7 @@ func _on_leaderboard_pressed() -> void:
 func _on_quit_to_menu_pressed() -> void:
 	get_tree().paused = false
 	_root.visible = false
+	Music.play_menu()
 	get_tree().change_scene_to_file(MAIN_MENU)
 
 
