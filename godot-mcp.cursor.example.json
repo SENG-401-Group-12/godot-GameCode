@@ -1,0 +1,13 @@
+{
+  "_comment": "Copy to .cursor/mcp.json locally (not committed). Adjust GODOT_PATH.",
+  "mcpServers": {
+    "godot": {
+      "command": "npx",
+      "args": ["-y", "@coding-solo/godot-mcp"],
+      "env": {
+        "GODOT_PATH": "C:\\Program Files\\Godot\\Godot_console.exe",
+        "DEBUG": "true"
+      }
+    }
+  }
+}

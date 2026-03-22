@@ -17,8 +17,11 @@ const ItemSlot = preload("res://scenes/characters/customer/item_slot.tscn")
 @export var max_amount := 5
 @export var time_limit := 20.0
 
+const _URGENT_TIME_SEC := 10.0
+
 var time_remaining := 0.0
 var is_resolved := false
+var _in_urgent_band := false
 
 func _ready() -> void:
 	requests = []
@@ -34,6 +37,13 @@ func _process(delta: float) -> void:
 
 	time_remaining = max(0.0, time_remaining - delta)
 	_update_timer_label()
+	var urgent := time_remaining > 0.0 and time_remaining <= _URGENT_TIME_SEC
+	if urgent and not _in_urgent_band:
+		_in_urgent_band = true
+		Music.register_customer_urgency()
+	elif not urgent and _in_urgent_band:
+		_in_urgent_band = false
+		Music.unregister_customer_urgency()
 	if time_remaining <= 0.0:
 		_resolve_expired()
 
@@ -63,6 +73,9 @@ func _setup_customer() -> void:
 	populate_display()
 	time_remaining = time_limit
 	is_resolved = false
+	if _in_urgent_band:
+		_in_urgent_band = false
+		Music.unregister_customer_urgency()
 	interaction_area.monitorable = true
 	interaction_area.monitoring = true
 	_update_timer_label()
@@ -80,6 +93,10 @@ func _on_interact() -> void:
 	for item in requests:
 		PlayerData.remove_crop(item.item_name, item.amount)
 
+	if _in_urgent_band:
+		_in_urgent_band = false
+		Music.unregister_customer_urgency()
+
 	is_resolved = true
 	interaction_area.monitorable = false
 	interaction_area.monitoring = false
@@ -89,6 +106,10 @@ func _on_interact() -> void:
 func _resolve_expired() -> void:
 	if is_resolved:
 		return
+
+	if _in_urgent_band:
+		_in_urgent_band = false
+		Music.unregister_customer_urgency()
 
 	is_resolved = true
 	interaction_area.monitorable = false

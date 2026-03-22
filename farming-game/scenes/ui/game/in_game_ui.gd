@@ -10,6 +10,10 @@ const UI_FONT = preload("res://assets/game/ui/fonts/PixelOperator8.ttf")
 @onready var summary_label: Label = $MarginContainer/HBoxContainer/CropPanel/MarginContainer/VBoxContainer/SummaryLabel
 @onready var crop_buttons: VBoxContainer = $MarginContainer/HBoxContainer/CropPanel/MarginContainer/VBoxContainer/ScrollContainer/CropButtons
 @onready var message_label: Label = $MarginContainer/HBoxContainer/CenterMessage
+@onready var game_over_layer: ColorRect = $GameOverLayer
+@onready var game_over_body: Label = $GameOverLayer/CenterContainer/Panel/Margin/VBox/BodyLabel
+@onready var game_over_submit: Label = $GameOverLayer/CenterContainer/Panel/Margin/VBox/SubmitStatusLabel
+@onready var game_over_menu_button: Button = $GameOverLayer/CenterContainer/Panel/Margin/VBox/MenuButton
 
 var _message_tween: Tween = null
 
@@ -22,6 +26,8 @@ func _ready() -> void:
 	else: # If not on mobile, remove joystick and interact button from UI
 		$Joystick.queue_free()
 		$InteractButton.queue_free()
+	game_over_layer.visible = false
+	game_over_menu_button.pressed.connect(_on_game_over_menu_pressed)
 	get_parent().show()
 	_build_crop_buttons()
 	PlayerData.inventory_changed.connect(_refresh_crop_ui)
@@ -87,3 +93,23 @@ func _update_status(current_wave, fed_count, fed_target, missed_count, allowed_m
 	progress_label.text = "Fed: %d / %d" % [fed_count, fed_target]
 	missed_label.text = "Missed: %d / %d" % [missed_count, allowed_misses]
 	active_label.text = "Waiting now: %d" % active_customer_count
+
+
+func show_game_over(body_text: String, submit_status: String) -> void:
+	game_over_body.text = body_text
+	game_over_submit.text = submit_status
+	game_over_layer.visible = true
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	get_tree().paused = true
+
+
+func set_run_submit_status(text: String) -> void:
+	game_over_submit.text = text
+
+
+func _on_game_over_menu_pressed() -> void:
+	get_tree().paused = false
+	process_mode = Node.PROCESS_MODE_INHERIT
+	game_over_layer.visible = false
+	Music.play_menu()
+	get_tree().change_scene_to_file("res://scenes/ui/main_menu/main_menu.tscn")

@@ -8,6 +8,7 @@ signal signup_succeeded(message: String)
 signal signup_failed(message: String)
 
 signal leaderboard_received(data)
+signal leaderboard_failed(reason: String)
 signal run_submitted(data)
 signal personal_best_received(data)
 
@@ -22,6 +23,10 @@ var refresh_token: String = ""
 var current_user_id: String = ""
 var current_email: String = ""
 var guest_mode := true
+
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 
 
 func continue_as_guest() -> void:
@@ -265,13 +270,24 @@ func get_top_10() -> void:
 	var body := "{}"
 
 	http.request_completed.connect(func(result, response_code, response_headers, response_body):
-		var text : String = response_body.get_string_from_utf8()
+		if result != HTTPRequest.RESULT_SUCCESS:
+			leaderboard_failed.emit("Network error — check connection.")
+			http.queue_free()
+			return
+		var text: String = response_body.get_string_from_utf8()
 		var data = JSON.parse_string(text)
 
 		if response_code >= 200 and response_code < 300:
-			leaderboard_received.emit(data)
+			if typeof(data) == TYPE_ARRAY:
+				leaderboard_received.emit(data)
+			else:
+				leaderboard_failed.emit("Unexpected response from server.")
 		else:
 			print("Get top 10 failed: ", text)
+			var err_msg: String = text if text.length() > 0 else "Leaderboard request failed (%d)." % response_code
+			if err_msg.length() > 180:
+				err_msg = err_msg.substr(0, 177) + "..."
+			leaderboard_failed.emit(err_msg)
 
 		http.queue_free()
 	)
