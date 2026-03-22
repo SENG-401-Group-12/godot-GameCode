@@ -54,6 +54,7 @@ func _get_free_slot() -> int:
 	
 func _on_customer_done(_customer, slot_index: int):
 	customer_slots[slot_index] = null
+	await get_tree().create_timer(0.5).timeout # wait a short time before filling the slot
 	_fill_slots() # try to fill the free slot
 	
 func get_active_customer_count() -> int:

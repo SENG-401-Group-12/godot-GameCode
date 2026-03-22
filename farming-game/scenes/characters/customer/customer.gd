@@ -83,8 +83,8 @@ func _on_interact() -> void:
 	is_resolved = true
 	interaction_area.monitorable = false
 	interaction_area.monitoring = false
+	await flash_sprite(Color.GREEN, _leave_scene).finished
 	served.emit(self)
-	flash_sprite(Color.GREEN, _leave_scene)
 
 func _resolve_expired() -> void:
 	if is_resolved:
@@ -93,19 +93,20 @@ func _resolve_expired() -> void:
 	is_resolved = true
 	interaction_area.monitorable = false
 	interaction_area.monitoring = false
+	await flash_sprite(Color(0.65, 0.12, 0.12), _leave_scene).finished
 	expired.emit(self)
-	flash_sprite(Color(0.65, 0.12, 0.12), _leave_scene)
 
 func _leave_scene() -> void:
 	queue_free()
 
-func flash_sprite(color: Color, callback := Callable()) -> void:
+func flash_sprite(color: Color, callback := Callable()) -> Tween:
 	var tween = create_tween()
 	for _i in range(3):
 		tween.tween_property(sprite, "modulate", color, 0.08)
 		tween.tween_property(sprite, "modulate", Color.WHITE, 0.08)
 	if not callback.is_null():
 		tween.tween_callback(callback)
+	return tween
 
 func show_not_enough_label() -> void:
 	var label = $NotEnoughLabel
