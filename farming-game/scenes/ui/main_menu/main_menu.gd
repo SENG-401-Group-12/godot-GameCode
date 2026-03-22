@@ -18,6 +18,7 @@ const UI_FONT := preload("res://assets/game/ui/fonts/PixelOperator8.ttf")
 
 
 func _ready() -> void:
+	get_tree().paused = false
 	_apply_font_recursive(self)
 	_set_auth_open(false)
 	_leaderboard_window.hide()
