@@ -1,0 +1,189 @@
+[gd_scene load_steps=3 format=3 uid="uid://bqm3nmn8v0khx"]
+
+[ext_resource type="Script" path="res://scenes/ui/main_menu/main_menu.gd" id="1_menu"]
+[ext_resource type="Texture2D" uid="uid://budifo7dmnua3" path="res://assets/game/ui/menu3.jpg" id="2_bg"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_menu")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Dim" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.45)
+
+[node name="ContentMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="Center" type="CenterContainer" parent="ContentMargin"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="MainColumn" type="VBoxContainer" parent="ContentMargin/Center"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Title" type="Label" parent="ContentMargin/Center/MainColumn"]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+text = "Harvest For All"
+horizontal_alignment = 1
+
+[node name="UserLine" type="Label" parent="ContentMargin/Center/MainColumn"]
+layout_mode = 2
+text = "Playing as guest"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="PlayButton" type="Button" parent="ContentMargin/Center/MainColumn"]
+layout_mode = 2
+text = "Play"
+
+[node name="AccountButton" type="Button" parent="ContentMargin/Center/MainColumn"]
+layout_mode = 2
+text = "Account"
+
+[node name="LeaderboardButton" type="Button" parent="ContentMargin/Center/MainColumn"]
+layout_mode = 2
+text = "Leaderboard"
+
+[node name="QuitButton" type="Button" parent="ContentMargin/Center/MainColumn"]
+layout_mode = 2
+text = "Quit"
+
+[node name="AuthLayer" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="AuthCenter" type="CenterContainer" parent="AuthLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="AuthPanel" type="PanelContainer" parent="AuthLayer/AuthCenter"]
+visible = false
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="AuthLayer/AuthCenter/AuthPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="AuthLayer/AuthCenter/AuthPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="AuthTitle" type="Label" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
+layout_mode = 2
+text = "Supabase account"
+
+[node name="EmailEdit" type="LineEdit" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
+layout_mode = 2
+placeholder_text = "Email"
+
+[node name="PasswordEdit" type="LineEdit" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
+layout_mode = 2
+secret = true
+placeholder_text = "Password"
+
+[node name="LoginButton" type="Button" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
+layout_mode = 2
+text = "Log in"
+
+[node name="SignupButton" type="Button" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
+layout_mode = 2
+text = "Sign up"
+
+[node name="GuestButton" type="Button" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
+layout_mode = 2
+text = "Continue as guest"
+
+[node name="CloseAuthButton" type="Button" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
+layout_mode = 2
+text = "Close"
+
+[node name="AuthStatusLabel" type="Label" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
+layout_mode = 2
+autowrap_mode = 2
+
+[node name="LeaderboardWindow" type="Window" parent="."]
+title = "Leaderboard"
+initial_position = 2
+size = Vector2i(520, 360)
+visible = false
+
+[node name="Margin" type="MarginContainer" parent="LeaderboardWindow"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBox" type="VBoxContainer" parent="LeaderboardWindow/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LeaderboardStatus" type="Label" parent="LeaderboardWindow/Margin/VBox"]
+layout_mode = 2
+text = "Loading..."
+
+[node name="LeaderboardList" type="ItemList" parent="LeaderboardWindow/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CloseLeaderboardButton" type="Button" parent="LeaderboardWindow/Margin/VBox"]
+layout_mode = 2
+text = "Close"
+
+[connection signal="pressed" from="ContentMargin/Center/MainColumn/PlayButton" to="." method="_on_play_pressed"]
+[connection signal="pressed" from="ContentMargin/Center/MainColumn/AccountButton" to="." method="_on_account_button_pressed"]
+[connection signal="pressed" from="ContentMargin/Center/MainColumn/LeaderboardButton" to="." method="_on_leaderboard_pressed"]
+[connection signal="pressed" from="ContentMargin/Center/MainColumn/QuitButton" to="." method="_on_quit_pressed"]
+[connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/LoginButton" to="." method="_on_login_pressed"]
+[connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/SignupButton" to="." method="_on_signup_pressed"]
+[connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/GuestButton" to="." method="_on_guest_pressed"]
+[connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/CloseAuthButton" to="." method="_on_close_auth_pressed"]
+[connection signal="pressed" from="LeaderboardWindow/Margin/VBox/CloseLeaderboardButton" to="." method="_on_close_leaderboard_pressed"]
