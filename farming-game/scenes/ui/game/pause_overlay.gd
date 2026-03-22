@@ -5,7 +5,7 @@ const MAIN_MENU := "res://scenes/ui/main_menu/main_menu.tscn"
 const UI_FONT := preload("res://assets/game/ui/fonts/PixelOperator8.ttf")
 
 @onready var _root: Control = $PauseRoot
-@onready var _settings_window: Window = $PauseRoot/SettingsWindow
+@onready var _settings_window: Window = $SettingsUILayer/SettingsWindow
 @onready var _leaderboard_window: Window = $PauseRoot/LeaderboardWindow
 @onready var _leaderboard_list: ItemList = $PauseRoot/LeaderboardWindow/Margin/VBox/LeaderboardList
 @onready var _leaderboard_status: Label = $PauseRoot/LeaderboardWindow/Margin/VBox/LeaderboardStatus

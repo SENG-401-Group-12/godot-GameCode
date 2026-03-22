@@ -2,15 +2,15 @@ extends Window
 
 const UI_FONT = preload("res://assets/game/ui/fonts/PixelOperator8.ttf")
 
-@onready var _master_slider: HSlider = %MasterSlider
-@onready var _music_slider: HSlider = %MusicSlider
-@onready var _sfx_slider: HSlider = %SfxSlider
-@onready var _master_value: Label = %MasterValue
-@onready var _music_value: Label = %MusicValue
-@onready var _sfx_value: Label = %SfxValue
-@onready var _fullscreen: CheckButton = %FullscreenCheck
-@onready var _vsync: CheckButton = %VsyncCheck
-@onready var _sfx_hint: Label = %SfxHint
+@onready var _master_slider: HSlider = $Margin/VBox/MasterRow/MasterSlider
+@onready var _music_slider: HSlider = $Margin/VBox/MusicRow/MusicSlider
+@onready var _sfx_slider: HSlider = $Margin/VBox/SfxRow/SfxSlider
+@onready var _master_value: Label = $Margin/VBox/MasterRow/MasterValue
+@onready var _music_value: Label = $Margin/VBox/MusicRow/MusicValue
+@onready var _sfx_value: Label = $Margin/VBox/SfxRow/SfxValue
+@onready var _fullscreen: CheckButton = $Margin/VBox/FullscreenCheck
+@onready var _vsync: CheckButton = $Margin/VBox/VsyncCheck
+@onready var _sfx_hint: Label = $Margin/VBox/SfxHint
 
 
 func _ready() -> void:

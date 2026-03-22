@@ -81,8 +81,6 @@ layout_mode = 2
 text = "Press Esc to resume"
 horizontal_alignment = 1
 
-[node name="SettingsWindow" parent="PauseRoot" instance=ExtResource("2_settings")]
-
 [node name="LeaderboardWindow" type="Window" parent="PauseRoot"]
 title = "Leaderboard"
 initial_position = 2
@@ -119,6 +117,11 @@ size_flags_vertical = 3
 [node name="CloseLeaderboardButton" type="Button" parent="PauseRoot/LeaderboardWindow/Margin/VBox"]
 layout_mode = 2
 text = "Close"
+
+[node name="SettingsUILayer" type="CanvasLayer" parent="."]
+layer = 120
+
+[node name="SettingsWindow" parent="SettingsUILayer" instance=ExtResource("2_settings")]
 
 [connection signal="pressed" from="PauseRoot/Center/Panel/Margin/VBox/ResumeButton" to="." method="_on_resume_pressed"]
 [connection signal="pressed" from="PauseRoot/Center/Panel/Margin/VBox/SettingsButton" to="." method="_on_settings_pressed"]

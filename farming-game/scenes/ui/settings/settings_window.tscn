@@ -8,6 +8,8 @@ title = "Settings"
 initial_position = 2
 size = Vector2i(480, 420)
 visible = false
+exclusive = true
+unresizable = false
 script = ExtResource("1_set")
 
 [node name="Margin" type="MarginContainer" parent="."]
@@ -45,8 +47,8 @@ layout_mode = 2
 text = "Master"
 
 [node name="MasterSlider" type="HSlider" parent="Margin/VBox/MasterRow"]
-unique_name_in_owner = true
 layout_mode = 2
+custom_minimum_size = Vector2(0, 28)
 size_flags_horizontal = 3
 min_value = 0.0
 max_value = 100.0
@@ -68,8 +70,8 @@ layout_mode = 2
 text = "Music"
 
 [node name="MusicSlider" type="HSlider" parent="Margin/VBox/MusicRow"]
-unique_name_in_owner = true
 layout_mode = 2
+custom_minimum_size = Vector2(0, 28)
 size_flags_horizontal = 3
 min_value = 0.0
 max_value = 100.0
@@ -91,8 +93,8 @@ layout_mode = 2
 text = "Sound effects"
 
 [node name="SfxSlider" type="HSlider" parent="Margin/VBox/SfxRow"]
-unique_name_in_owner = true
 layout_mode = 2
+custom_minimum_size = Vector2(0, 28)
 size_flags_horizontal = 3
 min_value = 0.0
 max_value = 100.0
