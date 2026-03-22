@@ -59,7 +59,7 @@ layout_mode = 1
 
 [node name="ShopUI" parent="UserInterface" unique_id=110660899 instance=ExtResource("6_dcwuy")]
 visible = false
-z_index = 4096
+z_index = 64
 layout_mode = 1
 
 [node name="PauseOverlay" parent="UserInterface" instance=ExtResource("8_pause")]
