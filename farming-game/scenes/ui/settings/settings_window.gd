@@ -14,6 +14,9 @@ const UI_FONT = preload("res://assets/game/ui/fonts/PixelOperator8.ttf")
 
 
 func _ready() -> void:
+	# Was process_mode DISABLED in .tscn — that blocks all input on sliders/buttons.
+	# ALWAYS keeps this window usable when the game tree is paused (pause menu).
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	close_requested.connect(hide)
 	_apply_fonts(self)
 	_sfx_hint.modulate = Color(0.75, 0.75, 0.8)
@@ -28,9 +31,11 @@ func _ready() -> void:
 
 func open_settings() -> void:
 	_sync_from_settings()
-	var vs := get_viewport().get_visible_rect().size
-	var win_w := clampi(520, 400, max(400, int(vs.x) - 48))
-	var win_h := clampi(500, 360, max(360, int(vs.y) - 48))
+	var vp := get_tree().root.get_viewport().get_visible_rect().size
+	var max_w := maxi(300, int(vp.x) - 72)
+	var max_h := maxi(260, int(vp.y) - 72)
+	var win_w := clampi(380, 300, max_w)
+	var win_h := clampi(340, 240, max_h)
 	size = Vector2i(win_w, win_h)
 	popup_centered()
 
@@ -104,8 +109,10 @@ func _apply_fonts(node: Node) -> void:
 		var c := node as Control
 		if c is Button or c is Label:
 			c.add_theme_font_override("font", UI_FONT)
-			if c.name != "Title":
-				c.add_theme_font_size_override("font_size", 10)
+			if c.name == "Title":
+				c.add_theme_font_size_override("font_size", 14)
+			else:
+				c.add_theme_font_size_override("font_size", 9)
 		elif c is LineEdit:
 			c.add_theme_font_override("font", UI_FONT)
 			c.add_theme_font_size_override("font_size", 12)
