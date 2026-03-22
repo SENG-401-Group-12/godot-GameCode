@@ -22,6 +22,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		w.size = Vector2i(1280, 720)
 	else:
 		w.mode = Window.MODE_EXCLUSIVE_FULLSCREEN
+	GameSettings.fullscreen = w.mode == Window.MODE_EXCLUSIVE_FULLSCREEN
+	GameSettings.save_to_disk()
 	get_viewport().set_input_as_handled()
 
 const game_crops := [ # crops used in the game

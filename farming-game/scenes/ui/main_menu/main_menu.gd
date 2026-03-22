@@ -29,6 +29,7 @@ const TOMATO_ITEM: Texture2D = preload("res://assets/game/sprites/CropSprites/To
 @onready var _title_label: Label = $ContentMargin/MenuHBox/Center/MainColumn/Title
 @onready var _subtitle_label: Label = $ContentMargin/MenuHBox/Center/MainColumn/Subtitle
 
+@onready var _settings_window: Window = $SettingsWindow
 @onready var _leaderboard_window: Window = $LeaderboardWindow
 @onready var _leaderboard_list: ItemList = $LeaderboardWindow/Margin/VBox/LeaderboardList
 @onready var _leaderboard_status: Label = $LeaderboardWindow/Margin/VBox/LeaderboardStatus
@@ -78,6 +79,7 @@ func _fix_key_font_sizes() -> void:
 		$ContentMargin/MenuHBox/Center/MainColumn/PlayButton,
 		$ContentMargin/MenuHBox/Center/MainColumn/AccountButton,
 		$ContentMargin/MenuHBox/Center/MainColumn/LeaderboardButton,
+		$ContentMargin/MenuHBox/Center/MainColumn/SettingsButton,
 		$ContentMargin/MenuHBox/Center/MainColumn/QuitButton,
 		$AuthLayer/AuthCenter/AuthPanel/Margin/VBox/LoginButton,
 		$AuthLayer/AuthCenter/AuthPanel/Margin/VBox/SignupButton,
@@ -133,6 +135,7 @@ func _style_main_buttons() -> void:
 		$ContentMargin/MenuHBox/Center/MainColumn/PlayButton,
 		$ContentMargin/MenuHBox/Center/MainColumn/AccountButton,
 		$ContentMargin/MenuHBox/Center/MainColumn/LeaderboardButton,
+		$ContentMargin/MenuHBox/Center/MainColumn/SettingsButton,
 		$ContentMargin/MenuHBox/Center/MainColumn/QuitButton,
 	]:
 		var n := _make_menu_button_stylebox(Color(0.19, 0.15, 0.26, 1.0))
@@ -533,6 +536,10 @@ func _on_leaderboard_pressed() -> void:
 	_leaderboard_status.text = "Loading..."
 	_leaderboard_list.clear()
 	Backend.get_top_10()
+
+
+func _on_settings_pressed() -> void:
+	(_settings_window as Node).call("open_settings")
 
 
 func _on_leaderboard_failed(reason: String) -> void:

@@ -5,6 +5,7 @@ const MAIN_MENU := "res://scenes/ui/main_menu/main_menu.tscn"
 const UI_FONT := preload("res://assets/game/ui/fonts/PixelOperator8.ttf")
 
 @onready var _root: Control = $PauseRoot
+@onready var _settings_window: Window = $PauseRoot/SettingsWindow
 @onready var _leaderboard_window: Window = $PauseRoot/LeaderboardWindow
 @onready var _leaderboard_list: ItemList = $PauseRoot/LeaderboardWindow/Margin/VBox/LeaderboardList
 @onready var _leaderboard_status: Label = $PauseRoot/LeaderboardWindow/Margin/VBox/LeaderboardStatus
@@ -59,6 +60,10 @@ func close_pause() -> void:
 
 func _on_resume_pressed() -> void:
 	close_pause()
+
+
+func _on_settings_pressed() -> void:
+	(_settings_window as Node).call("open_settings")
 
 
 func _on_leaderboard_pressed() -> void:

@@ -1,6 +1,7 @@
-[gd_scene format=3 uid="uid://2231yplnj32w"]
+[gd_scene load_steps=3 format=3 uid="uid://2231yplnj32w"]
 
 [ext_resource type="Script" path="res://scenes/ui/game/pause_overlay.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/ui/settings/settings_window.tscn" id="2_settings"]
 
 [node name="PauseOverlay" type="CanvasLayer"]
 layer = 50
@@ -60,6 +61,11 @@ custom_minimum_size = Vector2(260, 40)
 layout_mode = 2
 text = "Resume"
 
+[node name="SettingsButton" type="Button" parent="PauseRoot/Center/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(260, 40)
+layout_mode = 2
+text = "Settings"
+
 [node name="LeaderboardButton" type="Button" parent="PauseRoot/Center/Panel/Margin/VBox"]
 custom_minimum_size = Vector2(260, 40)
 layout_mode = 2
@@ -74,6 +80,8 @@ text = "Quit to main menu"
 layout_mode = 2
 text = "Press Esc to resume"
 horizontal_alignment = 1
+
+[node name="SettingsWindow" parent="PauseRoot" instance=ExtResource("2_settings")]
 
 [node name="LeaderboardWindow" type="Window" parent="PauseRoot"]
 title = "Leaderboard"
@@ -113,6 +121,7 @@ layout_mode = 2
 text = "Close"
 
 [connection signal="pressed" from="PauseRoot/Center/Panel/Margin/VBox/ResumeButton" to="." method="_on_resume_pressed"]
+[connection signal="pressed" from="PauseRoot/Center/Panel/Margin/VBox/SettingsButton" to="." method="_on_settings_pressed"]
 [connection signal="pressed" from="PauseRoot/Center/Panel/Margin/VBox/LeaderboardButton" to="." method="_on_leaderboard_pressed"]
 [connection signal="pressed" from="PauseRoot/Center/Panel/Margin/VBox/QuitToMenuButton" to="." method="_on_quit_to_menu_pressed"]
 [connection signal="pressed" from="PauseRoot/LeaderboardWindow/Margin/VBox/CloseLeaderboardButton" to="." method="_on_close_leaderboard_pressed"]
