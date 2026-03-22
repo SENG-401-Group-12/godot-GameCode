@@ -33,6 +33,7 @@ func _ready() -> void:
 	Backend.signup_succeeded.connect(_on_signup_succeeded)
 	Backend.signup_failed.connect(_on_signup_failed)
 	Backend.leaderboard_received.connect(_on_leaderboard_received)
+	Backend.leaderboard_failed.connect(_on_leaderboard_failed)
 
 	var tw := create_tween().set_loops().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	tw.tween_property(_title_label, "modulate", Color(1.0, 0.98, 0.75), 1.35)
@@ -174,6 +175,11 @@ func _on_leaderboard_pressed() -> void:
 	_leaderboard_status.text = "Loading..."
 	_leaderboard_list.clear()
 	Backend.get_top_10()
+
+
+func _on_leaderboard_failed(reason: String) -> void:
+	_leaderboard_list.clear()
+	_leaderboard_status.text = reason
 
 
 func _on_leaderboard_received(data: Variant) -> void:

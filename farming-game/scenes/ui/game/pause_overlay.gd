@@ -25,6 +25,7 @@ func _ready() -> void:
 		hint.add_theme_font_size_override("font_size", 8)
 		hint.modulate = Color(0.85, 0.85, 0.85)
 	Backend.leaderboard_received.connect(_on_leaderboard_received)
+	Backend.leaderboard_failed.connect(_on_leaderboard_failed)
 
 
 func _apply_fonts(node: Node) -> void:
@@ -75,6 +76,11 @@ func _on_quit_to_menu_pressed() -> void:
 
 func _on_close_leaderboard_pressed() -> void:
 	_leaderboard_window.hide()
+
+
+func _on_leaderboard_failed(reason: String) -> void:
+	_leaderboard_list.clear()
+	_leaderboard_status.text = reason
 
 
 func _on_leaderboard_received(data: Variant) -> void:
