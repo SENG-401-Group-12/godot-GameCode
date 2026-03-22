@@ -1,4 +1,5 @@
 {
+  "_comment": "Copy to .cursor/mcp.json locally (not committed). Adjust GODOT_PATH.",
   "mcpServers": {
     "godot": {
       "command": "npx",
