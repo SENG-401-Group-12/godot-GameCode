@@ -2,6 +2,8 @@ extends Control
 
 # Kenney UI tiles live under res://assets/vendor/kenney_ui-pack-pixel-adventure/ for future button/panel themes.
 const RUN_SETUP_SCENE := "res://scenes/ui/run_setup/run_setup.tscn"
+const GAME_SCENE := "res://scenes/test/test_scene_gameloop.tscn"
+const TUTORIAL_SCENE := "res://scenes/tutorial/tutorial_lesson.tscn"
 const UI_FONT := preload("res://assets/game/ui/fonts/PixelOperator8.ttf")
 const MENU_BG_PATHS: PackedStringArray = [
 	"res://assets/game/ui/main_menu_background.jpg",
@@ -243,12 +245,15 @@ func _refresh_user_line() -> void:
 
 
 func _on_play_pressed() -> void:
+	GameProgress.tutorial_mode = false
+	GameProgress.exit_tutorial_to_main_menu = false
 	get_tree().change_scene_to_file(RUN_SETUP_SCENE)
 
 
 func _on_how_to_play_pressed() -> void:
-	GameProgress.open_tutorial_replay_from_menu = true
-	get_tree().change_scene_to_file(RUN_SETUP_SCENE)
+	GameProgress.tutorial_mode = true
+	GameProgress.exit_tutorial_to_main_menu = true
+	get_tree().change_scene_to_file(GAME_SCENE)
 
 
 func _on_quit_pressed() -> void:

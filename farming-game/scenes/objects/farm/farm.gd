@@ -1,6 +1,10 @@
 @tool
 extends Node2D
 
+signal crop_planted(crop_name: String)
+signal crop_harvested(crop_name: String)
+signal crop_ready_to_harvest(crop_name: String)
+
 enum FarmState {
 	EMPTY,
 	GROWING,
@@ -9,6 +13,8 @@ enum FarmState {
 
 @export var crop_data: CropData
 @export var starts_planted := false
+## Multiplies growth time per stage (values below 1 speed up growth, e.g. tutorial).
+@export var growth_time_scale: float = 1.0
 
 var _base_farm_size: Vector2i
 @export var base_farm_size = Globals.default_farm_size:
@@ -68,7 +74,7 @@ func _process(delta: float) -> void:
 		return
 
 	growth_timer += delta
-	var growth_time = max(0.15, crop_data.growth_time_per_stage - PlayerData.get_growth_speed_bonus(crop_data.crop_name))
+	var growth_time = max(0.08, (crop_data.growth_time_per_stage - PlayerData.get_growth_speed_bonus(crop_data.crop_name)) * growth_time_scale)
 	if growth_timer < growth_time:
 		return
 
@@ -80,6 +86,8 @@ func _process(delta: float) -> void:
 		state = FarmState.READY
 		farm_area.disabled = false
 		interaction_area.action_name = "HARVEST %s" % crop_data.crop_name.to_upper()
+		if crop_data != null:
+			crop_ready_to_harvest.emit(crop_data.crop_name)
 
 func _on_interact() -> void:
 	match state:
@@ -101,6 +109,7 @@ func plant_crop(new_crop: CropData) -> void:
 	_update_label_anchor()
 	place_dirt()
 	place_crop()
+	crop_planted.emit(crop_data.crop_name)
 
 func harvest_crop() -> void:
 	if crop_data == null:
@@ -110,6 +119,7 @@ func harvest_crop() -> void:
 	var base_harvest = get_farm_size().x * get_farm_size().y
 	var harvest_total = roundi(base_harvest * PlayerData.get_yield_bonus(crop_name))
 	PlayerData.add_crop(crop_name, harvest_total)
+	crop_harvested.emit(crop_name)
 	clear_plot()
 
 func clear_plot() -> void:

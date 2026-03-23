@@ -16,6 +16,10 @@ const ItemSlot = preload("res://scenes/characters/customer/item_slot.tscn")
 @export var min_amount := 2
 @export var max_amount := 5
 @export var time_limit := 20.0
+## If greater than 0, this customer only asks for Turnips (this many) — hands-on tutorial.
+@export var tutorial_turnip_amount: int = 0
+## If true, skip initial order setup until `begin_with_single_request` (tutorial: appear after harvest).
+@export var hold_until_configured: bool = false
 
 const _URGENT_TIME_SEC := 10.0
 
@@ -29,6 +33,14 @@ func _ready() -> void:
 	choose_random_sprite()
 	sprite.visible = true
 	$NotEnoughLabel.hide()
+	if hold_until_configured:
+		set_process(false)
+		interaction_area.monitorable = false
+		interaction_area.monitoring = false
+		timer_label.visible = false
+		for child in request_container.get_children():
+			child.queue_free()
+		return
 	_setup_customer()
 
 func _process(delta: float) -> void:
@@ -47,6 +59,41 @@ func _process(delta: float) -> void:
 	if time_remaining <= 0.0:
 		_resolve_expired()
 
+func begin_with_single_request(crop_name: String, amount: int) -> void:
+	var crop: CropData = null
+	for c in Globals.game_crops:
+		if c.crop_name == crop_name:
+			crop = c
+			break
+	if crop == null:
+		return
+
+	requests.clear()
+	var r := ItemRequest.new()
+	r.item_name = crop.crop_name
+	r.icon = crop.get_item_icon()
+	r.amount = clampi(amount, 1, 99)
+	requests.append(r)
+
+	for child in request_container.get_children():
+		child.queue_free()
+	populate_display()
+
+	time_remaining = time_limit
+	is_resolved = false
+	if _in_urgent_band:
+		_in_urgent_band = false
+		Music.unregister_customer_urgency()
+
+	visible = true
+	sprite.visible = true
+	set_process(true)
+	timer_label.visible = true
+	interaction_area.monitorable = true
+	interaction_area.monitoring = true
+	_update_timer_label()
+
+
 func configure_for_wave(wave_number: int, new_time_limit: float, request_count: int, amount_min: int, amount_max: int) -> void:
 	min_requests = max(1, request_count)
 	max_request = max(min_requests, request_count)
@@ -64,6 +111,28 @@ func choose_random_sprite() -> void:
 		sprite.play("cow_idle")
 
 func _setup_customer() -> void:
+	if tutorial_turnip_amount > 0:
+		requests.clear()
+		var turnip_data: CropData = Globals.game_crops[0]
+		var request := ItemRequest.new()
+		request.item_name = turnip_data.crop_name
+		request.icon = turnip_data.get_item_icon()
+		request.amount = tutorial_turnip_amount
+		requests.append(request)
+		sprite.play(&"chicken_idle")
+		for child in request_container.get_children():
+			child.queue_free()
+		populate_display()
+		time_remaining = time_limit
+		is_resolved = false
+		if _in_urgent_band:
+			_in_urgent_band = false
+			Music.unregister_customer_urgency()
+		interaction_area.monitorable = true
+		interaction_area.monitoring = true
+		_update_timer_label()
+		return
+
 	if requests.is_empty():
 		generate_random_requests(1)
 

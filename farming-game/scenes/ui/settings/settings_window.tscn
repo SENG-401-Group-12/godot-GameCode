@@ -99,7 +99,7 @@ layout_mode = 2
 [node name="Lbl3" type="Label" parent="Margin/RootVBox/Scroll/ScrollVBox/SfxRow"]
 custom_minimum_size = Vector2(96, 0)
 layout_mode = 2
-text = "Sound effects"
+text = "SFX"
 
 [node name="SfxSlider" type="HSlider" parent="Margin/RootVBox/Scroll/ScrollVBox/SfxRow"]
 layout_mode = 2
@@ -114,12 +114,6 @@ value = 75.0
 custom_minimum_size = Vector2(44, 0)
 layout_mode = 2
 text = "75%"
-
-[node name="SfxHint" type="Label" parent="Margin/RootVBox/Scroll/ScrollVBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 8
-text = "SFX volume is saved for when gameplay sounds are added."
-autowrap_mode = 2
 
 [node name="FullscreenCheck" type="CheckButton" parent="Margin/RootVBox/Scroll/ScrollVBox"]
 custom_minimum_size = Vector2(0, 28)

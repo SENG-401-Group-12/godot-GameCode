@@ -12,15 +12,118 @@ const MAX_FARM_SIZE_BONUS_PER_AXIS := 2
 var inventory := {}
 var crop_upgrades := {}
 var selected_crop_index := 0
-## 0..n — tint presets applied to the player sprite (same art, different palette feel).
 var character_preset_index: int = 0
-const CHARACTER_PRESET_MODULATES: Array[Color] = [
-	Color(1.0, 1.0, 1.0, 1.0),
-	Color(1.0, 0.92, 0.85, 1.0),
-	Color(0.9, 0.95, 1.0, 1.0),
-	Color(0.88, 1.0, 0.9, 1.0),
+const CHARACTER_PRESET_KEYS: PackedStringArray = [
+	"seedcap",
+	"butter_bean",
+	"dawn_sprout",
+	"river_field",
+	"cinder_patch",
+	"mist_orchard",
 ]
-const CHARACTER_PRESET_NAMES: PackedStringArray = ["Classic", "Warm", "Cool", "Meadow"]
+const CHARACTER_PRESET_NAMES: PackedStringArray = [
+	"Seedcap",
+	"Butter Bean",
+	"Dawn Sprout",
+	"River Field",
+	"Cinder Patch",
+	"Mist Orchard",
+]
+const CHARACTER_PRESET_TEXTURE_PATHS: PackedStringArray = [
+	"res://assets/game/character/mana_seed_farmer.png",
+	"res://assets/game/character/basic_character_spritesheet.png",
+	"res://assets/game/character/dawn_sprout.png",
+	"res://assets/game/character/river_field.png",
+	"res://assets/game/character/cinder_patch.png",
+	"res://assets/game/character/mist_orchard.png",
+]
+const SOURCE_PALETTE := {
+	"hat_dark": Color8(183, 67, 123),
+	"hat_mid": Color8(215, 110, 162),
+	"hat_light": Color8(250, 182, 193),
+	"cloth_dark": Color8(32, 80, 64),
+	"cloth_mid": Color8(40, 152, 96),
+	"cloth_light": Color8(88, 224, 160),
+	"accent_dark": Color8(96, 24, 88),
+	"accent_mid": Color8(91, 42, 84),
+	"accent_shadow": Color8(80, 56, 80),
+	"skin_dark": Color8(136, 88, 72),
+	"skin_mid": Color8(216, 152, 120),
+	"skin_light": Color8(248, 216, 184),
+}
+const CHARACTER_PRESET_PALETTES := {
+	"butter_bean": {
+		"hat_dark": Color8(110, 74, 24),
+		"hat_mid": Color8(188, 142, 60),
+		"hat_light": Color8(243, 222, 150),
+		"cloth_dark": Color8(76, 54, 102),
+		"cloth_mid": Color8(142, 104, 186),
+		"cloth_light": Color8(215, 190, 240),
+		"accent_dark": Color8(71, 92, 42),
+		"accent_mid": Color8(118, 149, 70),
+		"accent_shadow": Color8(62, 72, 42),
+		"skin_dark": Color8(110, 74, 54),
+		"skin_mid": Color8(181, 126, 94),
+		"skin_light": Color8(232, 194, 154),
+	},
+	"dawn_sprout": {
+		"hat_dark": Color8(126, 55, 24),
+		"hat_mid": Color8(216, 128, 58),
+		"hat_light": Color8(246, 203, 136),
+		"cloth_dark": Color8(43, 88, 56),
+		"cloth_mid": Color8(92, 170, 104),
+		"cloth_light": Color8(188, 229, 154),
+		"accent_dark": Color8(94, 48, 36),
+		"accent_mid": Color8(151, 93, 72),
+		"accent_shadow": Color8(74, 48, 39),
+		"skin_dark": Color8(103, 69, 52),
+		"skin_mid": Color8(181, 123, 95),
+		"skin_light": Color8(236, 191, 157),
+	},
+	"river_field": {
+		"hat_dark": Color8(38, 70, 121),
+		"hat_mid": Color8(83, 135, 199),
+		"hat_light": Color8(175, 209, 245),
+		"cloth_dark": Color8(34, 110, 111),
+		"cloth_mid": Color8(62, 169, 170),
+		"cloth_light": Color8(159, 224, 215),
+		"accent_dark": Color8(75, 58, 21),
+		"accent_mid": Color8(140, 110, 44),
+		"accent_shadow": Color8(54, 61, 44),
+		"skin_dark": Color8(89, 63, 50),
+		"skin_mid": Color8(152, 112, 89),
+		"skin_light": Color8(219, 181, 149),
+	},
+	"cinder_patch": {
+		"hat_dark": Color8(111, 36, 40),
+		"hat_mid": Color8(180, 78, 64),
+		"hat_light": Color8(238, 170, 124),
+		"cloth_dark": Color8(66, 43, 84),
+		"cloth_mid": Color8(124, 79, 153),
+		"cloth_light": Color8(199, 164, 224),
+		"accent_dark": Color8(172, 96, 35),
+		"accent_mid": Color8(223, 151, 72),
+		"accent_shadow": Color8(87, 56, 30),
+		"skin_dark": Color8(70, 45, 34),
+		"skin_mid": Color8(113, 79, 60),
+		"skin_light": Color8(170, 126, 96),
+	},
+	"mist_orchard": {
+		"hat_dark": Color8(143, 96, 94),
+		"hat_mid": Color8(210, 150, 143),
+		"hat_light": Color8(247, 214, 203),
+		"cloth_dark": Color8(52, 104, 89),
+		"cloth_mid": Color8(103, 182, 160),
+		"cloth_light": Color8(204, 240, 224),
+		"accent_dark": Color8(120, 78, 92),
+		"accent_mid": Color8(187, 135, 154),
+		"accent_shadow": Color8(84, 62, 72),
+		"skin_dark": Color8(129, 92, 74),
+		"skin_mid": Color8(199, 150, 122),
+		"skin_light": Color8(242, 208, 179),
+	},
+}
+var _character_texture_cache: Dictionary = {}
 
 func _make_default_upgrade_state() -> Dictionary:
 	return {
@@ -105,11 +208,40 @@ func get_size_bonus(crop_name: String) -> Vector2i:
 
 
 func set_character_preset(index: int) -> void:
-	character_preset_index = clampi(index, 0, maxi(0, CHARACTER_PRESET_MODULATES.size() - 1))
+	character_preset_index = clampi(index, 0, maxi(0, CHARACTER_PRESET_NAMES.size() - 1))
+
+
+func get_character_preset_key() -> String:
+	return CHARACTER_PRESET_KEYS[character_preset_index]
+
+
+func get_character_texture(index: int = -1) -> Texture2D:
+	var resolved := character_preset_index if index < 0 else index
+	resolved = clampi(resolved, 0, maxi(0, CHARACTER_PRESET_TEXTURE_PATHS.size() - 1))
+	var path := CHARACTER_PRESET_TEXTURE_PATHS[resolved]
+	if _character_texture_cache.has(path):
+		return _character_texture_cache[path] as Texture2D
+	var tex := load(path) as Texture2D
+	if tex == null:
+		tex = load(CHARACTER_PRESET_TEXTURE_PATHS[0]) as Texture2D
+	_character_texture_cache[path] = tex
+	return tex
+
+
+func uses_builtin_mana_frames() -> bool:
+	return get_character_preset_key() == "seedcap"
+
+
+func character_uses_mirrored_side_frames() -> bool:
+	return true
+
+
+func get_character_palette() -> Dictionary:
+	return CHARACTER_PRESET_PALETTES.get(get_character_preset_key(), {})
 
 
 func get_character_modulate() -> Color:
-	return CHARACTER_PRESET_MODULATES[character_preset_index]
+	return Color.WHITE
 
 
 func can_apply_upgrade(u: CropUpgrade) -> bool:
