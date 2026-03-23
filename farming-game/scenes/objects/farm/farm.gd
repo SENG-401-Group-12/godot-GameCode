@@ -1,6 +1,10 @@
 @tool
 extends Node2D
 
+signal crop_planted(crop_name: String)
+signal crop_harvested(crop_name: String)
+signal crop_ready_to_harvest(crop_name: String)
+
 enum FarmState {
 	EMPTY,
 	GROWING,
@@ -9,6 +13,8 @@ enum FarmState {
 
 @export var crop_data: CropData
 @export var starts_planted := false
+## Multiplies growth time per stage (values below 1 speed up growth, e.g. tutorial).
+@export var growth_time_scale: float = 1.0
 
 var _base_farm_size: Vector2i
 @export var base_farm_size = Globals.default_farm_size:
@@ -28,6 +34,7 @@ var state := FarmState.EMPTY
 @onready var crops: TileMapLayer = $Crops
 @onready var farm_area: CollisionShape2D = $InteractionArea/CollisionShape2D
 @onready var label_anchor: Node2D = $InteractionArea/LabelAnchor
+@onready var growth_timer_label: Label = $GrowthTimerLabel
 
 func get_farm_size() -> Vector2i:
 	if Engine.is_editor_hint():
@@ -61,6 +68,43 @@ func _ready() -> void:
 	else:
 		clear_plot()
 
+func _get_growth_time_per_stage() -> float:
+	if crop_data == null:
+		return 0.0
+	return max(
+		0.08,
+		(crop_data.growth_time_per_stage - PlayerData.get_growth_speed_bonus(crop_data.crop_name))
+		* growth_time_scale
+	)
+
+func _get_remaining_grow_seconds(stage_duration: float) -> float:
+	if crop_data == null:
+		return 0.0
+	var stages_until_mature := crop_data.growth_stages - 1 - growth_stage
+	return maxf(0.0, stages_until_mature * stage_duration - growth_timer)
+
+func _update_growth_timer_layout() -> void:
+	if growth_timer_label == null:
+		return
+	var tile_px := 16.0
+	var fw := get_farm_size().x * tile_px
+	var fh := get_farm_size().y * tile_px
+	growth_timer_label.size = Vector2(fw, 14)
+	growth_timer_label.position = Vector2(0.0, fh + 2.0)
+
+func _update_growth_timer_display() -> void:
+	if growth_timer_label == null or state != FarmState.GROWING or crop_data == null:
+		return
+	var stage_duration := _get_growth_time_per_stage()
+	var remaining := _get_remaining_grow_seconds(stage_duration)
+	var total_sec := ceili(remaining)
+	var minutes := total_sec / 60
+	var seconds := total_sec % 60
+	if minutes > 0:
+		growth_timer_label.text = "%d:%02d" % [minutes, seconds]
+	else:
+		growth_timer_label.text = "%02d" % seconds
+
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
@@ -68,7 +112,9 @@ func _process(delta: float) -> void:
 		return
 
 	growth_timer += delta
-	var growth_time = max(0.15, crop_data.growth_time_per_stage - PlayerData.get_growth_speed_bonus(crop_data.crop_name))
+	var growth_time := _get_growth_time_per_stage()
+	_update_growth_timer_display()
+
 	if growth_timer < growth_time:
 		return
 
@@ -78,8 +124,12 @@ func _process(delta: float) -> void:
 
 	if growth_stage == crop_data.growth_stages - 1:
 		state = FarmState.READY
+		if growth_timer_label:
+			growth_timer_label.visible = false
 		farm_area.disabled = false
 		interaction_area.action_name = "HARVEST %s" % crop_data.crop_name.to_upper()
+		if crop_data != null:
+			crop_ready_to_harvest.emit(crop_data.crop_name)
 
 func _on_interact() -> void:
 	match state:
@@ -101,6 +151,11 @@ func plant_crop(new_crop: CropData) -> void:
 	_update_label_anchor()
 	place_dirt()
 	place_crop()
+	if growth_timer_label:
+		_update_growth_timer_layout()
+		growth_timer_label.visible = true
+		_update_growth_timer_display()
+	crop_planted.emit(crop_data.crop_name)
 
 func harvest_crop() -> void:
 	if crop_data == null:
@@ -110,6 +165,7 @@ func harvest_crop() -> void:
 	var base_harvest = get_farm_size().x * get_farm_size().y
 	var harvest_total = roundi(base_harvest * PlayerData.get_yield_bonus(crop_name))
 	PlayerData.add_crop(crop_name, harvest_total)
+	crop_harvested.emit(crop_name)
 	clear_plot()
 
 func clear_plot() -> void:
@@ -121,6 +177,8 @@ func clear_plot() -> void:
 	place_dirt()
 	crops.clear()
 	farm_area.disabled = false
+	if growth_timer_label:
+		growth_timer_label.visible = false
 	_update_action_name()
 
 func _update_action_name() -> void:
@@ -178,6 +236,7 @@ func _update_collision_shape() -> void:
 
 func _update_label_anchor() -> void:
 	label_anchor.position = Vector2((get_farm_size().x * 16) * 0.5, (get_farm_size().y * 16) * 0.5)
+	_update_growth_timer_layout()
 
 func get_farm_cells() -> Array[Vector2i]:
 	var cells: Array[Vector2i] = []
@@ -227,3 +286,5 @@ func update_farm_size_from_upgrade() -> void:
 	_update_label_anchor()
 	place_dirt()
 	place_crop()
+	if state == FarmState.GROWING and growth_timer_label:
+		_update_growth_timer_display()

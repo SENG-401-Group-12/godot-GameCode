@@ -1,7 +1,9 @@
 extends Control
 
 # Kenney UI tiles live under res://assets/vendor/kenney_ui-pack-pixel-adventure/ for future button/panel themes.
-const GAME_SCENE := preload("res://scenes/test/test_scene_gameloop.tscn")
+const RUN_SETUP_SCENE := "res://scenes/ui/run_setup/run_setup.tscn"
+const GAME_SCENE := "res://scenes/test/test_scene_gameloop.tscn"
+const TUTORIAL_SCENE := "res://scenes/tutorial/tutorial_lesson.tscn"
 const UI_FONT := preload("res://assets/game/ui/fonts/PixelOperator8.ttf")
 const MENU_BG_PATHS: PackedStringArray = [
 	"res://assets/game/ui/main_menu_background.jpg",
@@ -42,6 +44,7 @@ func _ready() -> void:
 	_set_auth_open(false)
 	_set_profile_open(false)
 	_leaderboard_window.hide()
+	_style_leaderboard_window()
 	_refresh_user_line()
 
 	Backend.login_succeeded.connect(_on_login_succeeded)
@@ -104,6 +107,7 @@ func _fix_key_font_sizes() -> void:
 	_profile_name.add_theme_font_size_override("font_size", 14)
 	for p in [
 		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/PlayButton,
+		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/HowToPlayButton,
 		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/AccountButton,
 		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/LeaderboardButton,
 		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/SettingsButton,
@@ -151,6 +155,7 @@ func _make_menu_button_stylebox(bg: Color) -> StyleBoxFlat:
 func _style_main_buttons() -> void:
 	for b: Button in [
 		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/PlayButton,
+		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/HowToPlayButton,
 		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/AccountButton,
 		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/LeaderboardButton,
 		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/SettingsButton,
@@ -199,10 +204,22 @@ func _add_menu_sparkles() -> void:
 		ft.tween_property(f, "modulate:a", 0.65, slow)
 
 
+func _style_leaderboard_window() -> void:
+	## Native OS title bars ignore pixel fonts; use borderless window + in-panel title label.
+	_leaderboard_window.borderless = true
+	_leaderboard_window.title = ""
+	var tl: Label = _leaderboard_window.get_node_or_null("Margin/VBox/LeaderboardTitle") as Label
+	if tl:
+		tl.add_theme_font_size_override("font_size", 13)
+
+
 func _apply_font_recursive(node: Node) -> void:
 	if node is Control:
 		var c := node as Control
 		if c is Button or c is Label or c is LineEdit:
+			c.add_theme_font_override("font", UI_FONT)
+			c.add_theme_font_size_override("font_size", 10)
+		elif c is ItemList:
 			c.add_theme_font_override("font", UI_FONT)
 			c.add_theme_font_size_override("font_size", 10)
 	for child in node.get_children():
@@ -273,7 +290,15 @@ func _refresh_user_line() -> void:
 
 
 func _on_play_pressed() -> void:
-	get_tree().change_scene_to_packed(GAME_SCENE)
+	GameProgress.tutorial_mode = false
+	GameProgress.exit_tutorial_to_main_menu = false
+	get_tree().change_scene_to_file(RUN_SETUP_SCENE)
+
+
+func _on_how_to_play_pressed() -> void:
+	GameProgress.tutorial_mode = true
+	GameProgress.exit_tutorial_to_main_menu = true
+	get_tree().change_scene_to_file(GAME_SCENE)
 
 
 func _on_quit_pressed() -> void:
@@ -397,7 +422,7 @@ func _on_leaderboard_received(data: Variant) -> void:
 	if rows.is_empty():
 		_leaderboard_status.text = "No scores yet."
 		return
-	_leaderboard_status.text = "Top runs"
+	_leaderboard_status.text = "Top scores (best run per account)"
 	var rank := 1
 	for entry in rows:
 		if typeof(entry) != TYPE_DICTIONARY:

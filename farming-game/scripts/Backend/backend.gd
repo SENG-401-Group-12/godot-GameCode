@@ -10,7 +10,9 @@ signal signup_failed(message: String)
 signal leaderboard_received(data)
 signal leaderboard_failed(reason: String)
 signal run_submitted(data)
+signal run_submit_failed(reason: String)
 signal personal_best_received(data)
+signal personal_best_failed(reason: String)
 
 signal profile_created(data)
 signal profile_updated(data)
@@ -269,7 +271,8 @@ func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_
 	var http := HTTPRequest.new()
 	add_child(http)
 
-	var url := SUPABASE_URL + "/rest/v1/runs"
+	## Server RPC: one row per account; only updates when the new score is higher (see supabase/leaderboard_functions.sql).
+	var url := SUPABASE_URL + "/rest/v1/rpc/submit_run_best"
 	var headers := [
 		"apikey: " + SUPABASE_ANON_KEY,
 		"Authorization: Bearer " + access_token,
@@ -278,12 +281,11 @@ func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_
 	]
 
 	var body_dict := {
-		"user_id": current_user_id,
-		"score_total": score_total,
-		"duration_ms": duration_ms,
-		"waves_completed": waves_completed,
-		"total_fed": total_fed,
-		"total_missed": total_missed
+		"p_score_total": score_total,
+		"p_duration_ms": duration_ms,
+		"p_waves_completed": waves_completed,
+		"p_total_fed": total_fed,
+		"p_total_missed": total_missed
 	}
 	var body := JSON.stringify(body_dict)
 
@@ -294,7 +296,19 @@ func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_
 		if response_code >= 200 and response_code < 300:
 			run_submitted.emit(data)
 		else:
+			var err := "Could not save score."
+			if typeof(data) == TYPE_DICTIONARY:
+				if data.has("message"):
+					err = str(data["message"])
+				elif data.has("hint"):
+					err = str(data["hint"])
+			elif text.length() > 0 and text.length() < 200:
+				err = text
 			print("Submit run failed: ", text)
+			run_submit_failed.emit(err)
+
+		if is_logged_in():
+			get_personal_best()
 
 		http.queue_free()
 	)
@@ -363,10 +377,15 @@ func get_personal_best() -> void:
 		var text: String = response_body.get_string_from_utf8()
 		var data = JSON.parse_string(text)
 
+		if result != HTTPRequest.RESULT_SUCCESS:
+			personal_best_failed.emit("Network error.")
+			http.queue_free()
+			return
 		if response_code >= 200 and response_code < 300:
 			personal_best_received.emit(data)
 		else:
 			print("Get personal best failed: ", text)
+			personal_best_failed.emit(text if text.length() > 0 else "Could not load account best.")
 
 		http.queue_free()
 	)
