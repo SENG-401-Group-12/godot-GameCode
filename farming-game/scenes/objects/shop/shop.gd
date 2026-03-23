@@ -10,16 +10,29 @@ const CLOSED_REGION := Rect2(0, 0, 48, 48)
 const OPEN_REGION := Rect2(192, 0, 48, 48)
 
 var is_open := false
-@export var shop_timer := 20.0
+@export var shop_timer := 22.0
 @onready var timer_count := shop_timer
+## When true, the countdown is hidden and the shop is always openable (used during the hands-on tutorial).
+var tutorial_skip_timer := false
 
 func _ready() -> void:
 	interaction_area.interact = Callable(self, "_on_interact") # link the "_on_interact" function
 	set_opened(false)
-	timer_label.show()
+	if tutorial_skip_timer:
+		timer_label.hide()
+	else:
+		timer_label.show()
 	$NotAvailableLabel.hide()
 
 func _process(delta: float) -> void:
+	# Hands-on tutorial uses GameProgress; keep countdown hidden even if setup ran a frame late.
+	if GameProgress.tutorial_mode and not tutorial_skip_timer:
+		set_tutorial_skip_timer(true)
+	if tutorial_skip_timer:
+		timer_count = 0.0
+		if timer_label:
+			timer_label.hide()
+		return
 	if timer_count > 0:
 		timer_label.show()
 		timer_count -= delta
@@ -39,8 +52,16 @@ func _on_interact() -> void:
 		return 
 		
 	set_opened(true)
-	timer_count = shop_timer
+	if not tutorial_skip_timer:
+		timer_count = shop_timer
 	shop_opened.emit()
+
+
+func set_tutorial_skip_timer(enabled: bool) -> void:
+	tutorial_skip_timer = enabled
+	timer_count = 0.0
+	if timer_label:
+		timer_label.hide()
 
 func set_opened(opened: bool) -> void:
 	is_open = opened

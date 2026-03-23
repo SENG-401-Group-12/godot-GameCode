@@ -16,13 +16,14 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="Harvest For All"
 run/main_scene="uid://bqm3nmn8v0khx"
-config/features=PackedStringArray("4.6", "Forward Plus")
+config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
 
 InteractionManager="*res://scripts/interaction/InteractionManager.tscn"
 GameSettings="*res://scripts/settings/game_settings.gd"
+GameProgress="*res://scripts/game_progress.gd"
 PlayerData="*uid://b3gyrgym203s6"
 Globals="*uid://bmskgidfm6qpu"
 UpgradeManager="*uid://bqp4ddrcxt80g"
@@ -86,6 +87,8 @@ pointing/emulate_touch_from_mouse=true
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true
 2d/snap/snap_2d_transforms_to_pixel=true
 2d/snap/snap_2d_vertices_to_pixel=true

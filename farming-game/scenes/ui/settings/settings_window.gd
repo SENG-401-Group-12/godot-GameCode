@@ -10,7 +10,6 @@ const UI_FONT = preload("res://assets/game/ui/fonts/PixelOperator8.ttf")
 @onready var _sfx_value: Label = $Margin/RootVBox/Scroll/ScrollVBox/SfxRow/SfxValue
 @onready var _fullscreen: CheckButton = $Margin/RootVBox/Scroll/ScrollVBox/FullscreenCheck
 @onready var _vsync: CheckButton = $Margin/RootVBox/Scroll/ScrollVBox/VsyncCheck
-@onready var _sfx_hint: Label = $Margin/RootVBox/Scroll/ScrollVBox/SfxHint
 
 
 func _ready() -> void:
@@ -19,7 +18,6 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	close_requested.connect(hide)
 	_apply_fonts(self)
-	_sfx_hint.modulate = Color(0.75, 0.75, 0.8)
 	_master_slider.value_changed.connect(_on_master_changed)
 	_music_slider.value_changed.connect(_on_music_changed)
 	_sfx_slider.value_changed.connect(_on_sfx_changed)
@@ -35,7 +33,7 @@ func open_settings() -> void:
 	var max_w := maxi(300, int(vp.x) - 72)
 	var max_h := maxi(260, int(vp.y) - 72)
 	var win_w := clampi(380, 300, max_w)
-	var win_h := clampi(340, 240, max_h)
+	var win_h := clampi(300, 220, max_h)
 	size = Vector2i(win_w, win_h)
 	popup_centered()
 

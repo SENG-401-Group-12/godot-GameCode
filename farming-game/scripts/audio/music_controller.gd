@@ -44,10 +44,12 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_bgm = AudioStreamPlayer.new()
 	_bgm.name = "BgmPlayer"
+	_bgm.bus = &"Master"
 	add_child(_bgm)
 	_stinger = AudioStreamPlayer.new()
 	_stinger.name = "StingerPlayer"
 	_stinger.pitch_scale = 1.0
+	_stinger.bus = &"Master"
 	add_child(_stinger)
 	_stinger.finished.connect(_on_stinger_finished)
 	GameSettings.settings_changed.connect(_on_game_settings_changed)
@@ -78,7 +80,11 @@ func play_menu() -> void:
 	_urgent_count = 0
 	_kill_fade()
 	_bgm.volume_db = _peak_db()
-	_crossfade_to("menu", _first_for_role("menu"))
+	var stream: AudioStream = _first_for_role("menu")
+	if stream == null:
+		push_warning("Music: no menu BGM found under %s (expected harvest-for-all-intro or menu.*)." % BGM_DIR)
+		return
+	_crossfade_to("menu", stream)
 
 
 func enter_gameplay() -> void:
@@ -142,6 +148,7 @@ func _play_gameplay_bgm(tension: bool) -> void:
 		key = "gameplay"
 		stream = _first_for_role("gameplay")
 	if stream == null:
+		push_warning("Music: no gameplay BGM under %s (expected harvest-for-all-game-loop or gameplay.*)." % BGM_DIR)
 		_bgm.stop()
 		_current_bgm_key = ""
 		return
