@@ -14,6 +14,8 @@ signal personal_best_received(data)
 
 signal profile_created(data)
 signal profile_updated(data)
+signal profile_lookup_succeeded(data)
+signal profile_lookup_failed(reason: String)
 
 const SUPABASE_URL := "https://YOUR_PROJECT_REF.supabase.co"
 const SUPABASE_ANON_KEY := "YOUR_SUPABASE_ANON_KEY"
@@ -22,6 +24,7 @@ var access_token: String = ""
 var refresh_token: String = ""
 var current_user_id: String = ""
 var current_email: String = ""
+var current_display_name: String = ""
 var guest_mode := true
 
 
@@ -35,6 +38,7 @@ func continue_as_guest() -> void:
 	refresh_token = ""
 	current_user_id = ""
 	current_email = ""
+	current_display_name = ""
 
 
 func is_logged_in() -> bool:
@@ -172,9 +176,10 @@ func create_profile(display_name: String) -> void:
 		var data = JSON.parse_string(text)
 
 		if response_code >= 200 and response_code < 300:
+			if typeof(data) == TYPE_ARRAY and not data.is_empty():
+				var d: Dictionary = data[0]
+				current_display_name = str(d.get("display_name", ""))
 			profile_created.emit(data)
-		else:
-			print("Create profile failed: ", text)
 
 		http.queue_free()
 	)
@@ -215,10 +220,48 @@ func update_profile(display_name: String) -> void:
 	)
 
 	http.request(url, headers, HTTPClient.METHOD_PATCH, body)
+	
+func get_my_profile() -> void:
+	if !is_logged_in():
+		profile_lookup_failed.emit("Must be logged in.")
+		return
 
+	var http := HTTPRequest.new()
+	add_child(http)
 
+	var url := SUPABASE_URL + "/rest/v1/profiles?id=eq." + current_user_id + "&select=*"
+	var headers := [
+		"apikey: " + SUPABASE_ANON_KEY,
+		"Authorization: Bearer " + access_token,
+		"Content-Type: application/json"
+	]
 
-func submit_run(score_total: int, duration_ms: int, waves_completed: int) -> void:
+	http.request_completed.connect(func(result, response_code, response_headers, response_body):
+		var text: String = response_body.get_string_from_utf8()
+		var data = JSON.parse_string(text)
+
+		if result != HTTPRequest.RESULT_SUCCESS:
+			profile_lookup_failed.emit("Network error while checking profile.")
+			http.queue_free()
+			return
+
+		if response_code >= 200 and response_code < 300:
+			if typeof(data) == TYPE_ARRAY:
+				var rows: Array = data
+				if not rows.is_empty():
+					var d: Dictionary = rows[0]
+					current_display_name = str(d.get("display_name", ""))
+			profile_lookup_succeeded.emit(data)
+		else:
+			profile_lookup_failed.emit("Profile lookup failed.")
+			print("Get profile failed: ", text)
+
+		http.queue_free()
+	)
+
+	http.request(url, headers, HTTPClient.METHOD_GET)
+
+func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_fed: int, total_missed: int) -> void:
 	if !is_logged_in():
 		print("Guest users cannot submit runs.")
 		return
@@ -238,7 +281,9 @@ func submit_run(score_total: int, duration_ms: int, waves_completed: int) -> voi
 		"user_id": current_user_id,
 		"score_total": score_total,
 		"duration_ms": duration_ms,
-		"waves_completed": waves_completed
+		"waves_completed": waves_completed,
+		"total_fed": total_fed,
+		"total_missed": total_missed
 	}
 	var body := JSON.stringify(body_dict)
 

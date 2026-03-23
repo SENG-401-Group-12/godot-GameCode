@@ -1,2 +1,3 @@
 # Cursor IDE — local only (each dev copies from godot-mcp.cursor.example.json if needed)
 .cursor/
+.DS_Store
