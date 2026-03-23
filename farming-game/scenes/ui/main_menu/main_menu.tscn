@@ -1,9 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://bqm3nmn8v0khx"]
+[gd_scene format=3 uid="uid://bqm3nmn8v0khx"]
 
-[ext_resource type="Script" path="res://scenes/ui/main_menu/main_menu.gd" id="1_menu"]
-[ext_resource type="PackedScene" path="res://scenes/ui/settings/settings_window.tscn" id="2_settings"]
+[ext_resource type="Script" uid="uid://cyasg8eq4p77i" path="res://scenes/ui/main_menu/main_menu.gd" id="1_menu"]
+[ext_resource type="PackedScene" uid="uid://cc7ipbc2ju2lg" path="res://scenes/ui/settings/settings_window.tscn" id="2_settings"]
 
-[node name="MainMenu" type="Control"]
+[node name="MainMenu" type="Control" unique_id=704273552]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -12,7 +12,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_menu")
 
-[node name="BaseColor" type="ColorRect" parent="."]
+[node name="BaseColor" type="ColorRect" parent="." unique_id=1396266520]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -22,7 +22,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.22, 0.1, 0.32, 1)
 
-[node name="MenuBackground" type="TextureRect" parent="."]
+[node name="MenuBackground" type="TextureRect" parent="." unique_id=78367587]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -33,7 +33,7 @@ mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="SkyBand" type="ColorRect" parent="."]
+[node name="SkyBand" type="ColorRect" parent="." unique_id=1072078221]
 visible = false
 layout_mode = 1
 anchors_preset = 10
@@ -44,7 +44,7 @@ grow_vertical = 0
 mouse_filter = 2
 color = Color(0.98, 0.52, 0.38, 1)
 
-[node name="AuroraSheen" type="ColorRect" parent="."]
+[node name="AuroraSheen" type="ColorRect" parent="." unique_id=1516141883]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -55,7 +55,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.35, 0.75, 0.92, 0.06)
 
-[node name="HorizonBloom" type="ColorRect" parent="."]
+[node name="HorizonBloom" type="ColorRect" parent="." unique_id=801089585]
 visible = false
 layout_mode = 1
 anchors_preset = 14
@@ -69,7 +69,7 @@ grow_vertical = 0
 mouse_filter = 2
 color = Color(1, 0.48, 0.58, 0.11)
 
-[node name="BgDecorHost" type="Control" parent="."]
+[node name="BgDecorHost" type="Control" parent="." unique_id=773893992]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -79,7 +79,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="CloudLeft" type="Panel" parent="."]
+[node name="CloudLeft" type="Panel" parent="." unique_id=1307584187]
 visible = false
 layout_mode = 0
 offset_left = -40.0
@@ -88,7 +88,7 @@ offset_right = 210.0
 offset_bottom = 108.0
 mouse_filter = 2
 
-[node name="CloudRight" type="Panel" parent="."]
+[node name="CloudRight" type="Panel" parent="." unique_id=116447707]
 visible = false
 layout_mode = 0
 offset_left = 430.0
@@ -97,7 +97,7 @@ offset_right = 670.0
 offset_bottom = 128.0
 mouse_filter = 2
 
-[node name="CloudHigh" type="Panel" parent="."]
+[node name="CloudHigh" type="Panel" parent="." unique_id=43495087]
 visible = false
 layout_mode = 0
 offset_left = 200.0
@@ -106,7 +106,7 @@ offset_right = 420.0
 offset_bottom = 52.0
 mouse_filter = 2
 
-[node name="FieldBand" type="ColorRect" parent="."]
+[node name="FieldBand" type="ColorRect" parent="." unique_id=1054168183]
 visible = false
 layout_mode = 1
 anchors_preset = 12
@@ -117,19 +117,10 @@ offset_top = -210.0
 grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
-color = Color(0.16, 0.45, 0.30, 1)
+color = Color(0.16, 0.45, 0.3, 1)
 
-[node name="FxLayer" type="Control" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
+[node name="FxLayer" type="Control" parent="." unique_id=910559977]
 z_index = 1
-
-[node name="Dim" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -137,10 +128,20 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+
+[node name="Dim" type="ColorRect" parent="." unique_id=1773434713]
 z_index = 2
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 color = Color(0, 0, 0, 0.12)
 
-[node name="ContentMargin" type="MarginContainer" parent="."]
+[node name="ContentMargin" type="MarginContainer" parent="." unique_id=943083793]
+z_index = 5
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -148,38 +149,31 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
-z_index = 5
 theme_override_constants/margin_left = 24
 theme_override_constants/margin_top = 48
 theme_override_constants/margin_right = 24
 theme_override_constants/margin_bottom = 48
 
-[node name="MenuVBox" type="VBoxContainer" parent="ContentMargin"]
+[node name="MenuVBox" type="VBoxContainer" parent="ContentMargin" unique_id=33530496]
 layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="MenuTopSpacer" type="Control" parent="ContentMargin/MenuVBox"]
+[node name="MenuTopSpacer" type="Control" parent="ContentMargin/MenuVBox" unique_id=1954680959]
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 3.6
 
-[node name="MenuCenterContainer" type="CenterContainer" parent="ContentMargin/MenuVBox"]
+[node name="MenuCenterContainer" type="CenterContainer" parent="ContentMargin/MenuVBox" unique_id=139151374]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 0
 
-[node name="MenuBottomSpacer" type="Control" parent="ContentMargin/MenuVBox"]
-layout_mode = 2
-size_flags_vertical = 3
-size_flags_stretch_ratio = 1.0
-
-[node name="MainColumn" type="VBoxContainer" parent="ContentMargin/MenuVBox/MenuCenterContainer"]
+[node name="MainColumn" type="VBoxContainer" parent="ContentMargin/MenuVBox/MenuCenterContainer" unique_id=1035579164]
 layout_mode = 2
 theme_override_constants/separation = 7
 alignment = 1
-scale = Vector2(0.88, 0.88)
 
-[node name="Title" type="Label" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn"]
+[node name="Title" type="Label" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn" unique_id=11212920]
 layout_mode = 2
 size_flags_vertical = 0
 theme_override_colors/font_outline_color = Color(0.1, 0.06, 0.16, 0.9)
@@ -188,16 +182,16 @@ theme_override_font_sizes/font_size = 22
 text = "Harvest For All"
 horizontal_alignment = 1
 
-[node name="Subtitle" type="Label" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn"]
+[node name="Subtitle" type="Label" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn" unique_id=1297071638]
 layout_mode = 2
 size_flags_vertical = 0
-theme_override_font_sizes/font_size = 9
 theme_override_colors/font_outline_color = Color(0.12, 0.08, 0.2, 0.85)
 theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 9
 text = "A cozy town is counting on you!"
 horizontal_alignment = 1
 
-[node name="UserLine" type="Label" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn"]
+[node name="UserLine" type="Label" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn" unique_id=1517805910]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 size_flags_vertical = 0
@@ -206,7 +200,7 @@ text = "Playing as guest"
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="PlayButton" type="Button" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn"]
+[node name="PlayButton" type="Button" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn" unique_id=322600116]
 custom_minimum_size = Vector2(196, 36)
 layout_mode = 2
 size_flags_vertical = 0
@@ -218,44 +212,47 @@ layout_mode = 2
 size_flags_vertical = 0
 text = "How to play"
 
-[node name="AccountButton" type="Button" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn"]
+[node name="AccountButton" type="Button" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn" unique_id=339492439]
 custom_minimum_size = Vector2(196, 36)
 layout_mode = 2
 size_flags_vertical = 0
 text = "Account"
 
-[node name="LeaderboardButton" type="Button" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn"]
+[node name="LeaderboardButton" type="Button" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn" unique_id=408457175]
 custom_minimum_size = Vector2(196, 36)
 layout_mode = 2
 size_flags_vertical = 0
 text = "Leaderboard"
 
-[node name="SettingsButton" type="Button" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn"]
+[node name="SettingsButton" type="Button" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn" unique_id=186705994]
 custom_minimum_size = Vector2(196, 36)
 layout_mode = 2
 size_flags_vertical = 0
 text = "Settings"
 
-[node name="QuitButton" type="Button" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn"]
+[node name="QuitButton" type="Button" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn" unique_id=1541829360]
 custom_minimum_size = Vector2(196, 36)
 layout_mode = 2
 size_flags_vertical = 0
 text = "Quit"
 
-[node name="AuthLayer" type="CanvasLayer" parent="."]
+[node name="MenuBottomSpacer" type="Control" parent="ContentMargin/MenuVBox" unique_id=1196559433]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="AuthLayer" type="CanvasLayer" parent="." unique_id=565566421]
 layer = 20
 
-[node name="AuthBackdrop" type="ColorRect" parent="AuthLayer"]
+[node name="AuthBackdrop" type="ColorRect" parent="AuthLayer" unique_id=1157330159]
 visible = false
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 0
 color = Color(0, 0, 0, 0.88)
 
-[node name="AuthCenter" type="CenterContainer" parent="AuthLayer"]
+[node name="AuthCenter" type="CenterContainer" parent="AuthLayer" unique_id=1947366924]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -263,80 +260,79 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="AuthPanel" type="PanelContainer" parent="AuthLayer/AuthCenter"]
+[node name="AuthPanel" type="PanelContainer" parent="AuthLayer/AuthCenter" unique_id=1832819287]
 visible = false
 custom_minimum_size = Vector2(360, 0)
 layout_mode = 2
-mouse_filter = 0
 
-[node name="Margin" type="MarginContainer" parent="AuthLayer/AuthCenter/AuthPanel"]
+[node name="Margin" type="MarginContainer" parent="AuthLayer/AuthCenter/AuthPanel" unique_id=4410137]
 layout_mode = 2
 theme_override_constants/margin_left = 16
 theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 16
 
-[node name="VBox" type="VBoxContainer" parent="AuthLayer/AuthCenter/AuthPanel/Margin"]
+[node name="VBox" type="VBoxContainer" parent="AuthLayer/AuthCenter/AuthPanel/Margin" unique_id=1819002427]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="AuthTitle" type="Label" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
+[node name="AuthTitle" type="Label" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox" unique_id=731689708]
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "Sign in"
 horizontal_alignment = 1
 
-[node name="EmailEdit" type="LineEdit" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
+[node name="EmailEdit" type="LineEdit" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox" unique_id=617442392]
 custom_minimum_size = Vector2(120, 34)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 14
 placeholder_text = "you@example.com"
 
-[node name="PasswordEdit" type="LineEdit" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
+[node name="PasswordEdit" type="LineEdit" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox" unique_id=1882342265]
 custom_minimum_size = Vector2(120, 34)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 14
-secret = true
 placeholder_text = "Password"
+secret = true
 
-[node name="LoginButton" type="Button" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
+[node name="LoginButton" type="Button" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox" unique_id=374002000]
 custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Log in"
 
-[node name="SignupButton" type="Button" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
+[node name="SignupButton" type="Button" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox" unique_id=1566386967]
 custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Sign up"
 
-[node name="CloseAuthButton" type="Button" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
+[node name="CloseAuthButton" type="Button" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox" unique_id=1320209025]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Back"
 
-[node name="AuthStatusLabel" type="Label" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
+[node name="AuthStatusLabel" type="Label" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox" unique_id=337038968]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 9
 autowrap_mode = 2
 
-[node name="SettingsUILayer" type="CanvasLayer" parent="."]
+[node name="SettingsUILayer" type="CanvasLayer" parent="." unique_id=1306544014]
 layer = 25
 
-[node name="SettingsWindow" parent="SettingsUILayer" instance=ExtResource("2_settings")]
+[node name="SettingsWindow" parent="SettingsUILayer" unique_id=291061904 instance=ExtResource("2_settings")]
 
-[node name="LeaderboardWindow" type="Window" parent="."]
+[node name="LeaderboardWindow" type="Window" parent="." unique_id=1577395134]
 title = "Leaderboard"
 initial_position = 2
 size = Vector2i(520, 360)
 visible = false
 
-[node name="Margin" type="MarginContainer" parent="LeaderboardWindow"]
+[node name="Margin" type="MarginContainer" parent="LeaderboardWindow" unique_id=260751724]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -351,21 +347,82 @@ theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
-[node name="VBox" type="VBoxContainer" parent="LeaderboardWindow/Margin"]
+[node name="VBox" type="VBoxContainer" parent="LeaderboardWindow/Margin" unique_id=2027598913]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="LeaderboardStatus" type="Label" parent="LeaderboardWindow/Margin/VBox"]
+[node name="LeaderboardStatus" type="Label" parent="LeaderboardWindow/Margin/VBox" unique_id=1761443750]
 layout_mode = 2
 text = "Loading..."
 
-[node name="LeaderboardList" type="ItemList" parent="LeaderboardWindow/Margin/VBox"]
+[node name="LeaderboardList" type="ItemList" parent="LeaderboardWindow/Margin/VBox" unique_id=2113272267]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="CloseLeaderboardButton" type="Button" parent="LeaderboardWindow/Margin/VBox"]
+[node name="CloseLeaderboardButton" type="Button" parent="LeaderboardWindow/Margin/VBox" unique_id=1552245743]
 layout_mode = 2
 text = "Close"
+
+[node name="ProfileWindow" type="CanvasLayer" parent="." unique_id=1548052777]
+layer = 20
+
+[node name="ProfileBackdrop" type="ColorRect" parent="ProfileWindow" unique_id=1246804974]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.88)
+
+[node name="ProfileCenter" type="CenterContainer" parent="ProfileWindow" unique_id=339454645]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ProfilePanel" type="PanelContainer" parent="ProfileWindow/ProfileCenter" unique_id=109715048]
+visible = false
+custom_minimum_size = Vector2(360, 0)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="ProfileWindow/ProfileCenter/ProfilePanel" unique_id=1075870142]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="ProfileWindow/ProfileCenter/ProfilePanel/Margin" unique_id=544312459]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ProfileTitle" type="Label" parent="ProfileWindow/ProfileCenter/ProfilePanel/Margin/VBox" unique_id=1704679352]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Sign in"
+horizontal_alignment = 1
+
+[node name="ProfileNameEdit" type="LineEdit" parent="ProfileWindow/ProfileCenter/ProfilePanel/Margin/VBox" unique_id=277306769]
+custom_minimum_size = Vector2(120, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+placeholder_text = "Choose a display name"
+
+[node name="CreateProfileButton" type="Button" parent="ProfileWindow/ProfileCenter/ProfilePanel/Margin/VBox" unique_id=1848301474]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Log in"
+
+[node name="ProfileStatusLabel" type="Label" parent="ProfileWindow/ProfileCenter/ProfilePanel/Margin/VBox" unique_id=1919705363]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 9
+autowrap_mode = 2
 
 [connection signal="pressed" from="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/PlayButton" to="." method="_on_play_pressed"]
 [connection signal="pressed" from="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/HowToPlayButton" to="." method="_on_how_to_play_pressed"]
@@ -377,3 +434,4 @@ text = "Close"
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/SignupButton" to="." method="_on_signup_pressed"]
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/CloseAuthButton" to="." method="_on_close_auth_pressed"]
 [connection signal="pressed" from="LeaderboardWindow/Margin/VBox/CloseLeaderboardButton" to="." method="_on_close_leaderboard_pressed"]
+[connection signal="pressed" from="ProfileWindow/ProfileCenter/ProfilePanel/Margin/VBox/CreateProfileButton" to="." method="_on_create_profile_pressed"]
