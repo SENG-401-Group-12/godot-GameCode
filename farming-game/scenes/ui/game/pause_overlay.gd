@@ -27,6 +27,15 @@ func _ready() -> void:
 		hint.modulate = Color(0.85, 0.85, 0.85)
 	Backend.leaderboard_received.connect(_on_leaderboard_received)
 	Backend.leaderboard_failed.connect(_on_leaderboard_failed)
+	_style_leaderboard_window()
+
+
+func _style_leaderboard_window() -> void:
+	_leaderboard_window.borderless = true
+	_leaderboard_window.title = ""
+	var tl: Label = _leaderboard_window.get_node_or_null("Margin/VBox/LeaderboardTitle") as Label
+	if tl:
+		tl.add_theme_font_size_override("font_size", 13)
 
 
 func _apply_fonts(node: Node) -> void:
@@ -98,7 +107,7 @@ func _on_leaderboard_received(data: Variant) -> void:
 	if rows.is_empty():
 		_leaderboard_status.text = "No scores yet."
 		return
-	_leaderboard_status.text = "Top runs"
+	_leaderboard_status.text = "Top scores (best run per account)"
 	var rank := 1
 	for entry in rows:
 		if typeof(entry) != TYPE_DICTIONARY:
