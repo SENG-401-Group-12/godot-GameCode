@@ -261,7 +261,7 @@ func get_my_profile() -> void:
 
 	http.request(url, headers, HTTPClient.METHOD_GET)
 
-func submit_run(score_total: int, duration_ms: int, waves_completed: int) -> void:
+func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_fed: int, total_missed: int) -> void:
 	if !is_logged_in():
 		print("Guest users cannot submit runs.")
 		return
@@ -281,7 +281,9 @@ func submit_run(score_total: int, duration_ms: int, waves_completed: int) -> voi
 		"user_id": current_user_id,
 		"score_total": score_total,
 		"duration_ms": duration_ms,
-		"waves_completed": waves_completed
+		"waves_completed": waves_completed,
+		"total_fed": total_fed,
+		"total_missed": total_missed
 	}
 	var body := JSON.stringify(body_dict)
 

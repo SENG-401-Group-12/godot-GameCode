@@ -406,7 +406,10 @@ func _on_leaderboard_received(data: Variant) -> void:
 		var name := str(d.get("display_name", d.get("user_id", "?")))
 		var score := int(d.get("score_total", 0))
 		var waves := int(d.get("waves_completed", 0))
-		_leaderboard_list.add_item("%d. %s — %d pts, wave %d" % [rank, name, score, waves])
+		var fed := int(d.get("total_fed", 0))
+		var missed := int(d.get("total_missed", 0))
+
+		_leaderboard_list.add_item("%d. %s — %d pts (Wave %d) | Fed: %d | Missed: %d"% [rank, name, score, waves, fed, missed])
 		rank += 1
 
 
