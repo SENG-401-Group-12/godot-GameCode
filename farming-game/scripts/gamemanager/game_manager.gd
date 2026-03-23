@@ -65,6 +65,9 @@ func _ready() -> void:
 	customer_spawner.customer_expired.connect(_on_customer_expired)
 	customer_spawner.customer_spawned.connect(_refresh_ui_status)
 	Backend.run_submitted.connect(_on_run_submitted)
+	Backend.run_submit_failed.connect(_on_run_submit_failed)
+	Backend.personal_best_received.connect(_on_personal_best_received)
+	Backend.personal_best_failed.connect(_on_personal_best_failed)
 	randomize()
 	PlayerData.reset_run_state()
 	Music.enter_gameplay()
@@ -343,4 +346,40 @@ func _finalize_loss() -> void:
 
 
 func _on_run_submitted(_data: Variant) -> void:
-	game_ui.set_run_submit_status("Score saved. Thanks for playing!")
+	var ui := _resolve_game_ui()
+	if ui and ui.has_method(&"set_run_submit_status"):
+		ui.call("set_run_submit_status", "Score saved. Thanks for playing!")
+
+
+func _on_run_submit_failed(_reason: String) -> void:
+	var ui := _resolve_game_ui()
+	if ui and ui.has_method(&"set_run_submit_status"):
+		ui.call("set_run_submit_status", "Could not save score. Check connection.")
+
+
+func _on_personal_best_received(data: Variant) -> void:
+	var ui := _resolve_game_ui()
+	if ui == null or not ui.has_method(&"set_game_over_personal_best"):
+		return
+	var row: Dictionary = {}
+	if typeof(data) == TYPE_ARRAY:
+		var rows: Array = data
+		if not rows.is_empty() and typeof(rows[0]) == TYPE_DICTIONARY:
+			row = rows[0]
+	if row.is_empty():
+		ui.call("set_game_over_personal_best", "Account best: —")
+		return
+	var score := int(row.get("score_total", 0))
+	var waves := int(row.get("waves_completed", 0))
+	var fed := int(row.get("total_fed", 0))
+	var missed := int(row.get("total_missed", 0))
+	ui.call(
+		"set_game_over_personal_best",
+		"Account best: %d pts (Wave %d) | Fed: %d | Missed: %d" % [score, waves, fed, missed]
+	)
+
+
+func _on_personal_best_failed(_reason: String) -> void:
+	var ui := _resolve_game_ui()
+	if ui and ui.has_method(&"set_game_over_personal_best"):
+		ui.call("set_game_over_personal_best", "Account best: could not load.")

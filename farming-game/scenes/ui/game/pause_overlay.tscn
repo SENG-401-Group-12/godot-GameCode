@@ -82,9 +82,10 @@ text = "Press Esc to resume"
 horizontal_alignment = 1
 
 [node name="LeaderboardWindow" type="Window" parent="PauseRoot"]
-title = "Leaderboard"
+title = ""
 initial_position = 2
 size = Vector2i(520, 360)
+borderless = true
 visible = false
 
 [node name="Margin" type="MarginContainer" parent="PauseRoot/LeaderboardWindow"]
@@ -105,6 +106,12 @@ theme_override_constants/margin_bottom = 8
 [node name="VBox" type="VBoxContainer" parent="PauseRoot/LeaderboardWindow/Margin"]
 layout_mode = 2
 theme_override_constants/separation = 8
+
+[node name="LeaderboardTitle" type="Label" parent="PauseRoot/LeaderboardWindow/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/outline_size = 4
+text = "Leaderboard"
+horizontal_alignment = 1
 
 [node name="LeaderboardStatus" type="Label" parent="PauseRoot/LeaderboardWindow/Margin/VBox"]
 layout_mode = 2

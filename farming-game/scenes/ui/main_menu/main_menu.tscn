@@ -327,9 +327,10 @@ layer = 25
 [node name="SettingsWindow" parent="SettingsUILayer" unique_id=291061904 instance=ExtResource("2_settings")]
 
 [node name="LeaderboardWindow" type="Window" parent="." unique_id=1577395134]
-title = "Leaderboard"
+title = ""
 initial_position = 2
 size = Vector2i(520, 360)
+borderless = true
 visible = false
 
 [node name="Margin" type="MarginContainer" parent="LeaderboardWindow" unique_id=260751724]
@@ -350,6 +351,12 @@ theme_override_constants/margin_bottom = 8
 [node name="VBox" type="VBoxContainer" parent="LeaderboardWindow/Margin" unique_id=2027598913]
 layout_mode = 2
 theme_override_constants/separation = 8
+
+[node name="LeaderboardTitle" type="Label" parent="LeaderboardWindow/Margin/VBox" unique_id=1761443749]
+layout_mode = 2
+theme_override_constants/outline_size = 4
+text = "Leaderboard"
+horizontal_alignment = 1
 
 [node name="LeaderboardStatus" type="Label" parent="LeaderboardWindow/Margin/VBox" unique_id=1761443750]
 layout_mode = 2

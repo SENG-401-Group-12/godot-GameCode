@@ -19,6 +19,7 @@ const TUTORIAL_PROMPT_WAIT := "Click this box to hide. Use the Tutorial button t
 @onready var message_label: Label = $MarginContainer/HBoxContainer/CenterMessage
 @onready var game_over_layer: ColorRect = $GameOverLayer
 @onready var game_over_body: Label = $GameOverLayer/CenterContainer/Panel/Margin/VBox/BodyLabel
+@onready var game_over_personal_best: Label = $GameOverLayer/CenterContainer/Panel/Margin/VBox/PersonalBestLabel
 @onready var game_over_submit: Label = $GameOverLayer/CenterContainer/Panel/Margin/VBox/SubmitStatusLabel
 @onready var game_over_menu_button: Button = $GameOverLayer/CenterContainer/Panel/Margin/VBox/MenuButton
 
@@ -387,6 +388,12 @@ func _update_status(current_wave, fed_count, fed_target, missed_count, allowed_m
 func show_game_over(body_text: String, submit_status: String) -> void:
 	game_over_body.text = body_text
 	game_over_submit.text = submit_status
+	if Backend.is_logged_in():
+		game_over_personal_best.visible = true
+		game_over_personal_best.text = "Account best: fetching…"
+	else:
+		game_over_personal_best.visible = false
+		game_over_personal_best.text = ""
 	game_over_layer.visible = true
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	get_tree().paused = true
@@ -394,6 +401,12 @@ func show_game_over(body_text: String, submit_status: String) -> void:
 
 func set_run_submit_status(text: String) -> void:
 	game_over_submit.text = text
+
+
+func set_game_over_personal_best(line: String) -> void:
+	if not game_over_layer.visible:
+		return
+	game_over_personal_best.text = line
 
 
 func _on_game_over_menu_pressed() -> void:

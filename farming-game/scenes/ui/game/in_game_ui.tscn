@@ -228,6 +228,16 @@ text = "Stats"
 horizontal_alignment = 1
 autowrap_mode = 2
 
+[node name="PersonalBestLabel" type="Label" parent="GameOverLayer/CenterContainer/Panel/Margin/VBox" unique_id=1993266421]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("1_455v0")
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 1
+autowrap_mode = 2
+visible = false
+
 [node name="SubmitStatusLabel" type="Label" parent="GameOverLayer/CenterContainer/Panel/Margin/VBox" unique_id=1869282777]
 layout_mode = 2
 theme_override_constants/outline_size = 3
