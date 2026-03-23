@@ -28,6 +28,11 @@ const MENU_BG_PATHS: PackedStringArray = [
 @onready var _leaderboard_list: ItemList = $LeaderboardWindow/Margin/VBox/LeaderboardList
 @onready var _leaderboard_status: Label = $LeaderboardWindow/Margin/VBox/LeaderboardStatus
 
+@onready var _profile_backdrop: ColorRect = $ProfileWindow/ProfileBackdrop
+@onready var _profile_panel: PanelContainer = $ProfileWindow/ProfileCenter/ProfilePanel
+@onready var _profile_name: LineEdit = $ProfileWindow/ProfileCenter/ProfilePanel/Margin/VBox/ProfileNameEdit
+@onready var _profile_status: Label = $ProfileWindow/ProfileCenter/ProfilePanel/Margin/VBox/ProfileStatusLabel
+@onready var _profile_title: Label = $ProfileWindow/ProfileCenter/ProfilePanel/Margin/VBox/ProfileTitle
 
 func _ready() -> void:
 	get_tree().paused = false
@@ -35,6 +40,7 @@ func _ready() -> void:
 	_apply_font_recursive(self)
 	_fix_key_font_sizes()
 	_set_auth_open(false)
+	_set_profile_open(false)
 	_leaderboard_window.hide()
 	_refresh_user_line()
 
@@ -42,6 +48,9 @@ func _ready() -> void:
 	Backend.login_failed.connect(_on_login_failed)
 	Backend.signup_succeeded.connect(_on_signup_succeeded)
 	Backend.signup_failed.connect(_on_signup_failed)
+	Backend.profile_lookup_succeeded.connect(_on_profile_lookup_succeeded)
+	Backend.profile_lookup_failed.connect(_on_profile_lookup_failed)
+	Backend.profile_created.connect(_on_profile_created)
 	Backend.leaderboard_received.connect(_on_leaderboard_received)
 	Backend.leaderboard_failed.connect(_on_leaderboard_failed)
 
@@ -92,6 +101,7 @@ func _fix_key_font_sizes() -> void:
 	_auth_status.add_theme_font_size_override("font_size", 9)
 	_email.add_theme_font_size_override("font_size", 14)
 	_password.add_theme_font_size_override("font_size", 14)
+	_profile_name.add_theme_font_size_override("font_size", 14)
 	for p in [
 		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/PlayButton,
 		$ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/AccountButton,
@@ -104,6 +114,11 @@ func _fix_key_font_sizes() -> void:
 		$AuthLayer/AuthCenter/AuthPanel/Margin/VBox/LoginButton,
 		$AuthLayer/AuthCenter/AuthPanel/Margin/VBox/SignupButton,
 		$AuthLayer/AuthCenter/AuthPanel/Margin/VBox/CloseAuthButton,
+	]:
+		(p as Button).add_theme_font_size_override("font_size", 10)
+		
+	for p in [
+		$ProfileWindow/ProfileCenter/ProfilePanel/Margin/VBox/CreateProfileButton,
 	]:
 		(p as Button).add_theme_font_size_override("font_size", 10)
 
@@ -230,10 +245,27 @@ func _fit_auth_panel_to_screen() -> void:
 	var panel_w: int = clampi(360, 280, max_w)
 	_auth_panel.custom_minimum_size.x = panel_w
 
+func _set_profile_open(open: bool) -> void:
+	if open:
+		_fit_profile_panel_to_screen()
+	_profile_backdrop.visible = open
+	_profile_panel.visible = open
+	_content_margin.visible = not open
+	if open:
+		_profile_status.text = ""
+		_profile_name.grab_focus()
+
+
+func _fit_profile_panel_to_screen() -> void:
+	var vp: Vector2 = get_tree().root.get_viewport().get_visible_rect().size
+	var max_w: int = maxi(260, int(vp.x) - 56)
+	var panel_w: int = clampi(360, 280, max_w)
+	_profile_panel.custom_minimum_size.x = panel_w
+
 
 func _refresh_user_line() -> void:
 	if Backend.is_logged_in():
-		_user_line.text = "Signed in as %s" % Backend.current_email
+		_user_line.text = "Signed in as %s" % Backend.current_display_name
 		_account_button.text = "Sign out"
 	else:
 		_user_line.text = "Playing as guest (scores are local only)"
@@ -280,13 +312,21 @@ func _on_signup_pressed() -> void:
 		return
 	_auth_status.text = "Creating account..."
 	Backend.signup(em, _password.text)
+	
+func _on_create_profile_pressed() -> void:
+	var name := _profile_name.text.strip_edges()
+	if name.is_empty():
+		_profile_status.text = "Enter a profile name."
+		return
+
+	_profile_status.text = "Creating profile..."
+	Backend.create_profile(name)
 
 
 func _on_login_succeeded(_user_id: String) -> void:
-	_auth_status.text = "Welcome back!"
-	_refresh_user_line()
-	_set_auth_open(false)
-
+	_auth_status.text = "Checking profile..."
+	Backend.get_my_profile()
+	
 
 func _on_login_failed(message: String) -> void:
 	_auth_status.text = message
@@ -301,7 +341,36 @@ func _on_signup_succeeded(message: String) -> void:
 
 func _on_signup_failed(message: String) -> void:
 	_auth_status.text = message
+	
+func _on_profile_lookup_succeeded(data: Variant) -> void:
+	if typeof(data) != TYPE_ARRAY:
+		_auth_status.text = "Unexpected profile response."
+		return
 
+	var rows: Array = data
+	if rows.is_empty():
+		_show_profile_prompt()
+	else:
+		_auth_status.text = "Welcome back!"
+		_refresh_user_line()
+		_set_auth_open(false)
+
+func _on_profile_created(_data: Variant) -> void:
+	_profile_status.text = "Profile created!"
+	_refresh_user_line()
+	_set_profile_open(false)
+	_set_auth_open(false)
+
+func _on_profile_lookup_failed(reason: String) -> void:
+	_auth_status.text = reason
+	
+func _show_profile_prompt() -> void:
+	_set_auth_open(false)
+	_set_profile_open(true)
+	_profile_title.text = "Create Profile"
+	_profile_status.text = "Choose a profile name to finish setup."
+	_profile_name.text = ""
+	_profile_name.grab_focus()
 
 func _on_leaderboard_pressed() -> void:
 	_leaderboard_window.popup_centered_ratio(0.85)
