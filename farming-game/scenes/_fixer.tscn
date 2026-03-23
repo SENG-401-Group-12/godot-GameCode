@@ -1,0 +1,5 @@
+[gd_scene format=3]
+
+[node name="root" type="Node" unique_id=1541801137]
+
+[node name="Fixer" type="Node" parent="." unique_id=1615442583]

@@ -1,5 +1,7 @@
 extends Control
 
+signal upgrade_purchased
+
 @onready var card_container: HBoxContainer = $MarginContainer/CardContainer
 @onready var main_hud: Control = $"../InGameUI"
 @onready var shop = $"../../Shop"
@@ -13,7 +15,7 @@ func _ready() -> void:
 
 func open_shop():
 	shop.set_opened(true)
-	main_hud.hide()
+	_set_hud_hidden_for_shop(true)
 	get_tree().paused = true # pause the game while the shop is open
 	show()
 	populate_upgrades()
@@ -34,6 +36,7 @@ func _on_upgrade_selected(upgrade: CropUpgrade):
 	if not upgrade.apply_upgrade():
 		populate_upgrades()
 		return
+	upgrade_purchased.emit()
 	close_shop()
 	
 func close_shop():
@@ -42,4 +45,18 @@ func close_shop():
 	hide()
 	get_tree().paused = false
 	shop.set_opened(false)
-	main_hud.show()
+	_set_hud_hidden_for_shop(false)
+
+
+## During tutorial the objective panel lives under InGameUI; hiding the whole control removed it. Only hide gameplay chrome.
+func _set_hud_hidden_for_shop(hidden: bool) -> void:
+	if GameProgress.tutorial_mode:
+		main_hud.get_node("MarginContainer").visible = not hidden
+		var joy := main_hud.get_node_or_null("Joystick")
+		if joy:
+			joy.visible = not hidden
+		var ib := main_hud.get_node_or_null("InteractButton")
+		if ib:
+			ib.visible = not hidden
+	else:
+		main_hud.visible = not hidden

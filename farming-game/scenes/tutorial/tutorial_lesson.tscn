@@ -1,0 +1,85 @@
+[gd_scene load_steps=9 format=3 uid="uid://bh7tutlesson01"]
+
+[ext_resource type="Script" path="res://scenes/tutorial/tutorial_lesson.gd" id="1_tl"]
+[ext_resource type="PackedScene" uid="uid://u5nmmr88o4nj" path="res://scenes/characters/player/player.tscn" id="2_pl"]
+[ext_resource type="PackedScene" uid="uid://5i1gc6aeesew" path="res://scenes/objects/farm/farm.tscn" id="3_fm"]
+[ext_resource type="PackedScene" uid="uid://cexvxlcbyhk1p" path="res://scenes/objects/shop/shop.tscn" id="4_sh"]
+[ext_resource type="PackedScene" uid="uid://djyk4rjek8b7y" path="res://scenes/characters/customer/customer.tscn" id="5_cu"]
+[ext_resource type="PackedScene" uid="uid://deraramrweldn" path="res://scenes/ui/game/in_game_ui.tscn" id="6_ui"]
+[ext_resource type="PackedScene" uid="uid://bslw2wobhrnmv" path="res://scenes/ui/game/shop/shop_ui.tscn" id="7_su"]
+[ext_resource type="Script" path="res://scripts/ui/game/user_interface.gd" id="8_usr"]
+[ext_resource type="PackedScene" path="res://scenes/ui/game/pause_overlay.tscn" id="9_ps"]
+
+[node name="TutorialLesson" type="Node2D"]
+script = ExtResource("1_tl")
+
+[node name="Backdrop" type="CanvasLayer" parent="."]
+layer = -8
+
+[node name="ColorRect" type="ColorRect" parent="Backdrop"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.14, 0.24, 0.16, 1)
+
+[node name="Farm" parent="." instance=ExtResource("3_fm")]
+position = Vector2(104, 188)
+growth_time_scale = 0.1
+
+[node name="Shop" parent="." instance=ExtResource("4_sh")]
+position = Vector2(520, 188)
+shop_timer = 8.0
+
+[node name="Customer" parent="." instance=ExtResource("5_cu")]
+visible = false
+position = Vector2(312, 108)
+time_limit = 120.0
+hold_until_configured = true
+
+[node name="Player" parent="." instance=ExtResource("2_pl")]
+position = Vector2(312, 210)
+
+[node name="UserInterface" type="Control" parent="."]
+visible = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("8_usr")
+
+[node name="InGameUI" parent="UserInterface" instance=ExtResource("6_ui")]
+layout_mode = 1
+
+[node name="ShopUI" parent="UserInterface" instance=ExtResource("7_su")]
+z_index = 64
+layout_mode = 1
+
+[node name="PauseOverlay" parent="UserInterface" instance=ExtResource("9_ps")]
+layout_mode = 1
+
+[node name="StepBanner" type="CanvasLayer" parent="."]
+layer = 40
+
+[node name="Margin" type="MarginContainer" parent="StepBanner"]
+anchors_preset = 10
+anchor_left = 0.5
+anchor_top = 0.0
+anchor_right = 0.5
+anchor_bottom = 0.0
+offset_left = -312.0
+offset_top = 4.0
+offset_right = 312.0
+offset_bottom = 76.0
+grow_horizontal = 2
+
+[node name="StepLabel" type="Label" parent="StepBanner/Margin"]
+layout_mode = 2
+theme_override_constants/outline_size = 3
+theme_override_colors/font_outline_color = Color(0.08, 0.06, 0.12, 0.95)
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3

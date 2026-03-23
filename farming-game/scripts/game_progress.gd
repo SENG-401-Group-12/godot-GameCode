@@ -6,8 +6,10 @@ const _CFG_PATH := "user://game_progress.cfg"
 const _SEC := "progress"
 
 var tutorial_completed: bool = false
-## When true, next RunSetup scene only shows tutorial and returns to the main menu.
-var open_tutorial_replay_from_menu: bool = false
+## When true, finishing the hands-on tutorial returns to the main menu instead of starting a run.
+var exit_tutorial_to_main_menu: bool = false
+## When true, game_manager runs the guided tutorial flow inside the real gameplay scene.
+var tutorial_mode: bool = false
 
 
 func _ready() -> void:

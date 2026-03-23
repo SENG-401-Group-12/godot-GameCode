@@ -11,6 +11,7 @@ func _run() -> void:
 	var scenes: PackedStringArray = [
 		"res://scenes/ui/main_menu/main_menu.tscn",
 		"res://scenes/ui/run_setup/run_setup.tscn",
+		"res://scenes/tutorial/tutorial_lesson.tscn",
 		"res://scenes/test/test_scene_gameloop.tscn",
 		"res://scenes/ui/game/in_game_ui.tscn",
 		"res://scenes/ui/game/shop/shop_ui.tscn",
