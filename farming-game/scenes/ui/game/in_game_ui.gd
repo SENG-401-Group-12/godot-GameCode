@@ -13,9 +13,10 @@ const TUTORIAL_PROMPT_WAIT := "Click this box to hide. Use the Tutorial button t
 @onready var missed_label: Label = $MarginContainer/HBoxContainer/StatusPanel/MarginContainer/VBoxContainer/MissedLabel
 @onready var active_label: Label = $MarginContainer/HBoxContainer/StatusPanel/MarginContainer/VBoxContainer/ActiveLabel
 @onready var status_panel: Control = $MarginContainer/HBoxContainer/StatusPanel
-@onready var selected_crop_label: Label = $MarginContainer/HBoxContainer/CropPanel/MarginContainer/VBoxContainer/SelectedCropLabel
-@onready var summary_label: Label = $MarginContainer/HBoxContainer/CropPanel/MarginContainer/VBoxContainer/SummaryLabel
-@onready var crop_buttons: VBoxContainer = $MarginContainer/HBoxContainer/CropPanel/MarginContainer/VBoxContainer/ScrollContainer/CropButtons
+@onready var selected_crop_icon: TextureRect = $MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer/SelectedCropIconWrap/SelectedCropIcon
+@onready var selected_crop_label: Label = $MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer/SelectedCropLabel
+@onready var summary_label: Label = $MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer/SummaryLabel
+@onready var crop_buttons: VBoxContainer = $MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer/ScrollContainer/CropButtonsMargin/CropButtons
 @onready var message_label: Label = $MarginContainer/HBoxContainer/CenterMessage
 @onready var game_over_layer: ColorRect = $GameOverLayer
 @onready var game_over_body: Label = $GameOverLayer/CenterContainer/Panel/Margin/VBox/BodyLabel
@@ -135,7 +136,8 @@ func _build_crop_buttons() -> void:
 		var crop: CropData = Globals.game_crops[index]
 		var button := Button.new()
 		button.icon = crop.get_item_icon()
-		button.custom_minimum_size = Vector2(142, 45)
+		button.custom_minimum_size = Vector2(126, 32)
+		button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		button.add_theme_font_override("font", UI_FONT)
 		button.add_theme_font_size_override("font_size", 8)
 		button.add_theme_constant_override("h_separation", 6)
@@ -164,11 +166,18 @@ func _refresh_crop_ui() -> void:
 		button.text = "%s\n%d" % [crop.crop_name, amount]
 		button.modulate = Color(1.0, 0.95, 0.75) if is_selected else Color(0.85, 0.85, 0.85)
 
-	summary_label.text = "\nStored crops: %d" % total_inventory
+	summary_label.text = "Stored crops: %d" % total_inventory
 
 
 func _on_selected_crop_changed(crop_name: String) -> void:
 	selected_crop_label.text = "Selected seed:\n%s" % crop_name
+	if selected_crop_icon:
+		var tex: Texture2D = null
+		for c in Globals.game_crops:
+			if c != null and c.crop_name == crop_name:
+				tex = c.get_item_icon()
+				break
+		selected_crop_icon.texture = tex
 	_refresh_crop_ui()
 
 

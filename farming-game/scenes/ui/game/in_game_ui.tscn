@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://deraramrweldn"]
 
 [ext_resource type="FontFile" uid="uid://7bf452djqkbk" path="res://assets/game/ui/fonts/PixelOperator8.ttf" id="1_455v0"]
+[ext_resource type="Texture2D" uid="uid://c4rt1w7u2typg" path="res://assets/game/ui/ui_tilemap.png" id="2_crop_frame"]
 [ext_resource type="Script" uid="uid://dgl476s4pncfa" path="res://scenes/ui/game/in_game_ui.gd" id="1_tj78p"]
 [ext_resource type="PackedScene" uid="uid://b1k6yaiua2xk0" path="res://scenes/ui/joystick/joystick.tscn" id="3_mjylm"]
 [ext_resource type="PackedScene" uid="uid://fls0qb2aavrb" path="res://scenes/ui/interact_button/interact_button.tscn" id="4_kx3kk"]
@@ -105,13 +106,38 @@ text = "Feed the town: click a crop, plant an empty plot, harvest it, then press
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="CropPanel" type="ColorRect" parent="MarginContainer/HBoxContainer" unique_id=224634056]
+[node name="CropPanelFrame" type="NinePatchRect" parent="MarginContainer/HBoxContainer" unique_id=224634056]
 custom_minimum_size = Vector2(150, 275)
 layout_mode = 2
 size_flags_vertical = 0
+texture = ExtResource("2_crop_frame")
+region_rect = Rect2(165, 33, 32, 32)
+patch_margin_left = 10
+patch_margin_top = 10
+patch_margin_right = 10
+patch_margin_bottom = 10
+axis_stretch_horizontal = 2
+axis_stretch_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HBoxContainer/CropPanelFrame" unique_id=1080182239]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="CropPanelInner" type="ColorRect" parent="MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer" unique_id=224634057]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 color = Color(0, 0, 0, 0.29411766)
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HBoxContainer/CropPanel" unique_id=1080182239]
+[node name="InnerMargin" type="MarginContainer" parent="MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner" unique_id=224634058]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -123,10 +149,23 @@ theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer/CropPanel/MarginContainer" unique_id=1436311688]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin" unique_id=1436311688]
 layout_mode = 2
+theme_override_constants/separation = 8
 
-[node name="SelectedCropLabel" type="Label" parent="MarginContainer/HBoxContainer/CropPanel/MarginContainer/VBoxContainer" unique_id=977940285]
+[node name="SelectedCropIconWrap" type="CenterContainer" parent="MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer" unique_id=977940283]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="SelectedCropIcon" type="TextureRect" parent="MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer/SelectedCropIconWrap" unique_id=977940284]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture_filter = 0
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SelectedCropLabel" type="Label" parent="MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer" unique_id=977940285]
 custom_minimum_size = Vector2(142, 10)
 layout_mode = 2
 theme_override_constants/outline_size = 4
@@ -139,7 +178,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
 
-[node name="SummaryLabel" type="Label" parent="MarginContainer/HBoxContainer/CropPanel/MarginContainer/VBoxContainer" unique_id=1408825935]
+[node name="SummaryLabel" type="Label" parent="MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer" unique_id=1408825935]
 custom_minimum_size = Vector2(142, 10)
 layout_mode = 2
 theme_override_constants/outline_size = 4
@@ -150,14 +189,18 @@ horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
 
-[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/HBoxContainer/CropPanel/MarginContainer/VBoxContainer" unique_id=1242764303]
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer" unique_id=1242764303]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="CropButtons" type="VBoxContainer" parent="MarginContainer/HBoxContainer/CropPanel/MarginContainer/VBoxContainer/ScrollContainer" unique_id=1738848057]
+[node name="CropButtonsMargin" type="MarginContainer" parent="MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer/ScrollContainer" unique_id=1738848058]
+layout_mode = 2
+theme_override_constants/margin_left = 6
+
+[node name="CropButtons" type="VBoxContainer" parent="MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer/ScrollContainer/CropButtonsMargin" unique_id=1738848057]
 layout_mode = 2
 
-[node name="Button" type="Button" parent="MarginContainer/HBoxContainer/CropPanel/MarginContainer/VBoxContainer/ScrollContainer/CropButtons" unique_id=1343388306]
+[node name="Button" type="Button" parent="MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer/ScrollContainer/CropButtonsMargin/CropButtons" unique_id=1343388306]
 layout_mode = 2
 
 [node name="Joystick" parent="." unique_id=1514460779 instance=ExtResource("3_mjylm")]
