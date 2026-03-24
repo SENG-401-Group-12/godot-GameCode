@@ -206,7 +206,7 @@ layout_mode = 2
 size_flags_vertical = 0
 text = "Play"
 
-[node name="HowToPlayButton" type="Button" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn"]
+[node name="HowToPlayButton" type="Button" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn" unique_id=6330716]
 custom_minimum_size = Vector2(196, 36)
 layout_mode = 2
 size_flags_vertical = 0
@@ -326,49 +326,140 @@ layer = 25
 
 [node name="SettingsWindow" parent="SettingsUILayer" unique_id=291061904 instance=ExtResource("2_settings")]
 
-[node name="LeaderboardWindow" type="Window" parent="." unique_id=1577395134]
-title = ""
-initial_position = 2
-size = Vector2i(520, 360)
-borderless = true
+[node name="ModePickLayer" type="CanvasLayer" parent="." unique_id=1577395200]
+layer = 13
 visible = false
 
-[node name="Margin" type="MarginContainer" parent="LeaderboardWindow" unique_id=260751724]
+[node name="ModePickBackdrop" type="ColorRect" parent="ModePickLayer" unique_id=1577395201]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = -8.0
-offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 8
+color = Color(0, 0, 0, 0.55)
 
-[node name="VBox" type="VBoxContainer" parent="LeaderboardWindow/Margin" unique_id=2027598913]
+[node name="ModePickCenter" type="CenterContainer" parent="ModePickLayer" unique_id=1577395202]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ModePickPanel" type="PanelContainer" parent="ModePickLayer/ModePickCenter" unique_id=1577395203]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="ModePickLayer/ModePickCenter/ModePickPanel" unique_id=1577395136]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="ModePickLayer/ModePickCenter/ModePickPanel/Margin" unique_id=1577395137]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ModePickTitle" type="Label" parent="ModePickLayer/ModePickCenter/ModePickPanel/Margin/VBox" unique_id=1577395138]
+layout_mode = 2
+theme_override_constants/outline_size = 3
+text = "Choose game mode"
+horizontal_alignment = 1
+
+[node name="NormalModeButton" type="Button" parent="ModePickLayer/ModePickCenter/ModePickPanel/Margin/VBox" unique_id=1577395139]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+text = "Normal mode"
+
+[node name="EndlessModeButton" type="Button" parent="ModePickLayer/ModePickCenter/ModePickPanel/Margin/VBox" unique_id=1577395140]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+text = "Endless mode"
+
+[node name="ModePickBackButton" type="Button" parent="ModePickLayer/ModePickCenter/ModePickPanel/Margin/VBox" unique_id=1577395141]
+layout_mode = 2
+text = "Back"
+
+[node name="LeaderboardLayer" type="CanvasLayer" parent="." unique_id=1577395134]
+layer = 14
+visible = false
+
+[node name="LeaderboardBackdrop" type="ColorRect" parent="LeaderboardLayer" unique_id=1577395142]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.55)
+
+[node name="LeaderboardCenter" type="CenterContainer" parent="LeaderboardLayer" unique_id=1577395143]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="LeaderboardPanel" type="PanelContainer" parent="LeaderboardLayer/LeaderboardCenter" unique_id=1577395144]
+custom_minimum_size = Vector2(520, 0)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="LeaderboardLayer/LeaderboardCenter/LeaderboardPanel" unique_id=260751724]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="LeaderboardLayer/LeaderboardCenter/LeaderboardPanel/Margin" unique_id=2027598913]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="LeaderboardTitle" type="Label" parent="LeaderboardWindow/Margin/VBox" unique_id=1761443749]
+[node name="LeaderboardTitle" type="Label" parent="LeaderboardLayer/LeaderboardCenter/LeaderboardPanel/Margin/VBox" unique_id=1761443749]
 layout_mode = 2
 theme_override_constants/outline_size = 4
 text = "Leaderboard"
 horizontal_alignment = 1
 
-[node name="LeaderboardStatus" type="Label" parent="LeaderboardWindow/Margin/VBox" unique_id=1761443750]
+[node name="LeaderboardStatus" type="Label" parent="LeaderboardLayer/LeaderboardCenter/LeaderboardPanel/Margin/VBox" unique_id=1761443750]
 layout_mode = 2
 text = "Loading..."
+autowrap_mode = 2
 
-[node name="LeaderboardList" type="ItemList" parent="LeaderboardWindow/Margin/VBox" unique_id=2113272267]
+[node name="BaseGameSection" type="VBoxContainer" parent="LeaderboardLayer/LeaderboardCenter/LeaderboardPanel/Margin/VBox" unique_id=2113272266]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="BaseGameTitle" type="Label" parent="LeaderboardLayer/LeaderboardCenter/LeaderboardPanel/Margin/VBox/BaseGameSection" unique_id=2113272265]
+layout_mode = 2
+theme_override_constants/outline_size = 2
+text = "Base game"
+horizontal_alignment = 1
+
+[node name="LeaderboardListBase" type="ItemList" parent="LeaderboardLayer/LeaderboardCenter/LeaderboardPanel/Margin/VBox/BaseGameSection" unique_id=2113272267]
+custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="CloseLeaderboardButton" type="Button" parent="LeaderboardWindow/Margin/VBox" unique_id=1552245743]
+[node name="EndlessSection" type="VBoxContainer" parent="LeaderboardLayer/LeaderboardCenter/LeaderboardPanel/Margin/VBox" unique_id=2113272268]
 layout_mode = 2
-text = "Close"
+theme_override_constants/separation = 4
+
+[node name="EndlessTitle" type="Label" parent="LeaderboardLayer/LeaderboardCenter/LeaderboardPanel/Margin/VBox/EndlessSection" unique_id=2113272269]
+layout_mode = 2
+theme_override_constants/outline_size = 2
+text = "Endless mode"
+horizontal_alignment = 1
+
+[node name="LeaderboardListEndless" type="ItemList" parent="LeaderboardLayer/LeaderboardCenter/LeaderboardPanel/Margin/VBox/EndlessSection" unique_id=2113272270]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BackLeaderboardButton" type="Button" parent="LeaderboardLayer/LeaderboardCenter/LeaderboardPanel/Margin/VBox" unique_id=1552245743]
+layout_mode = 2
+text = "Back"
 
 [node name="ProfileWindow" type="CanvasLayer" parent="." unique_id=1548052777]
 layer = 20
@@ -440,5 +531,8 @@ autowrap_mode = 2
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/LoginButton" to="." method="_on_login_pressed"]
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/SignupButton" to="." method="_on_signup_pressed"]
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/CloseAuthButton" to="." method="_on_close_auth_pressed"]
-[connection signal="pressed" from="LeaderboardWindow/Margin/VBox/CloseLeaderboardButton" to="." method="_on_close_leaderboard_pressed"]
+[connection signal="pressed" from="ModePickLayer/ModePickCenter/ModePickPanel/Margin/VBox/NormalModeButton" to="." method="_on_mode_normal_pressed"]
+[connection signal="pressed" from="ModePickLayer/ModePickCenter/ModePickPanel/Margin/VBox/EndlessModeButton" to="." method="_on_mode_endless_pressed"]
+[connection signal="pressed" from="ModePickLayer/ModePickCenter/ModePickPanel/Margin/VBox/ModePickBackButton" to="." method="_on_mode_pick_back_pressed"]
+[connection signal="pressed" from="LeaderboardLayer/LeaderboardCenter/LeaderboardPanel/Margin/VBox/BackLeaderboardButton" to="." method="_on_close_leaderboard_pressed"]
 [connection signal="pressed" from="ProfileWindow/ProfileCenter/ProfilePanel/Margin/VBox/CreateProfileButton" to="." method="_on_create_profile_pressed"]

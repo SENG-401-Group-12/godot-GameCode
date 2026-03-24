@@ -81,49 +81,86 @@ layout_mode = 2
 text = "Press Esc to resume"
 horizontal_alignment = 1
 
-[node name="LeaderboardWindow" type="Window" parent="PauseRoot"]
-title = ""
-initial_position = 2
-size = Vector2i(520, 360)
-borderless = true
+[node name="PauseLeaderboardLayer" type="CanvasLayer" parent="."]
+layer = 55
 visible = false
 
-[node name="Margin" type="MarginContainer" parent="PauseRoot/LeaderboardWindow"]
+[node name="LbBackdrop" type="ColorRect" parent="PauseLeaderboardLayer"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = -8.0
-offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 8
+mouse_filter = 0
+color = Color(0, 0, 0, 0.55)
 
-[node name="VBox" type="VBoxContainer" parent="PauseRoot/LeaderboardWindow/Margin"]
+[node name="LbCenter" type="CenterContainer" parent="PauseLeaderboardLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="LbPanel" type="PanelContainer" parent="PauseLeaderboardLayer/LbCenter"]
+custom_minimum_size = Vector2(520, 0)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="PauseLeaderboardLayer/LbCenter/LbPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="PauseLeaderboardLayer/LbCenter/LbPanel/Margin"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="LeaderboardTitle" type="Label" parent="PauseRoot/LeaderboardWindow/Margin/VBox"]
+[node name="LeaderboardTitle" type="Label" parent="PauseLeaderboardLayer/LbCenter/LbPanel/Margin/VBox"]
 layout_mode = 2
 theme_override_constants/outline_size = 4
 text = "Leaderboard"
 horizontal_alignment = 1
 
-[node name="LeaderboardStatus" type="Label" parent="PauseRoot/LeaderboardWindow/Margin/VBox"]
+[node name="LeaderboardStatus" type="Label" parent="PauseLeaderboardLayer/LbCenter/LbPanel/Margin/VBox"]
 layout_mode = 2
 text = "Loading..."
+autowrap_mode = 2
 
-[node name="LeaderboardList" type="ItemList" parent="PauseRoot/LeaderboardWindow/Margin/VBox"]
+[node name="BaseGameSection" type="VBoxContainer" parent="PauseLeaderboardLayer/LbCenter/LbPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="BaseGameTitle" type="Label" parent="PauseLeaderboardLayer/LbCenter/LbPanel/Margin/VBox/BaseGameSection"]
+layout_mode = 2
+theme_override_constants/outline_size = 2
+text = "Base game"
+horizontal_alignment = 1
+
+[node name="LeaderboardListBase" type="ItemList" parent="PauseLeaderboardLayer/LbCenter/LbPanel/Margin/VBox/BaseGameSection"]
+custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="CloseLeaderboardButton" type="Button" parent="PauseRoot/LeaderboardWindow/Margin/VBox"]
+[node name="EndlessSection" type="VBoxContainer" parent="PauseLeaderboardLayer/LbCenter/LbPanel/Margin/VBox"]
 layout_mode = 2
-text = "Close"
+theme_override_constants/separation = 4
+
+[node name="EndlessTitle" type="Label" parent="PauseLeaderboardLayer/LbCenter/LbPanel/Margin/VBox/EndlessSection"]
+layout_mode = 2
+theme_override_constants/outline_size = 2
+text = "Endless mode"
+horizontal_alignment = 1
+
+[node name="LeaderboardListEndless" type="ItemList" parent="PauseLeaderboardLayer/LbCenter/LbPanel/Margin/VBox/EndlessSection"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BackLeaderboardButton" type="Button" parent="PauseLeaderboardLayer/LbCenter/LbPanel/Margin/VBox"]
+layout_mode = 2
+text = "Back"
 
 [node name="SettingsUILayer" type="CanvasLayer" parent="."]
 layer = 120
@@ -134,4 +171,4 @@ layer = 120
 [connection signal="pressed" from="PauseRoot/Center/Panel/Margin/VBox/SettingsButton" to="." method="_on_settings_pressed"]
 [connection signal="pressed" from="PauseRoot/Center/Panel/Margin/VBox/LeaderboardButton" to="." method="_on_leaderboard_pressed"]
 [connection signal="pressed" from="PauseRoot/Center/Panel/Margin/VBox/QuitToMenuButton" to="." method="_on_quit_to_menu_pressed"]
-[connection signal="pressed" from="PauseRoot/LeaderboardWindow/Margin/VBox/CloseLeaderboardButton" to="." method="_on_close_leaderboard_pressed"]
+[connection signal="pressed" from="PauseLeaderboardLayer/LbCenter/LbPanel/Margin/VBox/BackLeaderboardButton" to="." method="_on_close_leaderboard_pressed"]

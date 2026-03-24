@@ -33,6 +33,7 @@ var _tutorial_mode := false
 var _tutorial_step: int = TutorialStep.PLANT
 var _tutorial_customer: Node2D
 var _tutorial_waiting_for_exit_click := false
+var _endless_run := false
 
 
 func _world() -> Node:
@@ -68,11 +69,16 @@ func _ready() -> void:
 	Backend.run_submit_failed.connect(_on_run_submit_failed)
 	Backend.personal_best_received.connect(_on_personal_best_received)
 	Backend.personal_best_failed.connect(_on_personal_best_failed)
+	Backend.personal_best_endless_received.connect(_on_personal_best_endless_received)
+	Backend.personal_best_endless_failed.connect(_on_personal_best_endless_failed)
 	randomize()
 	PlayerData.reset_run_state()
 	Music.enter_gameplay()
 
 	_tutorial_mode = GameProgress.tutorial_mode or GameProgress.exit_tutorial_to_main_menu
+	_endless_run = GameProgress.endless_mode and not _tutorial_mode
+	if _endless_run:
+		victory_after_wave = 0
 	if _tutorial_mode:
 		# Wait until the full level (farms, shop, UI) has finished _ready so frees/timer flags stick.
 		call_deferred("_bootstrap_tutorial_run")
@@ -213,7 +219,10 @@ func _finish_tutorial_flow() -> void:
 
 func _start_game() -> void:
 	game_finished = false
-	game_ui._show_message("Hungry customers will be coming in %d seconds! Prepare your crops before they show up!" % [start_time_buffer])
+	var intro := "Hungry customers will be coming in %d seconds! Prepare your crops before they show up!" % [start_time_buffer]
+	if _endless_run:
+		intro = "Endless mode — survive as many waves as you can.\n\n" + intro
+	game_ui._show_message(intro)
 	while start_time_buffer >= 0:
 		await get_tree().create_timer(1.0, false).timeout
 		start_time_buffer -= 1
@@ -321,7 +330,7 @@ func _finalize_victory() -> void:
 	var status := ""
 	if Backend.is_logged_in():
 		status = "Saving score to leaderboard..."
-		Backend.submit_run(score, duration_ms, waves_cleared, total_fed_count, total_missed_count)
+		Backend.submit_run(score, duration_ms, waves_cleared, total_fed_count, total_missed_count, _endless_run)
 	else:
 		status = "Sign in from the main menu to upload scores."
 	game_ui.show_game_over(body, status)
@@ -339,7 +348,7 @@ func _finalize_loss() -> void:
 	var status := ""
 	if Backend.is_logged_in():
 		status = "Saving score to leaderboard..."
-		Backend.submit_run(score, duration_ms, waves_cleared, total_fed_count, total_missed_count)
+		Backend.submit_run(score, duration_ms, waves_cleared, total_fed_count, total_missed_count, _endless_run)
 	else:
 		status = "Sign in from the main menu to upload scores."
 	game_ui.show_game_over(body, status)
@@ -367,7 +376,7 @@ func _on_personal_best_received(data: Variant) -> void:
 		if not rows.is_empty() and typeof(rows[0]) == TYPE_DICTIONARY:
 			row = rows[0]
 	if row.is_empty():
-		ui.call("set_game_over_personal_best", "Account best: —")
+		ui.call("set_game_over_personal_best", "Account best (base): —")
 		return
 	var score := int(row.get("score_total", 0))
 	var waves := int(row.get("waves_completed", 0))
@@ -375,11 +384,39 @@ func _on_personal_best_received(data: Variant) -> void:
 	var missed := int(row.get("total_missed", 0))
 	ui.call(
 		"set_game_over_personal_best",
-		"Account best: %d pts (Wave %d) | Fed: %d | Missed: %d" % [score, waves, fed, missed]
+		"Account best (base): %d pts (Wave %d) | Fed: %d | Missed: %d" % [score, waves, fed, missed]
 	)
 
 
 func _on_personal_best_failed(_reason: String) -> void:
 	var ui := _resolve_game_ui()
 	if ui and ui.has_method(&"set_game_over_personal_best"):
-		ui.call("set_game_over_personal_best", "Account best: could not load.")
+		ui.call("set_game_over_personal_best", "Account best (base): could not load.")
+
+
+func _on_personal_best_endless_received(data: Variant) -> void:
+	var ui := _resolve_game_ui()
+	if ui == null or not ui.has_method(&"set_game_over_personal_best"):
+		return
+	var row: Dictionary = {}
+	if typeof(data) == TYPE_ARRAY:
+		var rows: Array = data
+		if not rows.is_empty() and typeof(rows[0]) == TYPE_DICTIONARY:
+			row = rows[0]
+	if row.is_empty():
+		ui.call("set_game_over_personal_best", "Account best (endless): —")
+		return
+	var score := int(row.get("score_total", 0))
+	var waves := int(row.get("waves_completed", 0))
+	var fed := int(row.get("total_fed", 0))
+	var missed := int(row.get("total_missed", 0))
+	ui.call(
+		"set_game_over_personal_best",
+		"Account best (endless): %d pts (Wave %d) | Fed: %d | Missed: %d" % [score, waves, fed, missed]
+	)
+
+
+func _on_personal_best_endless_failed(_reason: String) -> void:
+	var ui := _resolve_game_ui()
+	if ui and ui.has_method(&"set_game_over_personal_best"):
+		ui.call("set_game_over_personal_best", "Account best (endless): could not load.")
