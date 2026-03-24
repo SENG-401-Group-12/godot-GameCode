@@ -10,6 +10,8 @@ var tutorial_completed: bool = false
 var exit_tutorial_to_main_menu: bool = false
 ## When true, game_manager runs the guided tutorial flow inside the real gameplay scene.
 var tutorial_mode: bool = false
+## Session flag: endless waves (no wave-12 victory); set from main menu before run setup.
+var endless_mode: bool = false
 
 
 func _ready() -> void:
