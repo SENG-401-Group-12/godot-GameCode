@@ -330,7 +330,7 @@ func _finalize_victory() -> void:
 	var status := ""
 	if Backend.is_logged_in():
 		status = "Saving score to leaderboard..."
-		Backend.submit_run(score, duration_ms, waves_cleared, total_fed_count, total_missed_count)
+		Backend.submit_run(score, duration_ms, waves_cleared, total_fed_count, total_missed_count, _endless_run)
 	else:
 		status = "Sign in from the main menu to upload scores."
 	game_ui.show_game_over(body, status)
@@ -348,10 +348,7 @@ func _finalize_loss() -> void:
 	var status := ""
 	if Backend.is_logged_in():
 		status = "Saving score to leaderboard..."
-		if _endless_run:
-			Backend.submit_run_endless(score, duration_ms, waves_cleared, total_fed_count, total_missed_count)
-		else:
-			Backend.submit_run(score, duration_ms, waves_cleared, total_fed_count, total_missed_count)
+		Backend.submit_run(score, duration_ms, waves_cleared, total_fed_count, total_missed_count, _endless_run)
 	else:
 		status = "Sign in from the main menu to upload scores."
 	game_ui.show_game_over(body, status)

@@ -206,7 +206,7 @@ layout_mode = 2
 size_flags_vertical = 0
 text = "Play"
 
-[node name="HowToPlayButton" type="Button" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn"]
+[node name="HowToPlayButton" type="Button" parent="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn" unique_id=6330716]
 custom_minimum_size = Vector2(196, 36)
 layout_mode = 2
 size_flags_vertical = 0
@@ -336,7 +336,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 0
 color = Color(0, 0, 0, 0.55)
 
 [node name="ModePickCenter" type="CenterContainer" parent="ModePickLayer" unique_id=1577395202]
@@ -392,7 +391,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 0
 color = Color(0, 0, 0, 0.55)
 
 [node name="LeaderboardCenter" type="CenterContainer" parent="LeaderboardLayer" unique_id=1577395143]
@@ -533,8 +531,8 @@ autowrap_mode = 2
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/LoginButton" to="." method="_on_login_pressed"]
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/SignupButton" to="." method="_on_signup_pressed"]
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/CloseAuthButton" to="." method="_on_close_auth_pressed"]
-[connection signal="pressed" from="LeaderboardLayer/LeaderboardCenter/LeaderboardPanel/Margin/VBox/BackLeaderboardButton" to="." method="_on_close_leaderboard_pressed"]
 [connection signal="pressed" from="ModePickLayer/ModePickCenter/ModePickPanel/Margin/VBox/NormalModeButton" to="." method="_on_mode_normal_pressed"]
 [connection signal="pressed" from="ModePickLayer/ModePickCenter/ModePickPanel/Margin/VBox/EndlessModeButton" to="." method="_on_mode_endless_pressed"]
 [connection signal="pressed" from="ModePickLayer/ModePickCenter/ModePickPanel/Margin/VBox/ModePickBackButton" to="." method="_on_mode_pick_back_pressed"]
+[connection signal="pressed" from="LeaderboardLayer/LeaderboardCenter/LeaderboardPanel/Margin/VBox/BackLeaderboardButton" to="." method="_on_close_leaderboard_pressed"]
 [connection signal="pressed" from="ProfileWindow/ProfileCenter/ProfilePanel/Margin/VBox/CreateProfileButton" to="." method="_on_create_profile_pressed"]
