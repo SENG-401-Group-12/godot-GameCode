@@ -267,7 +267,7 @@ func get_my_profile() -> void:
 
 	http.request(url, headers, HTTPClient.METHOD_GET)
 
-func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_fed: int, total_missed: int) -> void:
+func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_fed: int, total_missed: int, is_endless_mode: bool) -> void:
 	if !is_logged_in():
 		print("Guest users cannot submit runs.")
 		return
@@ -275,8 +275,7 @@ func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_
 	var http := HTTPRequest.new()
 	add_child(http)
 
-	## Server RPC: one row per account; only updates when the new score is higher (see supabase/leaderboard_functions.sql).
-	var url := SUPABASE_URL + "/rest/v1/rpc/submit_run_best"
+	var url := SUPABASE_URL + "/rest/v1/runs"
 	var headers := [
 		"apikey: " + SUPABASE_ANON_KEY,
 		"Authorization: Bearer " + access_token,
@@ -285,11 +284,13 @@ func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_
 	]
 
 	var body_dict := {
-		"p_score_total": score_total,
-		"p_duration_ms": duration_ms,
-		"p_waves_completed": waves_completed,
-		"p_total_fed": total_fed,
-		"p_total_missed": total_missed
+		"user_id": current_user_id,
+		"score_total": score_total,
+		"duration_ms": duration_ms,
+		"waves_completed": waves_completed,
+		"total_fed": total_fed,
+		"total_missed": total_missed,
+		"is_endless_mode": is_endless_mode
 	}
 	var body := JSON.stringify(body_dict)
 
@@ -299,6 +300,8 @@ func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_
 
 		if response_code >= 200 and response_code < 300:
 			run_submitted.emit(data)
+			if is_logged_in():
+				get_personal_best(is_endless_mode)
 		else:
 			var err := "Could not save score."
 			if typeof(data) == TYPE_DICTIONARY:
@@ -311,72 +314,16 @@ func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_
 			print("Submit run failed: ", text)
 			run_submit_failed.emit(err)
 
-		if is_logged_in():
-			get_personal_best()
-
 		http.queue_free()
 	)
 
 	http.request(url, headers, HTTPClient.METHOD_POST, body)
-
-
-func submit_run_endless(score_total: int, duration_ms: int, waves_completed: int, total_fed: int, total_missed: int) -> void:
-	if !is_logged_in():
-		print("Guest users cannot submit runs.")
-		return
-
-	var http := HTTPRequest.new()
-	add_child(http)
-
-	var url := SUPABASE_URL + "/rest/v1/rpc/submit_run_best_endless"
-	var headers := [
-		"apikey: " + SUPABASE_ANON_KEY,
-		"Authorization: Bearer " + access_token,
-		"Content-Type: application/json",
-		"Prefer: return=representation"
-	]
-
-	var body_dict := {
-		"p_score_total": score_total,
-		"p_duration_ms": duration_ms,
-		"p_waves_completed": waves_completed,
-		"p_total_fed": total_fed,
-		"p_total_missed": total_missed
-	}
-	var body := JSON.stringify(body_dict)
-
-	http.request_completed.connect(func(result, response_code, response_headers, response_body):
-		var text : String = response_body.get_string_from_utf8()
-		var data = JSON.parse_string(text)
-
-		if response_code >= 200 and response_code < 300:
-			run_submitted.emit(data)
-		else:
-			var err := "Could not save score."
-			if typeof(data) == TYPE_DICTIONARY:
-				if data.has("message"):
-					err = str(data["message"])
-				elif data.has("hint"):
-					err = str(data["hint"])
-			elif text.length() > 0 and text.length() < 200:
-				err = text
-			print("Submit endless run failed: ", text)
-			run_submit_failed.emit(err)
-
-		if is_logged_in():
-			get_personal_best_endless()
-
-		http.queue_free()
-	)
-
-	http.request(url, headers, HTTPClient.METHOD_POST, body)
-
 
 func get_top_10() -> void:
 	var http := HTTPRequest.new()
 	add_child(http)
 
-	var url := SUPABASE_URL + "/rest/v1/rpc/get_top_10"
+	var url := SUPABASE_URL + "/rest/v1/rpc/get_top_10_normal"
 	var headers := [
 		"apikey: " + SUPABASE_ANON_KEY,
 		"Authorization: Bearer " + SUPABASE_ANON_KEY,
@@ -455,8 +402,7 @@ func get_top_10_endless() -> void:
 
 	http.request(url, headers, HTTPClient.METHOD_POST, body)
 
-
-func get_personal_best() -> void:
+func get_personal_best(is_endless_mode: bool) -> void:
 	if !is_logged_in():
 		print("Must be logged in to get personal best.")
 		return
@@ -472,7 +418,8 @@ func get_personal_best() -> void:
 	]
 
 	var body_dict := {
-		"p_user_id": current_user_id
+		"p_user_id": current_user_id,
+		"p_is_endless_mode": is_endless_mode
 	}
 	var body := JSON.stringify(body_dict)
 
@@ -484,51 +431,12 @@ func get_personal_best() -> void:
 			personal_best_failed.emit("Network error.")
 			http.queue_free()
 			return
+
 		if response_code >= 200 and response_code < 300:
 			personal_best_received.emit(data)
 		else:
 			print("Get personal best failed: ", text)
 			personal_best_failed.emit(text if text.length() > 0 else "Could not load account best.")
-
-		http.queue_free()
-	)
-
-	http.request(url, headers, HTTPClient.METHOD_POST, body)
-
-
-func get_personal_best_endless() -> void:
-	if !is_logged_in():
-		print("Must be logged in to get personal best.")
-		return
-
-	var http := HTTPRequest.new()
-	add_child(http)
-
-	var url := SUPABASE_URL + "/rest/v1/rpc/get_personal_best_endless"
-	var headers := [
-		"apikey: " + SUPABASE_ANON_KEY,
-		"Authorization: Bearer " + access_token,
-		"Content-Type: application/json"
-	]
-
-	var body_dict := {
-		"p_user_id": current_user_id
-	}
-	var body := JSON.stringify(body_dict)
-
-	http.request_completed.connect(func(result, response_code, response_headers, response_body):
-		var text: String = response_body.get_string_from_utf8()
-		var data = JSON.parse_string(text)
-
-		if result != HTTPRequest.RESULT_SUCCESS:
-			personal_best_endless_failed.emit("Network error.")
-			http.queue_free()
-			return
-		if response_code >= 200 and response_code < 300:
-			personal_best_endless_received.emit(data)
-		else:
-			print("Get personal best endless failed: ", text)
-			personal_best_endless_failed.emit(text if text.length() > 0 else "Could not load account best.")
 
 		http.queue_free()
 	)
