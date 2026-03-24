@@ -14,6 +14,7 @@ const MENU_BG_PATHS: PackedStringArray = [
 @onready var _content_margin: MarginContainer = $ContentMargin
 @onready var _main_column: VBoxContainer = $ContentMargin/MenuVBox/MenuCenterContainer/MainColumn
 @onready var _fx_layer: Control = $FxLayer
+@onready var _menu_dim: ColorRect = $Dim
 @onready var _auth_backdrop: ColorRect = $AuthLayer/AuthBackdrop
 @onready var _auth_panel: PanelContainer = $AuthLayer/AuthCenter/AuthPanel
 @onready var _email: LineEdit = $AuthLayer/AuthCenter/AuthPanel/Margin/VBox/EmailEdit
@@ -26,9 +27,15 @@ const MENU_BG_PATHS: PackedStringArray = [
 @onready var _subtitle_label: Label = $ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/Subtitle
 
 @onready var _settings_window: Window = $SettingsUILayer/SettingsWindow
-@onready var _leaderboard_window: Window = $LeaderboardWindow
-@onready var _leaderboard_list: ItemList = $LeaderboardWindow/Margin/VBox/LeaderboardList
-@onready var _leaderboard_status: Label = $LeaderboardWindow/Margin/VBox/LeaderboardStatus
+@onready var _leaderboard_layer: CanvasLayer = $LeaderboardLayer
+@onready var _leaderboard_backdrop: ColorRect = $LeaderboardLayer/LeaderboardBackdrop
+@onready var _leaderboard_list_base: ItemList = $LeaderboardLayer/LeaderboardCenter/LeaderboardPanel/Margin/VBox/BaseGameSection/LeaderboardListBase
+@onready var _leaderboard_list_endless: ItemList = $LeaderboardLayer/LeaderboardCenter/LeaderboardPanel/Margin/VBox/EndlessSection/LeaderboardListEndless
+@onready var _leaderboard_status: Label = $LeaderboardLayer/LeaderboardCenter/LeaderboardPanel/Margin/VBox/LeaderboardStatus
+@onready var _mode_pick_layer: CanvasLayer = $ModePickLayer
+@onready var _mode_pick_backdrop: ColorRect = $ModePickLayer/ModePickBackdrop
+
+var _leaderboard_pending: int = 0
 
 @onready var _profile_backdrop: ColorRect = $ProfileWindow/ProfileBackdrop
 @onready var _profile_panel: PanelContainer = $ProfileWindow/ProfileCenter/ProfilePanel
@@ -43,8 +50,12 @@ func _ready() -> void:
 	_fix_key_font_sizes()
 	_set_auth_open(false)
 	_set_profile_open(false)
-	_leaderboard_window.hide()
-	_style_leaderboard_window()
+	_leaderboard_layer.visible = false
+	_set_mode_pick_open(false)
+	_style_leaderboard_panel()
+	_style_mode_pick_panel()
+	_leaderboard_backdrop.gui_input.connect(_on_leaderboard_backdrop_gui_input)
+	_mode_pick_backdrop.gui_input.connect(_on_mode_pick_backdrop_gui_input)
 	_refresh_user_line()
 
 	Backend.login_succeeded.connect(_on_login_succeeded)
@@ -56,6 +67,8 @@ func _ready() -> void:
 	Backend.profile_created.connect(_on_profile_created)
 	Backend.leaderboard_received.connect(_on_leaderboard_received)
 	Backend.leaderboard_failed.connect(_on_leaderboard_failed)
+	Backend.leaderboard_endless_received.connect(_on_leaderboard_endless_received)
+	Backend.leaderboard_endless_failed.connect(_on_leaderboard_endless_failed)
 
 	_add_menu_sparkles()
 	_style_main_buttons()
@@ -204,13 +217,44 @@ func _add_menu_sparkles() -> void:
 		ft.tween_property(f, "modulate:a", 0.65, slow)
 
 
-func _style_leaderboard_window() -> void:
-	## Native OS title bars ignore pixel fonts; use borderless window + in-panel title label.
-	_leaderboard_window.borderless = true
-	_leaderboard_window.title = ""
-	var tl: Label = _leaderboard_window.get_node_or_null("Margin/VBox/LeaderboardTitle") as Label
+func _style_leaderboard_panel() -> void:
+	var tl: Label = _leaderboard_layer.get_node_or_null("LeaderboardCenter/LeaderboardPanel/Margin/VBox/LeaderboardTitle") as Label
 	if tl:
 		tl.add_theme_font_size_override("font_size", 13)
+	var back_btn: Button = _leaderboard_layer.get_node_or_null("LeaderboardCenter/LeaderboardPanel/Margin/VBox/BackLeaderboardButton") as Button
+	if back_btn:
+		var n := _make_menu_button_stylebox(Color(0.19, 0.15, 0.26, 1.0))
+		var h := _make_menu_button_stylebox(Color(0.28, 0.22, 0.38, 1.0))
+		var pr := _make_menu_button_stylebox(Color(0.14, 0.11, 0.2, 1.0))
+		back_btn.add_theme_stylebox_override("normal", n)
+		back_btn.add_theme_stylebox_override("hover", h)
+		back_btn.add_theme_stylebox_override("pressed", pr)
+		back_btn.add_theme_stylebox_override("focus", n.duplicate())
+		back_btn.add_theme_color_override("font_color", Color(0.98, 0.96, 0.94, 1.0))
+		back_btn.add_theme_font_size_override("font_size", 11)
+
+
+func _style_mode_pick_panel() -> void:
+	var tl: Label = _mode_pick_layer.get_node_or_null("ModePickCenter/ModePickPanel/Margin/VBox/ModePickTitle") as Label
+	if tl:
+		tl.add_theme_font_size_override("font_size", 13)
+	for b in [
+		_mode_pick_layer.get_node_or_null("ModePickCenter/ModePickPanel/Margin/VBox/NormalModeButton"),
+		_mode_pick_layer.get_node_or_null("ModePickCenter/ModePickPanel/Margin/VBox/EndlessModeButton"),
+		_mode_pick_layer.get_node_or_null("ModePickCenter/ModePickPanel/Margin/VBox/ModePickBackButton"),
+	]:
+		if b is Button:
+			var bbtn := b as Button
+			var n := _make_menu_button_stylebox(Color(0.19, 0.15, 0.26, 1.0))
+			var h := _make_menu_button_stylebox(Color(0.28, 0.22, 0.38, 1.0))
+			var pr := _make_menu_button_stylebox(Color(0.14, 0.11, 0.2, 1.0))
+			bbtn.add_theme_stylebox_override("normal", n)
+			bbtn.add_theme_stylebox_override("hover", h)
+			bbtn.add_theme_stylebox_override("pressed", pr)
+			bbtn.add_theme_stylebox_override("focus", n.duplicate())
+			bbtn.add_theme_stylebox_override("disabled", n.duplicate())
+			bbtn.add_theme_color_override("font_color", Color(0.98, 0.96, 0.94, 1.0))
+			bbtn.add_theme_font_size_override("font_size", 11)
 
 
 func _apply_font_recursive(node: Node) -> void:
@@ -289,13 +333,48 @@ func _refresh_user_line() -> void:
 		_account_button.text = "Account"
 
 
+func _set_mode_pick_open(open: bool) -> void:
+	_mode_pick_layer.visible = open
+	_content_margin.visible = not open
+	_fx_layer.visible = not open
+	_menu_dim.visible = not open
+
+
 func _on_play_pressed() -> void:
 	GameProgress.tutorial_mode = false
 	GameProgress.exit_tutorial_to_main_menu = false
+	_leaderboard_layer.visible = false
+	_set_mode_pick_open(true)
+
+
+func _on_mode_normal_pressed() -> void:
+	GameProgress.endless_mode = false
+	_set_mode_pick_open(false)
 	get_tree().change_scene_to_file(RUN_SETUP_SCENE)
 
 
+func _on_mode_endless_pressed() -> void:
+	GameProgress.endless_mode = true
+	_set_mode_pick_open(false)
+	get_tree().change_scene_to_file(RUN_SETUP_SCENE)
+
+
+func _on_mode_pick_back_pressed() -> void:
+	_set_mode_pick_open(false)
+
+
+func _on_mode_pick_backdrop_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		_set_mode_pick_open(false)
+
+
+func _on_leaderboard_backdrop_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		_on_close_leaderboard_pressed()
+
+
 func _on_how_to_play_pressed() -> void:
+	GameProgress.endless_mode = false
 	GameProgress.tutorial_mode = true
 	GameProgress.exit_tutorial_to_main_menu = true
 	get_tree().change_scene_to_file(GAME_SCENE)
@@ -398,31 +477,46 @@ func _show_profile_prompt() -> void:
 	_profile_name.grab_focus()
 
 func _on_leaderboard_pressed() -> void:
-	_leaderboard_window.popup_centered_ratio(0.85)
+	_set_mode_pick_open(false)
+	_leaderboard_layer.visible = true
 	_leaderboard_status.text = "Loading..."
-	_leaderboard_list.clear()
+	_leaderboard_list_base.clear()
+	_leaderboard_list_endless.clear()
+	_leaderboard_pending = 2
 	Backend.get_top_10()
+	Backend.get_top_10_endless()
 
 
 func _on_settings_pressed() -> void:
 	(_settings_window as Node).call("open_settings")
 
 
+func _friendly_endless_leaderboard_error(raw: String) -> String:
+	var r := raw.strip_edges()
+	if r.length() > 160 or r.contains("function public.") or r.contains("PGRST"):
+		return "Endless scores need the server script (leaderboard_endless_runs.sql)."
+	return "Could not load endless list."
+
+
 func _on_leaderboard_failed(reason: String) -> void:
-	_leaderboard_list.clear()
-	_leaderboard_status.text = reason
+	_leaderboard_list_base.clear()
+	_leaderboard_pending = maxi(0, _leaderboard_pending - 1)
+	var short := reason.strip_edges()
+	if short.length() > 100:
+		short = short.substr(0, 97) + "..."
+	_leaderboard_list_base.add_item("— Base game: %s —" % short)
+	_leaderboard_try_finish_status()
 
 
-func _on_leaderboard_received(data: Variant) -> void:
-	_leaderboard_list.clear()
-	if typeof(data) != TYPE_ARRAY:
-		_leaderboard_status.text = "Unexpected response."
-		return
-	var rows: Array = data
-	if rows.is_empty():
-		_leaderboard_status.text = "No scores yet."
-		return
-	_leaderboard_status.text = "Top scores (best run per account)"
+func _on_leaderboard_endless_failed(reason: String) -> void:
+	_leaderboard_list_endless.clear()
+	_leaderboard_pending = maxi(0, _leaderboard_pending - 1)
+	_leaderboard_list_endless.add_item("— %s —" % _friendly_endless_leaderboard_error(reason))
+	_leaderboard_try_finish_status()
+
+
+func _fill_leaderboard_rows(list: ItemList, rows: Array) -> void:
+	list.clear()
 	var rank := 1
 	for entry in rows:
 		if typeof(entry) != TYPE_DICTIONARY:
@@ -433,10 +527,50 @@ func _on_leaderboard_received(data: Variant) -> void:
 		var waves := int(d.get("waves_completed", 0))
 		var fed := int(d.get("total_fed", 0))
 		var missed := int(d.get("total_missed", 0))
-
-		_leaderboard_list.add_item("%d. %s — %d pts (Wave %d) | Fed: %d | Missed: %d"% [rank, name, score, waves, fed, missed])
+		list.add_item("%d. %s — %d pts (Wave %d) | Fed: %d | Missed: %d" % [rank, name, score, waves, fed, missed])
 		rank += 1
 
 
+func _leaderboard_try_finish_status() -> void:
+	if _leaderboard_pending > 0:
+		return
+	if _leaderboard_status.text == "Loading...":
+		_leaderboard_status.text = "Top scores (best run per account, per mode)"
+
+
+func _on_leaderboard_received(data: Variant) -> void:
+	if typeof(data) != TYPE_ARRAY:
+		_leaderboard_list_base.clear()
+		_leaderboard_status.text = "Base game: unexpected response."
+		_leaderboard_pending = maxi(0, _leaderboard_pending - 1)
+		_leaderboard_try_finish_status()
+		return
+	var rows: Array = data
+	if rows.is_empty():
+		_leaderboard_list_base.clear()
+		_leaderboard_list_base.add_item("(No scores yet)")
+	else:
+		_fill_leaderboard_rows(_leaderboard_list_base, rows)
+	_leaderboard_pending -= 1
+	_leaderboard_try_finish_status()
+
+
+func _on_leaderboard_endless_received(data: Variant) -> void:
+	if typeof(data) != TYPE_ARRAY:
+		_leaderboard_list_endless.clear()
+		_leaderboard_status.text = "Endless mode: unexpected response."
+		_leaderboard_pending = maxi(0, _leaderboard_pending - 1)
+		_leaderboard_try_finish_status()
+		return
+	var rows: Array = data
+	if rows.is_empty():
+		_leaderboard_list_endless.clear()
+		_leaderboard_list_endless.add_item("(No scores yet)")
+	else:
+		_fill_leaderboard_rows(_leaderboard_list_endless, rows)
+	_leaderboard_pending -= 1
+	_leaderboard_try_finish_status()
+
+
 func _on_close_leaderboard_pressed() -> void:
-	_leaderboard_window.hide()
+	_leaderboard_layer.visible = false

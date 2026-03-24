@@ -9,10 +9,14 @@ signal signup_failed(message: String)
 
 signal leaderboard_received(data)
 signal leaderboard_failed(reason: String)
+signal leaderboard_endless_received(data)
+signal leaderboard_endless_failed(reason: String)
 signal run_submitted(data)
 signal run_submit_failed(reason: String)
 signal personal_best_received(data)
 signal personal_best_failed(reason: String)
+signal personal_best_endless_received(data)
+signal personal_best_endless_failed(reason: String)
 
 signal profile_created(data)
 signal profile_updated(data)
@@ -263,7 +267,7 @@ func get_my_profile() -> void:
 
 	http.request(url, headers, HTTPClient.METHOD_GET)
 
-func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_fed: int, total_missed: int) -> void:
+func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_fed: int, total_missed: int, is_endless_mode: bool) -> void:
 	if !is_logged_in():
 		print("Guest users cannot submit runs.")
 		return
@@ -271,8 +275,7 @@ func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_
 	var http := HTTPRequest.new()
 	add_child(http)
 
-	## Server RPC: one row per account; only updates when the new score is higher (see supabase/leaderboard_functions.sql).
-	var url := SUPABASE_URL + "/rest/v1/rpc/submit_run_best"
+	var url := SUPABASE_URL + "/rest/v1/runs"
 	var headers := [
 		"apikey: " + SUPABASE_ANON_KEY,
 		"Authorization: Bearer " + access_token,
@@ -281,11 +284,13 @@ func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_
 	]
 
 	var body_dict := {
-		"p_score_total": score_total,
-		"p_duration_ms": duration_ms,
-		"p_waves_completed": waves_completed,
-		"p_total_fed": total_fed,
-		"p_total_missed": total_missed
+		"user_id": current_user_id,
+		"score_total": score_total,
+		"duration_ms": duration_ms,
+		"waves_completed": waves_completed,
+		"total_fed": total_fed,
+		"total_missed": total_missed,
+		"is_endless_mode": is_endless_mode
 	}
 	var body := JSON.stringify(body_dict)
 
@@ -295,6 +300,8 @@ func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_
 
 		if response_code >= 200 and response_code < 300:
 			run_submitted.emit(data)
+			if is_logged_in():
+				get_personal_best(is_endless_mode)
 		else:
 			var err := "Could not save score."
 			if typeof(data) == TYPE_DICTIONARY:
@@ -307,19 +314,16 @@ func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_
 			print("Submit run failed: ", text)
 			run_submit_failed.emit(err)
 
-		if is_logged_in():
-			get_personal_best()
-
 		http.queue_free()
 	)
 
 	http.request(url, headers, HTTPClient.METHOD_POST, body)
-	
+
 func get_top_10() -> void:
 	var http := HTTPRequest.new()
 	add_child(http)
 
-	var url := SUPABASE_URL + "/rest/v1/rpc/get_top_10"
+	var url := SUPABASE_URL + "/rest/v1/rpc/get_top_10_normal"
 	var headers := [
 		"apikey: " + SUPABASE_ANON_KEY,
 		"Authorization: Bearer " + SUPABASE_ANON_KEY,
@@ -353,7 +357,52 @@ func get_top_10() -> void:
 
 	http.request(url, headers, HTTPClient.METHOD_POST, body)
 
-func get_personal_best() -> void:
+
+func get_top_10_endless() -> void:
+	var http := HTTPRequest.new()
+	add_child(http)
+
+	var url := SUPABASE_URL + "/rest/v1/rpc/get_top_10_endless"
+	var headers := [
+		"apikey: " + SUPABASE_ANON_KEY,
+		"Authorization: Bearer " + SUPABASE_ANON_KEY,
+		"Content-Type: application/json"
+	]
+
+	var body := "{}"
+
+	http.request_completed.connect(func(result, response_code, response_headers, response_body):
+		if result != HTTPRequest.RESULT_SUCCESS:
+			leaderboard_endless_failed.emit("Network error — check connection.")
+			http.queue_free()
+			return
+		var text: String = response_body.get_string_from_utf8()
+		var data = JSON.parse_string(text)
+
+		if response_code >= 200 and response_code < 300:
+			if typeof(data) == TYPE_ARRAY:
+				leaderboard_endless_received.emit(data)
+			else:
+				leaderboard_endless_failed.emit("Unexpected response from server.")
+		else:
+			print("Get top 10 endless failed: ", text)
+			# Missing RPC / migration: show empty endless list instead of raw SQL in UI.
+			var tl := text.to_lower()
+			if response_code == 404 or "pgrst" in tl or "could not find the function" in tl:
+				leaderboard_endless_received.emit([])
+				http.queue_free()
+				return
+			var err_msg: String = text if text.length() > 0 else "Leaderboard request failed (%d)." % response_code
+			if err_msg.length() > 180:
+				err_msg = err_msg.substr(0, 177) + "..."
+			leaderboard_endless_failed.emit(err_msg)
+
+		http.queue_free()
+	)
+
+	http.request(url, headers, HTTPClient.METHOD_POST, body)
+
+func get_personal_best(is_endless_mode: bool) -> void:
 	if !is_logged_in():
 		print("Must be logged in to get personal best.")
 		return
@@ -369,7 +418,8 @@ func get_personal_best() -> void:
 	]
 
 	var body_dict := {
-		"p_user_id": current_user_id
+		"p_user_id": current_user_id,
+		"p_is_endless_mode": is_endless_mode
 	}
 	var body := JSON.stringify(body_dict)
 
@@ -381,6 +431,7 @@ func get_personal_best() -> void:
 			personal_best_failed.emit("Network error.")
 			http.queue_free()
 			return
+
 		if response_code >= 200 and response_code < 300:
 			personal_best_received.emit(data)
 		else:

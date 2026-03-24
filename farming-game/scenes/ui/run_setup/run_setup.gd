@@ -194,6 +194,7 @@ func _on_continue_pressed() -> void:
 	GameProgress.exit_tutorial_to_main_menu = false
 	if not GameProgress.tutorial_completed:
 		GameProgress.tutorial_mode = true
+		GameProgress.endless_mode = false
 		get_tree().change_scene_to_file(GAME_SCENE)
 	else:
 		get_tree().change_scene_to_file(GAME_SCENE)
