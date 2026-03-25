@@ -6,5 +6,5 @@
 [resource]
 script = ExtResource("1_20yqm")
 crop_name = "Turnip"
-growth_time_per_stage = 4.0
+growth_time_per_stage = 1.0
 metadata/_custom_type_script = "uid://bpx40ij8v3u2p"
