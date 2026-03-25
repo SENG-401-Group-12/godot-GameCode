@@ -1,9 +1,10 @@
 [gd_scene format=3 uid="uid://deraramrweldn"]
 
 [ext_resource type="FontFile" uid="uid://7bf452djqkbk" path="res://assets/game/ui/fonts/PixelOperator8.ttf" id="1_455v0"]
-[ext_resource type="Texture2D" uid="uid://c4rt1w7u2typg" path="res://assets/game/ui/ui_tilemap.png" id="2_crop_frame"]
 [ext_resource type="Script" uid="uid://dgl476s4pncfa" path="res://scenes/ui/game/in_game_ui.gd" id="1_tj78p"]
+[ext_resource type="Texture2D" uid="uid://c4rt1w7u2typg" path="res://assets/game/ui/ui_tilemap.png" id="2_crop_frame"]
 [ext_resource type="PackedScene" uid="uid://b1k6yaiua2xk0" path="res://scenes/ui/joystick/joystick.tscn" id="3_mjylm"]
+[ext_resource type="PackedScene" uid="uid://b4qtj6qbc0yjk" path="res://scenes/ui/mobile_pause_button/mobile_pause_button.tscn" id="4_2citd"]
 [ext_resource type="PackedScene" uid="uid://fls0qb2aavrb" path="res://scenes/ui/interact_button/interact_button.tscn" id="4_kx3kk"]
 
 [node name="InGameUI" type="Control" unique_id=1526345901]
@@ -161,7 +162,6 @@ size_flags_horizontal = 4
 [node name="SelectedCropIcon" type="TextureRect" parent="MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer/SelectedCropIconWrap" unique_id=977940284]
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
-texture_filter = 0
 expand_mode = 1
 stretch_mode = 5
 
@@ -215,6 +215,13 @@ offset_right = 75.0
 offset_bottom = -75.0
 grow_vertical = 0
 metadata/_edit_use_anchors_ = true
+
+[node name="MobilePauseButton" parent="." unique_id=353982128 instance=ExtResource("4_2citd")]
+layout_mode = 0
+offset_left = 611.0
+offset_top = 28.0
+offset_right = 611.0
+offset_bottom = 28.0
 
 [node name="InteractButton" parent="." unique_id=593256940 instance=ExtResource("4_kx3kk")]
 position = Vector2(555, 323)
@@ -272,6 +279,7 @@ horizontal_alignment = 1
 autowrap_mode = 2
 
 [node name="PersonalBestLabel" type="Label" parent="GameOverLayer/CenterContainer/Panel/Margin/VBox" unique_id=1993266421]
+visible = false
 custom_minimum_size = Vector2(280, 0)
 layout_mode = 2
 theme_override_constants/outline_size = 3
@@ -279,7 +287,6 @@ theme_override_fonts/font = ExtResource("1_455v0")
 theme_override_font_sizes/font_size = 8
 horizontal_alignment = 1
 autowrap_mode = 2
-visible = false
 
 [node name="SubmitStatusLabel" type="Label" parent="GameOverLayer/CenterContainer/Panel/Margin/VBox" unique_id=1869282777]
 layout_mode = 2

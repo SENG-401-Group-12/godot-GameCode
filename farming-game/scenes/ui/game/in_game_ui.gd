@@ -43,13 +43,20 @@ var _tutorial_is_typing: bool = false
 
 var crop_button_nodes: Array[Button] = []
 
+func _is_touch_device() -> bool:
+	if OS.has_feature("mobile") or OS.has_feature("web_android") or OS.has_feature("web_ios"):
+		return true
+	if OS.has_feature("web"):
+		return JavaScriptBridge.eval("('ontouchstart' in window) || (navigator.maxTouchPoints > 0)", true)
+	return false
 
 func _ready() -> void:
-	if OS.get_name() == "Android" or OS.get_name() == "iOS" or OS.has_feature("mobile"):
+	if _is_touch_device():
 		pass
 	else:
 		$Joystick.queue_free()
 		$InteractButton.queue_free()
+		$MobilePauseButton.queue_free()
 	game_over_layer.visible = false
 	game_over_menu_button.pressed.connect(_on_game_over_menu_pressed)
 	get_parent().show()

@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://bqm3nmn8v0khx"]
 
 [ext_resource type="Script" uid="uid://cyasg8eq4p77i" path="res://scenes/ui/main_menu/main_menu.gd" id="1_menu"]
+[ext_resource type="Texture2D" uid="uid://dtx48mplonfn6" path="res://assets/game/ui/main_menu_background.jpg" id="2_qt1dd"]
 [ext_resource type="PackedScene" uid="uid://cc7ipbc2ju2lg" path="res://scenes/ui/settings/settings_window.tscn" id="2_settings"]
 
 [node name="MainMenu" type="Control" unique_id=704273552]
@@ -30,6 +31,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+texture = ExtResource("2_qt1dd")
 expand_mode = 1
 stretch_mode = 5
 
