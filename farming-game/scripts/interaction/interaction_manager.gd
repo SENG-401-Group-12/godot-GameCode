@@ -3,7 +3,14 @@ extends Node2D
 @onready var player = get_tree().get_first_node_in_group("Player")
 @onready var label = $Label
 
-var base_text = "[INTERACT] TO " if OS.get_name() == "Android" or OS.get_name() == "iOS" or OS.has_feature("mobile") else "[E] TO "
+func _is_touch_device() -> bool:
+	if OS.has_feature("mobile") or OS.has_feature("web_android") or OS.has_feature("web_ios"):
+		return true
+	if OS.has_feature("web"):
+		return JavaScriptBridge.eval("('ontouchstart' in window) || (navigator.maxTouchPoints > 0)", true)
+	return false
+
+var base_text = "[INTERACT] TO " if _is_touch_device() else "[E] TO "
 
 const LABEL_OFFSET = 36
 
