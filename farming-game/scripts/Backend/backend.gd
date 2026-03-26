@@ -38,6 +38,18 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 
+## Supabase may gzip JSON; Godot Web's HTTP stack often cannot decode gzip. Ask for identity encoding.
+func _supabase_headers(extra: PackedStringArray = PackedStringArray()) -> PackedStringArray:
+	var h := PackedStringArray([
+		"apikey: " + SUPABASE_ANON_KEY,
+		"Content-Type: application/json",
+		"Accept-Encoding: identity",
+	])
+	for s in extra:
+		h.append(s)
+	return h
+
+
 func continue_as_guest() -> void:
 	guest_mode = true
 	access_token = ""
@@ -60,10 +72,7 @@ func signup(email: String, password: String) -> void:
 	add_child(http)
 
 	var url := SUPABASE_URL + "/auth/v1/signup"
-	var headers := [
-		"apikey: " + SUPABASE_ANON_KEY,
-		"Content-Type: application/json"
-	]
+	var headers := _supabase_headers()
 
 	var body_dict := {
 		"email": email,
@@ -109,10 +118,7 @@ func login(email: String, password: String) -> void:
 	add_child(http)
 
 	var url := SUPABASE_URL + "/auth/v1/token?grant_type=password"
-	var headers := [
-		"apikey: " + SUPABASE_ANON_KEY,
-		"Content-Type: application/json"
-	]
+	var headers := _supabase_headers()
 
 	var body_dict := {
 		"email": email,
@@ -164,12 +170,10 @@ func create_profile(display_name: String) -> void:
 	add_child(http)
 
 	var url := SUPABASE_URL + "/rest/v1/profiles"
-	var headers := [
-		"apikey: " + SUPABASE_ANON_KEY,
+	var headers := _supabase_headers(PackedStringArray([
 		"Authorization: Bearer " + access_token,
-		"Content-Type: application/json",
-		"Prefer: return=representation"
-	]
+		"Prefer: return=representation",
+	]))
 
 	var body_dict := {
 		"id": current_user_id,
@@ -201,12 +205,10 @@ func update_profile(display_name: String) -> void:
 	add_child(http)
 
 	var url := SUPABASE_URL + "/rest/v1/profiles?id=eq." + current_user_id
-	var headers := [
-		"apikey: " + SUPABASE_ANON_KEY,
+	var headers := _supabase_headers(PackedStringArray([
 		"Authorization: Bearer " + access_token,
-		"Content-Type: application/json",
-		"Prefer: return=representation"
-	]
+		"Prefer: return=representation",
+	]))
 
 	var body_dict := {
 		"display_name": display_name
@@ -236,11 +238,9 @@ func get_my_profile() -> void:
 	add_child(http)
 
 	var url := SUPABASE_URL + "/rest/v1/profiles?id=eq." + current_user_id + "&select=*"
-	var headers := [
-		"apikey: " + SUPABASE_ANON_KEY,
+	var headers := _supabase_headers(PackedStringArray([
 		"Authorization: Bearer " + access_token,
-		"Content-Type: application/json"
-	]
+	]))
 
 	http.request_completed.connect(func(result, response_code, response_headers, response_body):
 		var text: String = response_body.get_string_from_utf8()
@@ -276,12 +276,10 @@ func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_
 	add_child(http)
 
 	var url := SUPABASE_URL + "/rest/v1/runs"
-	var headers := [
-		"apikey: " + SUPABASE_ANON_KEY,
+	var headers := _supabase_headers(PackedStringArray([
 		"Authorization: Bearer " + access_token,
-		"Content-Type: application/json",
-		"Prefer: return=representation"
-	]
+		"Prefer: return=representation",
+	]))
 
 	var body_dict := {
 		"user_id": current_user_id,
@@ -324,11 +322,9 @@ func get_top_10() -> void:
 	add_child(http)
 
 	var url := SUPABASE_URL + "/rest/v1/rpc/get_top_10_normal"
-	var headers := [
-		"apikey: " + SUPABASE_ANON_KEY,
+	var headers := _supabase_headers(PackedStringArray([
 		"Authorization: Bearer " + SUPABASE_ANON_KEY,
-		"Content-Type: application/json"
-	]
+	]))
 
 	var body := "{}"
 
@@ -363,11 +359,9 @@ func get_top_10_endless() -> void:
 	add_child(http)
 
 	var url := SUPABASE_URL + "/rest/v1/rpc/get_top_10_endless"
-	var headers := [
-		"apikey: " + SUPABASE_ANON_KEY,
+	var headers := _supabase_headers(PackedStringArray([
 		"Authorization: Bearer " + SUPABASE_ANON_KEY,
-		"Content-Type: application/json"
-	]
+	]))
 
 	var body := "{}"
 
@@ -411,11 +405,9 @@ func get_personal_best(is_endless_mode: bool) -> void:
 	add_child(http)
 
 	var url := SUPABASE_URL + "/rest/v1/rpc/get_personal_best"
-	var headers := [
-		"apikey: " + SUPABASE_ANON_KEY,
+	var headers := _supabase_headers(PackedStringArray([
 		"Authorization: Bearer " + access_token,
-		"Content-Type: application/json"
-	]
+	]))
 
 	var body_dict := {
 		"p_user_id": current_user_id,

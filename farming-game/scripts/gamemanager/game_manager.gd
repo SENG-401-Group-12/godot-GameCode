@@ -233,6 +233,7 @@ func _start_game() -> void:
 func _start_next_wave() -> void:
 	if game_finished:
 		return
+	Music.reset_wave_urgency()
 	waiting_for_next_wave = false
 	current_wave += 1
 	wave_fed_count = 0

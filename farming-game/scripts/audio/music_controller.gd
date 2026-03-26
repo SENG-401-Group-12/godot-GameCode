@@ -101,16 +101,24 @@ func register_customer_urgency() -> void:
 	if _context != "game":
 		return
 	_urgent_count += 1
-	if _urgent_count == 1:
-		_play_gameplay_bgm(true)
+	# Always sync BGM to urgency count. Previously we only switched on 0→1; a leaked count > 0
+	# from an edge case meant later waves never hit == 1 again, so tension never returned.
+	_play_gameplay_bgm(_urgent_count > 0)
 
 
 func unregister_customer_urgency() -> void:
 	if _context != "game":
 		return
 	_urgent_count = max(0, _urgent_count - 1)
-	if _urgent_count == 0:
-		_play_gameplay_bgm(false)
+	_play_gameplay_bgm(_urgent_count > 0)
+
+
+## Call at the start of each wave so urgency cannot carry over between waves.
+func reset_wave_urgency() -> void:
+	if _context != "game":
+		return
+	_urgent_count = 0
+	_play_gameplay_bgm(false)
 
 
 func play_wave_win_sting() -> void:

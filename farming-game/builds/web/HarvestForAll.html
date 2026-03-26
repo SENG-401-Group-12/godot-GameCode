@@ -9,6 +9,8 @@ html, body, #canvas {
 	margin: 0;
 	padding: 0;
 	border: 0;
+	width: 100%;
+	height: 100%;
 }
 
 body {
@@ -20,6 +22,8 @@ body {
 
 #canvas {
 	display: block;
+	width: 100%;
+	height: 100%;
 }
 
 #canvas:focus {
@@ -211,6 +215,26 @@ const engine = new Engine(GODOT_CONFIG);
 			},
 		}).then(() => {
 			setStatusMode('hidden');
+			function tryFullscreen() {
+				const canvas = document.getElementById('canvas');
+				if (canvas) {
+					const fn = canvas.requestFullscreen || canvas.webkitRequestFullscreen || canvas.msRequestFullscreen;
+					if (fn) {
+						fn.call(canvas).catch(function () {});
+						return;
+					}
+				}
+				const el = document.documentElement;
+				const fn2 = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+				if (fn2) {
+					fn2.call(el).catch(function () {});
+				}
+			}
+			tryFullscreen();
+			window.addEventListener('pointerdown', function onFirstPointer() {
+				window.removeEventListener('pointerdown', onFirstPointer);
+				tryFullscreen();
+			});
 		}, displayFailureNotice);
 	}
 }());
