@@ -19,6 +19,11 @@ on:
     paths:
       - "farming-game/**"
       - ".github/workflows/export-web-vercel.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "farming-game/**"
+      - ".github/workflows/export-web-vercel.yml"
   workflow_dispatch:
 
 concurrency:
@@ -63,19 +68,34 @@ jobs:
           mkdir -p builds/web
           godot --headless --verbose --export-release "Web" "builds/web/HarvestForAll.html"
 
-      - name: Mark workspace as safe for Git
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-
       - name: Setup Node.js for Vercel CLI
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: farming-game/builds/web
-          vercel-args: "--prod"
+      - name: Verify export payload
+        run: |
+          ls -la farming-game/builds/web
+          test -f farming-game/builds/web/HarvestForAll.html
+          test -f farming-game/builds/web/vercel.json
+
+      # PRs get preview deploys; main pushes get production deploys.
+      - name: Deploy to Vercel (preview)
+        if: github.event_name == 'pull_request'
+        working-directory: farming-game/builds/web
+        run: |
+          npx --yes vercel@latest deploy --yes --token "$VERCEL_TOKEN"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Deploy to Vercel (production)
+        if: github.event_name != 'pull_request'
+        working-directory: farming-game/builds/web
+        run: |
+          npx --yes vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
