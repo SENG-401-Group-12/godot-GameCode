@@ -27,7 +27,11 @@ const MENU_BG_PATHS: PackedStringArray = [
 @onready var _title_label: Label = $ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/Title
 @onready var _subtitle_label: Label = $ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/Subtitle
 @onready var _version_label: Label = $FooterLayer/VersionLabel
-@onready var _credits_text: Label = $FooterLayer/CreditsPanel/Margin/CreditsText
+@onready var _credits_button: Button = $FooterLayer/CreditsButton
+@onready var _credits_layer: CanvasLayer = $CreditsLayer
+@onready var _credits_backdrop: ColorRect = $CreditsLayer/CreditsBackdrop
+@onready var _credits_text: Label = $CreditsLayer/CreditsCenter/CreditsPanel/Margin/VBox/CreditsText
+@onready var _close_credits_button: Button = $CreditsLayer/CreditsCenter/CreditsPanel/Margin/VBox/CloseCreditsButton
 
 @onready var _settings_window: Window = $SettingsUILayer/SettingsWindow
 @onready var _leaderboard_layer: CanvasLayer = $LeaderboardLayer
@@ -54,11 +58,15 @@ func _ready() -> void:
 	_set_auth_open(false)
 	_set_profile_open(false)
 	_leaderboard_layer.visible = false
+	_credits_layer.visible = false
 	_set_mode_pick_open(false)
 	_style_leaderboard_panel()
 	_style_mode_pick_panel()
 	_leaderboard_backdrop.gui_input.connect(_on_leaderboard_backdrop_gui_input)
 	_mode_pick_backdrop.gui_input.connect(_on_mode_pick_backdrop_gui_input)
+	_credits_button.pressed.connect(_on_credits_button_pressed)
+	_credits_backdrop.gui_input.connect(_on_credits_backdrop_gui_input)
+	_close_credits_button.pressed.connect(_on_close_credits_pressed)
 	_refresh_user_line()
 
 	Backend.login_succeeded.connect(_on_login_succeeded)
@@ -83,7 +91,7 @@ func _ready() -> void:
 	var tw := create_tween().set_loops().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	tw.tween_property(_title_label, "modulate", Color(1.0, 0.95, 0.65), 1.25)
 	tw.tween_property(_title_label, "modulate", Color(1.0, 1.0, 1.0), 1.25)
-	_version_label.text = "Build: %s" % str(BuildInfo.VERSION)
+	_version_label.text = str(BuildInfo.VERSION)
 	_credits_text.text = "Credits\nNathan - Software Engineer\nMujtaba - Game Designer\nMykola - Database Engineer\nChristian - Requirements Analyst\nRodney - Test Engineer\nYassin - Project Manager\n\nMusic credits: Undertale - Toby Fox"
 
 	Music.play_menu()
@@ -190,6 +198,16 @@ func _style_main_buttons() -> void:
 		b.add_theme_stylebox_override("focus", n.duplicate())
 		b.add_theme_stylebox_override("disabled", n.duplicate())
 		b.add_theme_color_override("font_color", Color(0.98, 0.96, 0.94, 1.0))
+	var cn := _make_menu_button_stylebox(Color(0.19, 0.15, 0.26, 1.0))
+	var ch := _make_menu_button_stylebox(Color(0.28, 0.22, 0.38, 1.0))
+	var cp := _make_menu_button_stylebox(Color(0.14, 0.11, 0.2, 1.0))
+	_credits_button.add_theme_stylebox_override("normal", cn)
+	_credits_button.add_theme_stylebox_override("hover", ch)
+	_credits_button.add_theme_stylebox_override("pressed", cp)
+	_credits_button.add_theme_stylebox_override("focus", cn.duplicate())
+	_credits_button.add_theme_stylebox_override("disabled", cn.duplicate())
+	_credits_button.add_theme_color_override("font_color", Color(0.98, 0.96, 0.94, 1.0))
+	_credits_button.add_theme_font_size_override("font_size", 9)
 
 
 func _add_menu_sparkles() -> void:
@@ -398,6 +416,19 @@ func _on_mode_pick_back_pressed() -> void:
 func _on_mode_pick_backdrop_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		_set_mode_pick_open(false)
+
+
+func _on_credits_button_pressed() -> void:
+	_credits_layer.visible = true
+
+
+func _on_credits_backdrop_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		_on_close_credits_pressed()
+
+
+func _on_close_credits_pressed() -> void:
+	_credits_layer.visible = false
 
 
 func _on_leaderboard_backdrop_gui_input(event: InputEvent) -> void:

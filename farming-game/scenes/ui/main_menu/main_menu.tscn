@@ -172,15 +172,29 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -180.0
+offset_left = -220.0
 offset_top = -26.0
-offset_right = -12.0
+offset_right = -28.0
 offset_bottom = -10.0
 theme_override_font_sizes/font_size = 8
-text = "Build: dev-local"
+text = "V1.1.2"
 horizontal_alignment = 2
 
+[node name="CreditsButton" type="Button" parent="FooterLayer"]
+custom_minimum_size = Vector2(104, 28)
+layout_mode = 0
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -40.0
+offset_right = 128.0
+offset_bottom = -12.0
+text = "Credits"
+
 [node name="CreditsPanel" type="PanelContainer" parent="FooterLayer"]
+visible = false
 layout_mode = 0
 anchor_left = 0.0
 anchor_top = 1.0
@@ -441,7 +455,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.55)
+color = Color(0, 0, 0, 0.85)
 
 [node name="LeaderboardCenter" type="CenterContainer" parent="LeaderboardLayer" unique_id=1577395143]
 anchors_preset = 15
@@ -508,6 +522,58 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="BackLeaderboardButton" type="Button" parent="LeaderboardLayer/LeaderboardCenter/LeaderboardPanel/Margin/VBox" unique_id=1552245743]
+layout_mode = 2
+text = "Back"
+
+[node name="CreditsLayer" type="CanvasLayer" parent="." unique_id=1771325042]
+layer = 16
+visible = false
+
+[node name="CreditsBackdrop" type="ColorRect" parent="CreditsLayer" unique_id=1771325043]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.85)
+
+[node name="CreditsCenter" type="CenterContainer" parent="CreditsLayer" unique_id=1771325044]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="CreditsPanel" type="PanelContainer" parent="CreditsLayer/CreditsCenter" unique_id=1771325045]
+custom_minimum_size = Vector2(540, 0)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="CreditsLayer/CreditsCenter/CreditsPanel" unique_id=1771325046]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="VBox" type="VBoxContainer" parent="CreditsLayer/CreditsCenter/CreditsPanel/Margin" unique_id=1771325047]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="CreditsTitle" type="Label" parent="CreditsLayer/CreditsCenter/CreditsPanel/Margin/VBox" unique_id=1771325048]
+layout_mode = 2
+theme_override_constants/outline_size = 4
+text = "Credits"
+horizontal_alignment = 1
+
+[node name="CreditsText" type="Label" parent="CreditsLayer/CreditsCenter/CreditsPanel/Margin/VBox" unique_id=1771325049]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "Credits"
+autowrap_mode = 2
+
+[node name="CloseCreditsButton" type="Button" parent="CreditsLayer/CreditsCenter/CreditsPanel/Margin/VBox" unique_id=1771325050]
+custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
 text = "Back"
 
