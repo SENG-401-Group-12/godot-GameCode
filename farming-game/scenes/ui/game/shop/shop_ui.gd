@@ -44,8 +44,8 @@ func close_shop():
 	for child in card_container.get_children():
 		child.queue_free()
 	hide()
-	Music.exit_shop()
 	get_tree().paused = false
+	Music.exit_shop()
 	shop.set_opened(false)
 	_set_hud_hidden_for_shop(false)
 

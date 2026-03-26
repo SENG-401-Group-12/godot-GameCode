@@ -126,7 +126,15 @@ func enter_shop() -> void:
 	if stream == null:
 		push_warning("Music: no shop BGM under %s (expected harvest-for-all-shop-music or shop.*)." % BGM_DIR)
 		return
-	_crossfade_to("shop", stream)
+	# Shop immediately pauses the tree; use an immediate switch so paused tweens can't stall this transition on web.
+	_set_bgm_loop(stream)
+	_apply_bgm_pitch_for_key("shop")
+	_bgm.stream = stream
+	_bgm.volume_db = _peak_db()
+	_bgm.stream_paused = false
+	_bgm_paused_for_stinger = false
+	_bgm.play()
+	_current_bgm_key = "shop"
 
 
 func exit_shop() -> void:
