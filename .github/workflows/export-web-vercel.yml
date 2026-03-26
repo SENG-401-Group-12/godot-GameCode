@@ -1,0 +1,73 @@
+# Exports the Godot Web preset and deploys farming-game/builds/web to Vercel.
+#
+# Setup (GitHub → Settings → Secrets and variables → Actions):
+#   VERCEL_TOKEN          — https://vercel.com/account/tokens
+#   VERCEL_ORG_ID         — from .vercel/project.json after `vercel link`, or Vercel dashboard
+#   VERCEL_PROJECT_ID     — same
+# Optional (so the WASM build includes Supabase config; anon key is public with RLS):
+#   SUPABASE_URL
+#   SUPABASE_ANON_KEY
+#
+# Vercel project: Root Directory = farming-game/builds/web (or leave empty if this repo only contains the game).
+# You can disable automatic Vercel Git deploys and rely on this workflow only, to avoid serving stale committed binaries.
+
+name: Export Web → Vercel
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "farming-game/**"
+      - ".github/workflows/export-web-vercel.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: export-web-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: "4.6"
+
+jobs:
+  export-and-deploy:
+    name: Godot Web export + Vercel
+    runs-on: ubuntu-24.04
+    container:
+      image: barichello/godot-ci:4.6
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Export templates (godot-ci image)
+        run: |
+          mkdir -p ~/.local/share/godot/export_templates/
+          mv "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" \
+            ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+
+      - name: Optional Supabase .env for web export
+        shell: bash
+        run: |
+          if [ -z "${URL:-}" ] || [ -z "${KEY:-}" ]; then
+            echo "SUPABASE_URL / SUPABASE_ANON_KEY not set — export runs without res://.env (auth on web may be broken)."
+            exit 0
+          fi
+          printf 'SUPABASE_URL=%s\nSUPABASE_ANON_KEY=%s\n' "$URL" "$KEY" > farming-game/.env
+        env:
+          URL: ${{ secrets.SUPABASE_URL }}
+          KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+      - name: Export Web (preset name must match export_presets.cfg)
+        run: |
+          cd farming-game
+          mkdir -p builds/web
+          godot --headless --verbose --export-release "Web" "builds/web/HarvestForAll.html"
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: farming-game/builds/web
+          vercel-args: "--prod"
