@@ -237,9 +237,15 @@ func _start_next_wave() -> void:
 	current_wave += 1
 	wave_fed_count = 0
 	wave_missed_count = 0
-	var cust_lo := clampi(2 + (current_wave - 1) / 3, 2, 4)
-	var cust_hi := clampi(3 + (current_wave - 1) / 2, cust_lo, 6)
-	wave_customer_count = randi_range(cust_lo, cust_hi)
+	#var cust_lo := clampi(2 + (current_wave - 1) / 3, 2, 4)
+	#var cust_hi := clampi(3 + (current_wave - 1) / 2, cust_lo, 6)
+	#wave_customer_count = randi_range(cust_lo, cust_hi)
+	
+	if current_wave<=13:
+		wave_customer_count = roundi(0.55 * float(current_wave) + 1.0)
+	else:
+		wave_customer_count = roundi(0.4 * float(current_wave) + 3.0)
+	
 	allowed_misses = clampi(wave_customer_count / 3, 0, maxi(0, wave_customer_count - 1))
 	if current_wave == 1:
 		run_start_msec = Time.get_ticks_msec()
