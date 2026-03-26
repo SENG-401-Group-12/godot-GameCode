@@ -280,7 +280,6 @@ func _check_wave_complete() -> void:
 		_finalize_victory()
 		_wave_advance_in_progress = false
 		return
-	Music.play_wave_win_sting()
 	var wave_countdown := time_between_waves
 	game_ui._show_message("Wave complete! Next wave in %ds." % [wave_countdown], 5.0)
 	for _i in range(wave_countdown):
@@ -333,7 +332,10 @@ func _finalize_victory() -> void:
 		status = "Saving score to leaderboard..."
 		Backend.submit_run(score, duration_ms, waves_cleared, total_fed_count, total_missed_count, _endless_run)
 	else:
-		status = "Sign in from the main menu to upload scores."
+		status = "This run is saved on your device. Sign in from the main menu and it will upload automatically."
+		Backend.save_pending_run_if_guest(
+			score, duration_ms, waves_cleared, total_fed_count, total_missed_count, _endless_run
+		)
 	game_ui.show_game_over(body, status)
 
 
@@ -351,7 +353,10 @@ func _finalize_loss() -> void:
 		status = "Saving score to leaderboard..."
 		Backend.submit_run(score, duration_ms, waves_cleared, total_fed_count, total_missed_count, _endless_run)
 	else:
-		status = "Sign in from the main menu to upload scores."
+		status = "This run is saved on your device. Sign in from the main menu and it will upload automatically."
+		Backend.save_pending_run_if_guest(
+			score, duration_ms, waves_cleared, total_fed_count, total_missed_count, _endless_run
+		)
 	game_ui.show_game_over(body, status)
 
 

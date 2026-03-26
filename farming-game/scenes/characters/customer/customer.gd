@@ -28,6 +28,7 @@ var is_resolved := false
 var _in_urgent_band := false
 
 func _ready() -> void:
+	add_to_group(&"customers_with_order_timer")
 	requests = []
 	interaction_area.interact = Callable(self, "_on_interact")
 	choose_random_sprite()
@@ -103,6 +104,11 @@ func configure_for_wave(wave_number: int, new_time_limit: float, request_count: 
 	requests.clear()
 	generate_random_requests(wave_number)
 	_setup_customer()
+
+## Music.reset_wave_urgency() clears the global counter; clear local flag so wave-2+ can register urgency again.
+func on_wave_reset_clear_urgency_flag() -> void:
+	_in_urgent_band = false
+
 
 func choose_random_sprite() -> void:
 	if randi() % 2 == 0:

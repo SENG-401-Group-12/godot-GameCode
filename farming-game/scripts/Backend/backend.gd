@@ -34,6 +34,10 @@ var current_email: String = ""
 var current_display_name: String = ""
 var guest_mode := true
 
+## Last finished run as guest: uploaded automatically after sign-in (see try_submit_pending_run_after_auth).
+const PENDING_RUN_SAVE_PATH := "user://pending_guest_run.json"
+var _pending_run_upload_in_progress := false
+
 
 func _init() -> void:
 	_load_supabase_config()
@@ -114,6 +118,67 @@ func logout() -> void:
 	continue_as_guest()
 
 
+func save_pending_run_if_guest(
+	score_total: int,
+	duration_ms: int,
+	waves_completed: int,
+	total_fed: int,
+	total_missed: int,
+	is_endless_mode: bool
+) -> void:
+	if is_logged_in():
+		return
+	var payload := {
+		"score_total": score_total,
+		"duration_ms": duration_ms,
+		"waves_completed": waves_completed,
+		"total_fed": total_fed,
+		"total_missed": total_missed,
+		"is_endless_mode": is_endless_mode,
+	}
+	var f := FileAccess.open(PENDING_RUN_SAVE_PATH, FileAccess.WRITE)
+	if f == null:
+		push_warning("Backend: could not write pending guest run file.")
+		return
+	f.store_string(JSON.stringify(payload))
+	f.close()
+
+
+func _erase_pending_run_file() -> void:
+	if not FileAccess.file_exists(PENDING_RUN_SAVE_PATH):
+		return
+	var abs_path := ProjectSettings.globalize_path(PENDING_RUN_SAVE_PATH)
+	DirAccess.remove_absolute(abs_path)
+
+
+## Call after login or signup when a session exists so a guest run can be uploaded retroactively.
+func try_submit_pending_run_after_auth() -> void:
+	if not is_logged_in():
+		return
+	if _pending_run_upload_in_progress:
+		return
+	if not FileAccess.file_exists(PENDING_RUN_SAVE_PATH):
+		return
+	var f := FileAccess.open(PENDING_RUN_SAVE_PATH, FileAccess.READ)
+	if f == null:
+		return
+	var text := f.get_as_text()
+	f.close()
+	var parsed = JSON.parse_string(text)
+	if typeof(parsed) != TYPE_DICTIONARY:
+		_erase_pending_run_file()
+		return
+	var d: Dictionary = parsed
+	var score := int(d.get("score_total", 0))
+	var dur := int(d.get("duration_ms", 0))
+	var waves := int(d.get("waves_completed", 0))
+	var fed := int(d.get("total_fed", 0))
+	var missed := int(d.get("total_missed", 0))
+	var endless := bool(d.get("is_endless_mode", false))
+	_pending_run_upload_in_progress = true
+	submit_run(score, dur, waves, fed, missed, endless)
+
+
 func signup(email: String, password: String) -> void:
 	var http := HTTPRequest.new()
 	add_child(http)
@@ -143,6 +208,8 @@ func signup(email: String, password: String) -> void:
 					current_email = str(user.get("email", ""))
 					guest_mode = false
 
+			if is_logged_in():
+				call_deferred(&"try_submit_pending_run_after_auth")
 			signup_succeeded.emit("Signup successful. Check email confirmation if required.")
 		else:
 			var msg := "Signup failed."
@@ -188,6 +255,7 @@ func login(email: String, password: String) -> void:
 					current_email = str(user.get("email", ""))
 					guest_mode = false
 					login_succeeded.emit(current_user_id)
+					call_deferred(&"try_submit_pending_run_after_auth")
 				else:
 					login_failed.emit("Login succeeded, but no user data was returned.")
 			else:
@@ -344,10 +412,15 @@ func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_
 		var data = JSON.parse_string(text)
 
 		if response_code >= 200 and response_code < 300:
+			if _pending_run_upload_in_progress:
+				_pending_run_upload_in_progress = false
+				_erase_pending_run_file()
 			run_submitted.emit(data)
 			if is_logged_in():
 				get_personal_best(is_endless_mode)
 		else:
+			if _pending_run_upload_in_progress:
+				_pending_run_upload_in_progress = false
 			var err := "Could not save score."
 			if typeof(data) == TYPE_DICTIONARY:
 				if data.has("message"):

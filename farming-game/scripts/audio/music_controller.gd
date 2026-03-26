@@ -3,7 +3,7 @@ extends Node
 ## Loads optional audio from res://assets/audio/bgm/. Each role tries harvest-for-all-* names first, then short aliases.
 ## Menu intro plays at MENU_PITCH_SCALE (1.5 = faster, loop still matches file end).
 ## Output level follows GameSettings (master × music), default ~75% music × 100% master.
-## BGM and one-shot stingers never overlap: wave jingles pause BGM until the sting ends; run end stops BGM before the sting.
+## BGM and one-shot stingers never overlap for run end; no per-wave sting (BGM stays continuous between waves).
 
 const BGM_DIR := "res://assets/audio/bgm/"
 const MENU_PITCH_SCALE := 1.5
@@ -17,8 +17,6 @@ func _bases_for_role(role: String) -> PackedStringArray:
 			return PackedStringArray(["harvest-for-all-game-loop", "gameplay"])
 		"tension":
 			return PackedStringArray(["harvest-for-all-tension", "tension"])
-		"wave_win":
-			return PackedStringArray(["harvest-for-all-round-win", "wave_win"])
 		"run_loss":
 			return PackedStringArray(["harvest-for-all-round-loss", "run_loss"])
 		"max_win":
@@ -28,6 +26,10 @@ func _bases_for_role(role: String) -> PackedStringArray:
 
 var _bgm: AudioStreamPlayer
 var _stinger: AudioStreamPlayer
+## Single cached instances for gameplay/tension so crossfade "already playing" checks stay reliable
+## (repeated load() can return unequal instances or empty resource_path on some platforms).
+var _stream_gameplay: AudioStream
+var _stream_tension: AudioStream
 var _urgent_count := 0
 var _context := "menu"
 var _current_bgm_key := ""
@@ -55,6 +57,18 @@ func _ready() -> void:
 	GameSettings.settings_changed.connect(_on_game_settings_changed)
 
 
+func _streams_same_resource(a: AudioStream, b: AudioStream) -> bool:
+	if a == null or b == null:
+		return a == b
+	if a == b:
+		return true
+	var pa := String(a.resource_path)
+	var pb := String(b.resource_path)
+	if not pa.is_empty() and not pb.is_empty():
+		return pa == pb
+	return false
+
+
 func _peak_db() -> float:
 	return GameSettings.get_music_volume_db()
 
@@ -76,6 +90,8 @@ func _stop_stingers() -> void:
 
 func play_menu() -> void:
 	_stop_stingers()
+	_stream_gameplay = null
+	_stream_tension = null
 	_context = "menu"
 	_urgent_count = 0
 	_kill_fade()
@@ -104,6 +120,15 @@ func register_customer_urgency() -> void:
 	# Always sync BGM to urgency count. Previously we only switched on 0→1; a leaked count > 0
 	# from an edge case meant later waves never hit == 1 again, so tension never returned.
 	_play_gameplay_bgm(_urgent_count > 0)
+	if _urgent_count > 0:
+		# If crossfade was blocked (e.g. wave sting) or state was mid-transition, retry next frame.
+		call_deferred("_deferred_reassert_urgency_bgm")
+
+
+func _deferred_reassert_urgency_bgm() -> void:
+	if _context != "game" or _urgent_count <= 0:
+		return
+	_play_gameplay_bgm(true)
 
 
 func unregister_customer_urgency() -> void:
@@ -119,10 +144,7 @@ func reset_wave_urgency() -> void:
 		return
 	_urgent_count = 0
 	_play_gameplay_bgm(false)
-
-
-func play_wave_win_sting() -> void:
-	_play_stinger_one_shot("wave_win", true)
+	_reset_customer_urgency_flags_after_wave()
 
 
 func play_max_win_sting() -> void:
@@ -131,6 +153,9 @@ func play_max_win_sting() -> void:
 	_current_bgm_key = ""
 	_bgm.stream_paused = false
 	_bgm_paused_for_stinger = false
+	# Stop customers from calling register/reassert while run is over (was restarting BGM after loss sting).
+	_context = "ended"
+	_urgent_count = 0
 	_play_stinger_one_shot("max_win", false)
 
 
@@ -140,7 +165,18 @@ func play_run_loss_sting() -> void:
 	_current_bgm_key = ""
 	_bgm.stream_paused = false
 	_bgm_paused_for_stinger = false
+	_context = "ended"
+	_urgent_count = 0
 	_play_stinger_one_shot("run_loss", false)
+
+
+func _reset_customer_urgency_flags_after_wave() -> void:
+	var tree := get_tree()
+	if tree == null:
+		return
+	for n in tree.get_nodes_in_group(&"customers_with_order_timer"):
+		if n.has_method(&"on_wave_reset_clear_urgency_flag"):
+			n.on_wave_reset_clear_urgency_flag()
 
 
 func _kill_fade() -> void:
@@ -149,12 +185,26 @@ func _kill_fade() -> void:
 	_fade_tween = null
 
 
+func _cached_stream_for_role(role: String) -> AudioStream:
+	match role:
+		"gameplay":
+			if _stream_gameplay == null:
+				_stream_gameplay = _first_for_role("gameplay")
+			return _stream_gameplay
+		"tension":
+			if _stream_tension == null:
+				_stream_tension = _first_for_role("tension")
+			return _stream_tension
+		_:
+			return _first_for_role(role)
+
+
 func _play_gameplay_bgm(tension: bool) -> void:
 	var key := "tension" if tension else "gameplay"
-	var stream: AudioStream = _first_for_role(key)
+	var stream: AudioStream = _cached_stream_for_role(key)
 	if stream == null and tension:
 		key = "gameplay"
-		stream = _first_for_role("gameplay")
+		stream = _cached_stream_for_role("gameplay")
 	if stream == null:
 		push_warning("Music: no gameplay BGM under %s (expected harvest-for-all-game-loop or gameplay.*)." % BGM_DIR)
 		_bgm.stop()
@@ -206,8 +256,8 @@ func _crossfade_to(key: String, stream: AudioStream) -> void:
 	if _stinger.playing and _resume_bgm_after_stinger:
 		return
 	# Key can be stale if a crossfade was killed (e.g. wave-win sting) before the tween callback ran.
-	# Only skip when the player is actually outputting this stream, not just when keys match.
-	if key == _current_bgm_key and _bgm.playing and _bgm.stream == stream:
+	# Match by resource_path too: repeated load() can yield a different instance than _bgm.stream.
+	if key == _current_bgm_key and _bgm.playing and _streams_same_resource(_bgm.stream, stream):
 		return
 	_set_bgm_loop(stream)
 	_apply_bgm_pitch_for_key(key)

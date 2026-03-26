@@ -69,6 +69,8 @@ func _ready() -> void:
 	Backend.leaderboard_failed.connect(_on_leaderboard_failed)
 	Backend.leaderboard_endless_received.connect(_on_leaderboard_endless_received)
 	Backend.leaderboard_endless_failed.connect(_on_leaderboard_endless_failed)
+	Backend.run_submitted.connect(_on_menu_run_submitted_feedback)
+	Backend.run_submit_failed.connect(_on_menu_run_submit_failed)
 
 	_add_menu_sparkles()
 	_style_main_buttons()
@@ -331,6 +333,31 @@ func _refresh_user_line() -> void:
 	else:
 		_user_line.text = "Playing as guest (scores are local only)"
 		_account_button.text = "Account"
+
+
+func _on_menu_run_submitted_feedback(_data: Variant) -> void:
+	if get_tree().current_scene != self:
+		return
+	if not is_instance_valid(_user_line):
+		return
+	_user_line.text = "Your last run was saved to the leaderboard."
+	await get_tree().create_timer(4.0).timeout
+	if is_instance_valid(_user_line):
+		_refresh_user_line()
+
+
+func _on_menu_run_submit_failed(_reason: String) -> void:
+	if get_tree().current_scene != self:
+		return
+	if not is_instance_valid(_user_line):
+		return
+	var short := _reason.strip_edges()
+	if short.length() > 90:
+		short = short.substr(0, 87) + "..."
+	_user_line.text = "Could not upload saved run: %s" % short
+	await get_tree().create_timer(6.0).timeout
+	if is_instance_valid(_user_line):
+		_refresh_user_line()
 
 
 func _set_mode_pick_open(open: bool) -> void:
