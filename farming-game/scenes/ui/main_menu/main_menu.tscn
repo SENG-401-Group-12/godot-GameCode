@@ -21,7 +21,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.22, 0.1, 0.32, 1)
+color = Color(0, 0, 0, 1)
 
 [node name="MenuBackground" type="TextureRect" parent="." unique_id=78367587]
 layout_mode = 1
