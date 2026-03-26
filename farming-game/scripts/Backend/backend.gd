@@ -51,10 +51,15 @@ func _load_supabase_config() -> void:
 	var url := OS.get_environment("SUPABASE_URL").strip_edges()
 	var key := OS.get_environment("SUPABASE_ANON_KEY").strip_edges()
 	var from_file := _parse_dotenv_file("res://.env")
+	var from_public_cfg := _parse_dotenv_file("res://supabase_web.cfg")
 	if url.is_empty():
 		url = str(from_file.get("SUPABASE_URL", "")).strip_edges()
+	if url.is_empty():
+		url = str(from_public_cfg.get("SUPABASE_URL", "")).strip_edges()
 	if key.is_empty():
 		key = str(from_file.get("SUPABASE_ANON_KEY", "")).strip_edges()
+	if key.is_empty():
+		key = str(from_public_cfg.get("SUPABASE_ANON_KEY", "")).strip_edges()
 	supabase_url = url
 	supabase_anon_key = key
 	if supabase_url.is_empty() or supabase_anon_key.is_empty():
@@ -99,6 +104,10 @@ func _supabase_headers(extra: PackedStringArray = PackedStringArray()) -> Packed
 	for s in extra:
 		h.append(s)
 	return h
+
+
+func _has_supabase_config() -> bool:
+	return not supabase_url.is_empty() and not supabase_anon_key.is_empty()
 
 
 func continue_as_guest() -> void:
@@ -180,6 +189,9 @@ func try_submit_pending_run_after_auth() -> void:
 
 
 func signup(email: String, password: String) -> void:
+	if not _has_supabase_config():
+		signup_failed.emit("Backend config missing on this build. Please contact support.")
+		return
 	var http := HTTPRequest.new()
 	add_child(http)
 
@@ -225,9 +237,15 @@ func signup(email: String, password: String) -> void:
 		http.queue_free()
 	)
 
-	http.request(url, headers, HTTPClient.METHOD_POST, body)
+	var req_err := http.request(url, headers, HTTPClient.METHOD_POST, body)
+	if req_err != OK:
+		signup_failed.emit("Could not start signup request (%s)." % error_string(req_err))
+		http.queue_free()
 
 func login(email: String, password: String) -> void:
+	if not _has_supabase_config():
+		login_failed.emit("Backend config missing on this build. Please contact support.")
+		return
 	var http := HTTPRequest.new()
 	add_child(http)
 
@@ -274,7 +292,10 @@ func login(email: String, password: String) -> void:
 		http.queue_free()
 	)
 
-	http.request(url, headers, HTTPClient.METHOD_POST, body)
+	var req_err := http.request(url, headers, HTTPClient.METHOD_POST, body)
+	if req_err != OK:
+		login_failed.emit("Could not start login request (%s)." % error_string(req_err))
+		http.queue_free()
 	
 func create_profile(display_name: String) -> void:
 	if !is_logged_in():
@@ -348,6 +369,9 @@ func get_my_profile() -> void:
 	if !is_logged_in():
 		profile_lookup_failed.emit("Must be logged in.")
 		return
+	if not _has_supabase_config():
+		profile_lookup_failed.emit("Backend config missing on this build.")
+		return
 
 	var http := HTTPRequest.new()
 	add_child(http)
@@ -380,7 +404,10 @@ func get_my_profile() -> void:
 		http.queue_free()
 	)
 
-	http.request(url, headers, HTTPClient.METHOD_GET)
+	var req_err := http.request(url, headers, HTTPClient.METHOD_GET)
+	if req_err != OK:
+		profile_lookup_failed.emit("Could not start profile request (%s)." % error_string(req_err))
+		http.queue_free()
 
 func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_fed: int, total_missed: int, is_endless_mode: bool) -> void:
 	if !is_logged_in():
@@ -438,6 +465,9 @@ func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_
 	http.request(url, headers, HTTPClient.METHOD_POST, body)
 
 func get_top_10() -> void:
+	if not _has_supabase_config():
+		leaderboard_failed.emit("Backend config missing on this build.")
+		return
 	var http := HTTPRequest.new()
 	add_child(http)
 
@@ -471,10 +501,16 @@ func get_top_10() -> void:
 		http.queue_free()
 	)
 
-	http.request(url, headers, HTTPClient.METHOD_POST, body)
+	var req_err := http.request(url, headers, HTTPClient.METHOD_POST, body)
+	if req_err != OK:
+		leaderboard_failed.emit("Could not start leaderboard request (%s)." % error_string(req_err))
+		http.queue_free()
 
 
 func get_top_10_endless() -> void:
+	if not _has_supabase_config():
+		leaderboard_endless_failed.emit("Backend config missing on this build.")
+		return
 	var http := HTTPRequest.new()
 	add_child(http)
 
@@ -514,7 +550,10 @@ func get_top_10_endless() -> void:
 		http.queue_free()
 	)
 
-	http.request(url, headers, HTTPClient.METHOD_POST, body)
+	var req_err := http.request(url, headers, HTTPClient.METHOD_POST, body)
+	if req_err != OK:
+		leaderboard_endless_failed.emit("Could not start endless request (%s)." % error_string(req_err))
+		http.queue_free()
 
 func get_personal_best(is_endless_mode: bool) -> void:
 	if !is_logged_in():

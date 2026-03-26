@@ -50,14 +50,14 @@ jobs:
           mv "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" \
             ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
 
-      - name: Optional Supabase .env for web export
+      - name: Optional Supabase config for web export
         shell: bash
         run: |
           if [ -z "${URL:-}" ] || [ -z "${KEY:-}" ]; then
-            echo "SUPABASE_URL / SUPABASE_ANON_KEY not set — export runs without res://.env (auth on web may be broken)."
+            echo "SUPABASE_URL / SUPABASE_ANON_KEY not set — export runs without web backend config."
             exit 0
           fi
-          printf 'SUPABASE_URL=%s\nSUPABASE_ANON_KEY=%s\n' "$URL" "$KEY" > farming-game/.env
+          printf 'SUPABASE_URL=%s\nSUPABASE_ANON_KEY=%s\n' "$URL" "$KEY" > farming-game/supabase_web.cfg
         env:
           URL: ${{ secrets.SUPABASE_URL }}
           KEY: ${{ secrets.SUPABASE_ANON_KEY }}

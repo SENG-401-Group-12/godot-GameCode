@@ -77,6 +77,14 @@ func apply_display_settings() -> void:
 	var w := get_window()
 	if w == null:
 		return
+	# Web canvas should track browser viewport; forcing desktop 1280x720 here causes
+	# input/canvas scale mismatch (quarter-screen clicks) on some hosts.
+	if OS.has_feature("web"):
+		if fullscreen:
+			w.mode = Window.MODE_FULLSCREEN
+		else:
+			w.mode = Window.MODE_MAXIMIZED
+		return
 	if fullscreen:
 		w.mode = Window.MODE_EXCLUSIVE_FULLSCREEN
 	else:
