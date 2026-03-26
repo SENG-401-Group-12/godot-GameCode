@@ -1,6 +1,7 @@
 # Local secrets for Godot / Supabase (see farming-game/.env.example)
 farming-game/.env
 
-# Cursor IDE — local only (each dev copies from godot-mcp.cursor.example.json if needed)
+# Cursor IDE — local only (MCP config under .cursor/; optional local template not tracked)
 .cursor/
+godot-mcp.cursor.example.json
 .DS_Store
