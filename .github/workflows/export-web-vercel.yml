@@ -59,12 +59,12 @@ jobs:
           fi
           printf 'SUPABASE_URL=%s\nSUPABASE_ANON_KEY=%s\n' "$URL" "$KEY" > farming-game/supabase_web.cfg
           cat > farming-game/scripts/Backend/backend_web_config.gd <<EOF
-extends RefCounted
+          extends RefCounted
 
-# CI-generated for web export.
-const SUPABASE_URL := "${URL}"
-const SUPABASE_ANON_KEY := "${KEY}"
-EOF
+          # CI-generated for web export.
+          const SUPABASE_URL := "${URL}"
+          const SUPABASE_ANON_KEY := "${KEY}"
+          EOF
           echo "Generated farming-game/supabase_web.cfg"
         env:
           URL: ${{ secrets.SUPABASE_URL }}
