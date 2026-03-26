@@ -66,6 +66,11 @@ jobs:
       - name: Mark workspace as safe for Git
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
+      - name: Setup Node.js for Vercel CLI
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
         with:
