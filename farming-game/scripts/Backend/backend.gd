@@ -106,8 +106,10 @@ func _supabase_headers(extra: PackedStringArray = PackedStringArray()) -> Packed
 	var h := PackedStringArray([
 		"apikey: " + supabase_anon_key,
 		"Content-Type: application/json",
-		"Accept-Encoding: identity",
 	])
+	# Browsers block custom Accept-Encoding; sending it on Web causes request failures.
+	if not OS.has_feature("web"):
+		h.append("Accept-Encoding: identity")
 	for s in extra:
 		h.append(s)
 	return h
