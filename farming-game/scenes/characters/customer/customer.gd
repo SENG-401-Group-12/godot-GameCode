@@ -100,9 +100,20 @@ func configure_for_wave(wave_number: int, new_time_limit: float, request_count: 
 	max_request = max(min_requests, request_count)
 	min_amount = max(1, amount_min)
 	max_amount = max(min_amount, amount_max)
-	time_limit = maxf(10.0, new_time_limit)
+	#time_limit = maxf(10.0, new_time_limit)
 	requests.clear()
 	generate_random_requests(wave_number)
+	var has_slow_crop = false
+	for req in requests:
+		if req.item_name == "Potato" or req.item_name == "Eggplant":
+			has_slow_crop = true
+	
+	if not has_slow_crop and wave_number < 6:
+		time_limit = 15.0
+	else:
+		time_limit = maxf(10.0, new_time_limit)
+		
+	
 	_setup_customer()
 
 ## Music.reset_wave_urgency() clears the global counter; clear local flag so wave-2+ can register urgency again.
@@ -217,7 +228,7 @@ func show_not_enough_label() -> void:
 func generate_random_requests(wave_number: int) -> void:
 	var crop_list = Globals.game_crops.duplicate()
 	crop_list.shuffle()
-	var request_count = min(randi_range(min_requests, max_request), crop_list.size())
+	var request_count = min(randi_range(1, 2), crop_list.size())
 
 	for i in range(request_count):
 		var request = ItemRequest.new()
