@@ -246,7 +246,7 @@ func _start_next_wave() -> void:
 	else:
 		wave_customer_count = roundi(0.4 * float(current_wave) + 3.0)
 	
-	allowed_misses = clampi(wave_customer_count / 3, 0, maxi(0, wave_customer_count - 1))
+	allowed_misses = clampi( float(wave_customer_count) / 3.5, 0, maxi(0, wave_customer_count - 1))
 	if current_wave == 1:
 		run_start_msec = Time.get_ticks_msec()
 	var req_hi := mini(3, 1 + (current_wave + 1) / 2)
