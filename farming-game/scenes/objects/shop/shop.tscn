@@ -5,8 +5,8 @@
 [ext_resource type="Script" uid="uid://v0gqfty1t3f7" path="res://scripts/interaction/interaction_area/interaction_area.gd" id="3_pleuv"]
 [ext_resource type="FontFile" uid="uid://7bf452djqkbk" path="res://assets/game/ui/fonts/PixelOperator8.ttf" id="4_w2wlk"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_t4yi1"]
-size = Vector2(40, 40)
+[sub_resource type="CircleShape2D" id="CircleShape2D_w2wlk"]
+radius = 32.0
 
 [node name="Shop" type="Node2D" unique_id=797344515]
 script = ExtResource("1_6sfbp")
@@ -23,7 +23,7 @@ action_name = "OPEN SHOP"
 metadata/_custom_type_script = "uid://v0gqfty1t3f7"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea" unique_id=1157695015]
-shape = SubResource("RectangleShape2D_t4yi1")
+shape = SubResource("CircleShape2D_w2wlk")
 
 [node name="LabelAnchor" type="Node2D" parent="InteractionArea" unique_id=1610577128]
 
