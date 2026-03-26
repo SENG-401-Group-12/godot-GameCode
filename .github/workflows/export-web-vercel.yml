@@ -82,9 +82,8 @@ jobs:
       # PRs get preview deploys; main pushes get production deploys.
       - name: Deploy to Vercel (preview)
         if: github.event_name == 'pull_request'
-        working-directory: farming-game/builds/web
         run: |
-          npx --yes vercel@latest deploy --yes --token "$VERCEL_TOKEN"
+          npx --yes vercel@latest deploy --yes --cwd farming-game/builds/web --token "$VERCEL_TOKEN"
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -92,9 +91,8 @@ jobs:
 
       - name: Deploy to Vercel (production)
         if: github.event_name != 'pull_request'
-        working-directory: farming-game/builds/web
         run: |
-          npx --yes vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN"
+          npx --yes vercel@latest deploy --prod --yes --cwd farming-game/builds/web --token "$VERCEL_TOKEN"
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
