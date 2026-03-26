@@ -156,6 +156,54 @@ theme_override_constants/margin_top = 48
 theme_override_constants/margin_right = 24
 theme_override_constants/margin_bottom = 48
 
+[node name="FooterLayer" type="Control" parent="."]
+z_index = 6
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="VersionLabel" type="Label" parent="FooterLayer"]
+layout_mode = 0
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -180.0
+offset_top = -26.0
+offset_right = -12.0
+offset_bottom = -10.0
+theme_override_font_sizes/font_size = 8
+text = "Build: dev-local"
+horizontal_alignment = 2
+
+[node name="CreditsPanel" type="PanelContainer" parent="FooterLayer"]
+layout_mode = 0
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -178.0
+offset_right = 362.0
+offset_bottom = -12.0
+
+[node name="Margin" type="MarginContainer" parent="FooterLayer/CreditsPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="CreditsText" type="Label" parent="FooterLayer/CreditsPanel/Margin"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 8
+text = "Credits"
+autowrap_mode = 2
+
 [node name="MenuVBox" type="VBoxContainer" parent="ContentMargin" unique_id=33530496]
 layout_mode = 2
 theme_override_constants/separation = 0

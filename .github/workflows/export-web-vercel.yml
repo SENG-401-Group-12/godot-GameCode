@@ -50,6 +50,12 @@ jobs:
           mv "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" \
             ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
 
+      - name: Generate build version metadata
+        shell: bash
+        run: |
+          SHORT_SHA="$(echo "$GITHUB_SHA" | cut -c1-7)"
+          printf 'extends RefCounted\n\n# CI-generated build identifier for UI.\nconst VERSION := "web-%s"\n' "$SHORT_SHA" > farming-game/scripts/build_info.gd
+
       - name: Optional Supabase config for web export
         shell: bash
         run: |

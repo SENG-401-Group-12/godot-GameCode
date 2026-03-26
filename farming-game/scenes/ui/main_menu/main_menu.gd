@@ -5,6 +5,7 @@ const RUN_SETUP_SCENE := "res://scenes/ui/run_setup/run_setup.tscn"
 const GAME_SCENE := "res://scenes/test/test_scene_gameloop.tscn"
 const TUTORIAL_SCENE := "res://scenes/tutorial/tutorial_lesson.tscn"
 const UI_FONT := preload("res://assets/game/ui/fonts/PixelOperator8.ttf")
+const BuildInfo = preload("res://scripts/build_info.gd")
 const MENU_BG_PATHS: PackedStringArray = [
 	"res://assets/game/ui/main_menu_background.jpg",
 	"res://assets/game/ui/main_menu_background.jpeg",
@@ -25,6 +26,8 @@ const MENU_BG_PATHS: PackedStringArray = [
 @onready var _user_line: Label = $ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/UserLine
 @onready var _title_label: Label = $ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/Title
 @onready var _subtitle_label: Label = $ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/Subtitle
+@onready var _version_label: Label = $FooterLayer/VersionLabel
+@onready var _credits_text: Label = $FooterLayer/CreditsPanel/Margin/CreditsText
 
 @onready var _settings_window: Window = $SettingsUILayer/SettingsWindow
 @onready var _leaderboard_layer: CanvasLayer = $LeaderboardLayer
@@ -80,6 +83,8 @@ func _ready() -> void:
 	var tw := create_tween().set_loops().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	tw.tween_property(_title_label, "modulate", Color(1.0, 0.95, 0.65), 1.25)
 	tw.tween_property(_title_label, "modulate", Color(1.0, 1.0, 1.0), 1.25)
+	_version_label.text = "Build: %s" % str(BuildInfo.VERSION)
+	_credits_text.text = "Credits\nNathan - Software Engineer\nMujtaba - Game Designer\nMykola - Database Engineer\nChristian - Requirements Analyst\nRodney - Test Engineer\nYassin - Project Manager\n\nMusic credits: Undertale - Toby Fox"
 
 	Music.play_menu()
 
