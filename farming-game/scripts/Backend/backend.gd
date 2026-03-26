@@ -126,7 +126,49 @@ func _has_supabase_config() -> bool:
 
 
 func _network_error_text(prefix: String, result: int) -> String:
-	return "%s (%s: %d)." % [prefix, error_string(result), result]
+	return "%s (%s: %d)." % [prefix, _http_result_name(result), result]
+
+
+func _http_result_name(result: int) -> String:
+	match result:
+		HTTPRequest.RESULT_SUCCESS:
+			return "SUCCESS"
+		HTTPRequest.RESULT_CHUNKED_BODY_SIZE_MISMATCH:
+			return "CHUNKED_BODY_SIZE_MISMATCH"
+		HTTPRequest.RESULT_CANT_CONNECT:
+			return "CANT_CONNECT"
+		HTTPRequest.RESULT_CANT_RESOLVE:
+			return "CANT_RESOLVE"
+		HTTPRequest.RESULT_CONNECTION_ERROR:
+			return "CONNECTION_ERROR"
+		HTTPRequest.RESULT_TLS_HANDSHAKE_ERROR:
+			return "TLS_HANDSHAKE_ERROR"
+		HTTPRequest.RESULT_NO_RESPONSE:
+			return "NO_RESPONSE"
+		HTTPRequest.RESULT_BODY_SIZE_LIMIT_EXCEEDED:
+			return "BODY_SIZE_LIMIT_EXCEEDED"
+		HTTPRequest.RESULT_BODY_DECOMPRESS_FAILED:
+			return "BODY_DECOMPRESS_FAILED"
+		HTTPRequest.RESULT_REQUEST_FAILED:
+			return "REQUEST_FAILED"
+		HTTPRequest.RESULT_DOWNLOAD_FILE_CANT_OPEN:
+			return "DOWNLOAD_FILE_CANT_OPEN"
+		HTTPRequest.RESULT_DOWNLOAD_FILE_WRITE_ERROR:
+			return "DOWNLOAD_FILE_WRITE_ERROR"
+		HTTPRequest.RESULT_REDIRECT_LIMIT_REACHED:
+			return "REDIRECT_LIMIT_REACHED"
+		HTTPRequest.RESULT_TIMEOUT:
+			return "TIMEOUT"
+		_:
+			return "RESULT_UNKNOWN"
+
+
+func _new_http_request() -> HTTPRequest:
+	var http := HTTPRequest.new()
+	# Avoid body decompression failures seen on some HTML5/Supabase responses.
+	http.accept_gzip = false
+	add_child(http)
+	return http
 
 
 func continue_as_guest() -> void:
@@ -211,8 +253,7 @@ func signup(email: String, password: String) -> void:
 	if not _has_supabase_config():
 		signup_failed.emit("Backend config missing on this build. Please contact support.")
 		return
-	var http := HTTPRequest.new()
-	add_child(http)
+	var http := _new_http_request()
 
 	var url := supabase_url + "/auth/v1/signup"
 	var headers := _supabase_headers()
@@ -265,8 +306,7 @@ func login(email: String, password: String) -> void:
 	if not _has_supabase_config():
 		login_failed.emit("Backend config missing on this build. Please contact support.")
 		return
-	var http := HTTPRequest.new()
-	add_child(http)
+	var http := _new_http_request()
 
 	var url := supabase_url + "/auth/v1/token?grant_type=password"
 	var headers := _supabase_headers()
@@ -321,8 +361,7 @@ func create_profile(display_name: String) -> void:
 		print("User must be logged in to create a profile.")
 		return
 
-	var http := HTTPRequest.new()
-	add_child(http)
+	var http := _new_http_request()
 
 	var url := supabase_url + "/rest/v1/profiles"
 	var headers := _supabase_headers(PackedStringArray([
@@ -356,8 +395,7 @@ func update_profile(display_name: String) -> void:
 		print("User must be logged in to update a profile.")
 		return
 
-	var http := HTTPRequest.new()
-	add_child(http)
+	var http := _new_http_request()
 
 	var url := supabase_url + "/rest/v1/profiles?id=eq." + current_user_id
 	var headers := _supabase_headers(PackedStringArray([
@@ -392,8 +430,7 @@ func get_my_profile() -> void:
 		profile_lookup_failed.emit("Backend config missing on this build.")
 		return
 
-	var http := HTTPRequest.new()
-	add_child(http)
+	var http := _new_http_request()
 
 	var url := supabase_url + "/rest/v1/profiles?id=eq." + current_user_id + "&select=*"
 	var headers := _supabase_headers(PackedStringArray([
@@ -433,8 +470,7 @@ func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_
 		print("Guest users cannot submit runs.")
 		return
 
-	var http := HTTPRequest.new()
-	add_child(http)
+	var http := _new_http_request()
 
 	var url := supabase_url + "/rest/v1/runs"
 	var headers := _supabase_headers(PackedStringArray([
@@ -487,8 +523,7 @@ func get_top_10() -> void:
 	if not _has_supabase_config():
 		leaderboard_failed.emit("Backend config missing on this build.")
 		return
-	var http := HTTPRequest.new()
-	add_child(http)
+	var http := _new_http_request()
 
 	var url := supabase_url + "/rest/v1/rpc/get_top_10_normal"
 	var headers := _supabase_headers(PackedStringArray([
@@ -530,8 +565,7 @@ func get_top_10_endless() -> void:
 	if not _has_supabase_config():
 		leaderboard_endless_failed.emit("Backend config missing on this build.")
 		return
-	var http := HTTPRequest.new()
-	add_child(http)
+	var http := _new_http_request()
 
 	var url := supabase_url + "/rest/v1/rpc/get_top_10_endless"
 	var headers := _supabase_headers(PackedStringArray([
@@ -579,8 +613,7 @@ func get_personal_best(is_endless_mode: bool) -> void:
 		print("Must be logged in to get personal best.")
 		return
 
-	var http := HTTPRequest.new()
-	add_child(http)
+	var http := _new_http_request()
 
 	var url := supabase_url + "/rest/v1/rpc/get_personal_best"
 	var headers := _supabase_headers(PackedStringArray([
