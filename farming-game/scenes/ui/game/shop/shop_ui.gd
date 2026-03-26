@@ -15,6 +15,7 @@ func _ready() -> void:
 
 func open_shop():
 	shop.set_opened(true)
+	Music.enter_shop()
 	_set_hud_hidden_for_shop(true)
 	get_tree().paused = true # pause the game while the shop is open
 	show()
@@ -43,6 +44,7 @@ func close_shop():
 	for child in card_container.get_children():
 		child.queue_free()
 	hide()
+	Music.exit_shop()
 	get_tree().paused = false
 	shop.set_opened(false)
 	_set_hud_hidden_for_shop(false)

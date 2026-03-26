@@ -17,6 +17,8 @@ func _bases_for_role(role: String) -> PackedStringArray:
 			return PackedStringArray(["harvest-for-all-game-loop", "gameplay"])
 		"tension":
 			return PackedStringArray(["harvest-for-all-tension", "tension"])
+		"shop":
+			return PackedStringArray(["harvest-for-all-shop-music", "shop"])
 		"run_loss":
 			return PackedStringArray(["harvest-for-all-round-loss", "run_loss"])
 		"max_win":
@@ -30,6 +32,7 @@ var _stinger: AudioStreamPlayer
 ## (repeated load() can return unequal instances or empty resource_path on some platforms).
 var _stream_gameplay: AudioStream
 var _stream_tension: AudioStream
+var _stream_shop: AudioStream
 var _urgent_count := 0
 var _context := "menu"
 var _current_bgm_key := ""
@@ -111,6 +114,26 @@ func enter_gameplay() -> void:
 	_bgm.volume_db = _peak_db()
 	_bgm.pitch_scale = 1.0
 	_play_gameplay_bgm(false)
+
+
+func enter_shop() -> void:
+	if _context != "game":
+		return
+	_stop_stingers()
+	_context = "shop"
+	_kill_fade()
+	var stream: AudioStream = _cached_stream_for_role("shop")
+	if stream == null:
+		push_warning("Music: no shop BGM under %s (expected harvest-for-all-shop-music or shop.*)." % BGM_DIR)
+		return
+	_crossfade_to("shop", stream)
+
+
+func exit_shop() -> void:
+	if _context != "shop":
+		return
+	_context = "game"
+	_play_gameplay_bgm(_urgent_count > 0)
 
 
 func register_customer_urgency() -> void:
@@ -195,6 +218,10 @@ func _cached_stream_for_role(role: String) -> AudioStream:
 			if _stream_tension == null:
 				_stream_tension = _first_for_role("tension")
 			return _stream_tension
+		"shop":
+			if _stream_shop == null:
+				_stream_shop = _first_for_role("shop")
+			return _stream_shop
 		_:
 			return _first_for_role(role)
 

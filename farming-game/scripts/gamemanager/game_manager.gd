@@ -36,6 +36,11 @@ var _tutorial_waiting_for_exit_click := false
 var _endless_run := false
 
 
+func _max_misses_before_fail() -> int:
+	# Game ends when wave_missed_count > allowed_misses, so displayed cap is allowed + 1.
+	return maxi(0, allowed_misses + 1)
+
+
 func _world() -> Node:
 	return get_parent()
 
@@ -257,7 +262,7 @@ func _start_next_wave() -> void:
 		configs.append(config.duplicate())
 	customer_spawner.queue_customers(configs)
 	_wave_advance_in_progress = false
-	game_ui._update_status(current_wave, wave_fed_count, wave_customer_count, wave_missed_count, allowed_misses, customer_spawner.get_active_customer_count())
+	game_ui._update_status(current_wave, wave_fed_count, wave_customer_count, wave_missed_count, _max_misses_before_fail(), customer_spawner.get_active_customer_count())
 	game_ui._show_message("Wave %d started. %d hungry customers are waiting." % [current_wave, wave_customer_count], 3.0)
 
 
@@ -311,7 +316,7 @@ func _on_customer_expired() -> void:
 
 
 func _refresh_ui_status() -> void:
-	game_ui._update_status(current_wave, wave_fed_count, wave_customer_count, wave_missed_count, allowed_misses, customer_spawner.get_active_customer_count())
+	game_ui._update_status(current_wave, wave_fed_count, wave_customer_count, wave_missed_count, _max_misses_before_fail(), customer_spawner.get_active_customer_count())
 
 
 func _compute_score() -> int:
