@@ -58,6 +58,13 @@ jobs:
             exit 0
           fi
           printf 'SUPABASE_URL=%s\nSUPABASE_ANON_KEY=%s\n' "$URL" "$KEY" > farming-game/supabase_web.cfg
+          cat > farming-game/scripts/Backend/backend_web_config.gd <<EOF
+extends RefCounted
+
+# CI-generated for web export.
+const SUPABASE_URL := "${URL}"
+const SUPABASE_ANON_KEY := "${KEY}"
+EOF
           echo "Generated farming-game/supabase_web.cfg"
         env:
           URL: ${{ secrets.SUPABASE_URL }}
@@ -67,6 +74,7 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           test -s farming-game/supabase_web.cfg || (echo "Missing SUPABASE_URL / SUPABASE_ANON_KEY for production deploy." && exit 1)
+          test -s farming-game/scripts/Backend/backend_web_config.gd || (echo "Missing generated backend_web_config.gd." && exit 1)
 
       - name: Export Web (preset name must match export_presets.cfg)
         run: |

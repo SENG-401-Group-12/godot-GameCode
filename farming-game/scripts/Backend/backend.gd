@@ -1,5 +1,6 @@
 extends Node
 class_name backend
+const BackendWebConfig = preload("res://scripts/Backend/backend_web_config.gd")
 
 signal login_succeeded(user_id: String)
 signal login_failed(message: String)
@@ -52,14 +53,20 @@ func _load_supabase_config() -> void:
 	var key := OS.get_environment("SUPABASE_ANON_KEY").strip_edges()
 	var from_file := _parse_dotenv_file("res://.env")
 	var from_public_cfg := _parse_dotenv_file("res://supabase_web.cfg")
+	var from_embedded_url := str(BackendWebConfig.SUPABASE_URL).strip_edges()
+	var from_embedded_key := str(BackendWebConfig.SUPABASE_ANON_KEY).strip_edges()
 	if url.is_empty():
 		url = str(from_file.get("SUPABASE_URL", "")).strip_edges()
 	if url.is_empty():
 		url = str(from_public_cfg.get("SUPABASE_URL", "")).strip_edges()
+	if url.is_empty():
+		url = from_embedded_url
 	if key.is_empty():
 		key = str(from_file.get("SUPABASE_ANON_KEY", "")).strip_edges()
 	if key.is_empty():
 		key = str(from_public_cfg.get("SUPABASE_ANON_KEY", "")).strip_edges()
+	if key.is_empty():
+		key = from_embedded_key
 	supabase_url = url
 	supabase_anon_key = key
 	if supabase_url.is_empty() or supabase_anon_key.is_empty():
