@@ -1,0 +1,9 @@
+{
+  "rewrites": [{ "source": "/", "destination": "/HarvestForAll.html" }],
+  "headers": [
+    {
+      "source": "/(.*).wasm",
+      "headers": [{ "key": "Content-Type", "value": "application/wasm" }]
+    }
+  ]
+}
