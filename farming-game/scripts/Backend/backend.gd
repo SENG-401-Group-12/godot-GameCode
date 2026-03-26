@@ -472,20 +472,18 @@ func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_
 
 	var http := _new_http_request()
 
-	var url := supabase_url + "/rest/v1/runs"
+	var rpc_name := "submit_run_best_endless" if is_endless_mode else "submit_run_best"
+	var url := supabase_url + "/rest/v1/rpc/" + rpc_name
 	var headers := _supabase_headers(PackedStringArray([
 		"Authorization: Bearer " + access_token,
-		"Prefer: return=representation",
 	]))
 
 	var body_dict := {
-		"user_id": current_user_id,
-		"score_total": score_total,
-		"duration_ms": duration_ms,
-		"waves_completed": waves_completed,
-		"total_fed": total_fed,
-		"total_missed": total_missed,
-		"is_endless_mode": is_endless_mode
+		"p_score_total": score_total,
+		"p_duration_ms": duration_ms,
+		"p_waves_completed": waves_completed,
+		"p_total_fed": total_fed,
+		"p_total_missed": total_missed,
 	}
 	var body := JSON.stringify(body_dict)
 
