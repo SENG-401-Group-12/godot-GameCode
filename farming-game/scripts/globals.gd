@@ -3,7 +3,7 @@ extends Node
 ## F11 toggles exclusive fullscreen. Uses InputMap + _process (PROCESS_MODE_ALWAYS) so it works on the main menu,
 ## during pause, and even when keys would otherwise be treated as unhandled GUI noise.
 
-const player_speed := 125 # movement speed
+const player_speed := 140 # movement speed
 
 
 func _ready() -> void:

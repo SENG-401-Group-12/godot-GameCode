@@ -6,6 +6,6 @@
 [resource]
 script = ExtResource("1_qduqi")
 crop_name = "Strawberry"
-growth_time_per_stage = 2.0
+growth_time_per_stage = 1.5
 row_on_spritesheet = 6
 metadata/_custom_type_script = "uid://bpx40ij8v3u2p"

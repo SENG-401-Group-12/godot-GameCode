@@ -8,7 +8,7 @@ signal customer_expired
 
 @export var slot_spacing := 80.0 # distance between customers
 
-var customer_slots: Array = [null, null, null, null] # null is an empty slot
+var customer_slots: Array = [null, null, null] # null is an empty slot
 var customer_queue: Array = [] # holds config dicts
 
 func queue_customers(configs: Array) -> void:

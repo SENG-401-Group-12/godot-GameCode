@@ -211,7 +211,7 @@ func show_not_enough_label() -> void:
 func generate_random_requests(wave_number: int) -> void:
 	var crop_list = Globals.game_crops.duplicate()
 	crop_list.shuffle()
-	var request_count = min(randi_range(min_requests, max_request), crop_list.size())
+	var request_count = min(randi_range(1, 2), crop_list.size())
 
 	for i in range(request_count):
 		var request = ItemRequest.new()

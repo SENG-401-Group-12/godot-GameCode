@@ -6,6 +6,6 @@
 [resource]
 script = ExtResource("1_m3r4i")
 crop_name = "Eggplant"
-growth_time_per_stage = 2.5
+growth_time_per_stage = 2.0
 row_on_spritesheet = 3
 metadata/_custom_type_script = "uid://bpx40ij8v3u2p"
