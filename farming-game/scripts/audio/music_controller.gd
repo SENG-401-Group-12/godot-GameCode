@@ -205,7 +205,9 @@ func _crossfade_to(key: String, stream: AudioStream) -> void:
 	# Avoid swapping/unpausing BGM while the wave-clear jingle plays (would overlap audio).
 	if _stinger.playing and _resume_bgm_after_stinger:
 		return
-	if key == _current_bgm_key and _bgm.playing:
+	# Key can be stale if a crossfade was killed (e.g. wave-win sting) before the tween callback ran.
+	# Only skip when the player is actually outputting this stream, not just when keys match.
+	if key == _current_bgm_key and _bgm.playing and _bgm.stream == stream:
 		return
 	_set_bgm_loop(stream)
 	_apply_bgm_pitch_for_key(key)

@@ -23,8 +23,9 @@ signal profile_updated(data)
 signal profile_lookup_succeeded(data)
 signal profile_lookup_failed(reason: String)
 
-const SUPABASE_URL := "https://YOUR_PROJECT_REF.supabase.co"
-const SUPABASE_ANON_KEY := "YOUR_SUPABASE_ANON_KEY"
+## Filled from OS env (SUPABASE_URL, SUPABASE_ANON_KEY) and/or res://.env — see .env.example (never commit .env).
+var supabase_url: String = ""
+var supabase_anon_key: String = ""
 
 var access_token: String = ""
 var refresh_token: String = ""
@@ -34,14 +35,60 @@ var current_display_name: String = ""
 var guest_mode := true
 
 
+func _init() -> void:
+	_load_supabase_config()
+
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+
+
+func _load_supabase_config() -> void:
+	var url := OS.get_environment("SUPABASE_URL").strip_edges()
+	var key := OS.get_environment("SUPABASE_ANON_KEY").strip_edges()
+	var from_file := _parse_dotenv_file("res://.env")
+	if url.is_empty():
+		url = str(from_file.get("SUPABASE_URL", "")).strip_edges()
+	if key.is_empty():
+		key = str(from_file.get("SUPABASE_ANON_KEY", "")).strip_edges()
+	supabase_url = url
+	supabase_anon_key = key
+	if supabase_url.is_empty() or supabase_anon_key.is_empty():
+		push_error(
+			"Backend: Missing Supabase config. Set SUPABASE_URL and SUPABASE_ANON_KEY in the system environment "
+			+ "or create farming-game/.env (copy from .env.example). Auth and leaderboards will fail until set."
+		)
+
+
+func _parse_dotenv_file(path: String) -> Dictionary:
+	var out: Dictionary = {}
+	if not FileAccess.file_exists(path):
+		return out
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		push_warning("Backend: could not open %s for reading." % path)
+		return out
+	var content := f.get_as_text()
+	f.close()
+	for raw_line in content.split("\n"):
+		var line := raw_line.replace("\r", "").strip_edges()
+		if line.is_empty() or line.begins_with("#"):
+			continue
+		var eq := line.find("=")
+		if eq <= 0:
+			continue
+		var k := line.substr(0, eq).strip_edges()
+		var v := line.substr(eq + 1).strip_edges()
+		if v.length() >= 2 and ((v.begins_with("\"") and v.ends_with("\"")) or (v.begins_with("'") and v.ends_with("'"))):
+			v = v.substr(1, v.length() - 2)
+		out[k] = v
+	return out
 
 
 ## Supabase may gzip JSON; Godot Web's HTTP stack often cannot decode gzip. Ask for identity encoding.
 func _supabase_headers(extra: PackedStringArray = PackedStringArray()) -> PackedStringArray:
 	var h := PackedStringArray([
-		"apikey: " + SUPABASE_ANON_KEY,
+		"apikey: " + supabase_anon_key,
 		"Content-Type: application/json",
 		"Accept-Encoding: identity",
 	])
@@ -71,7 +118,7 @@ func signup(email: String, password: String) -> void:
 	var http := HTTPRequest.new()
 	add_child(http)
 
-	var url := SUPABASE_URL + "/auth/v1/signup"
+	var url := supabase_url + "/auth/v1/signup"
 	var headers := _supabase_headers()
 
 	var body_dict := {
@@ -117,7 +164,7 @@ func login(email: String, password: String) -> void:
 	var http := HTTPRequest.new()
 	add_child(http)
 
-	var url := SUPABASE_URL + "/auth/v1/token?grant_type=password"
+	var url := supabase_url + "/auth/v1/token?grant_type=password"
 	var headers := _supabase_headers()
 
 	var body_dict := {
@@ -169,7 +216,7 @@ func create_profile(display_name: String) -> void:
 	var http := HTTPRequest.new()
 	add_child(http)
 
-	var url := SUPABASE_URL + "/rest/v1/profiles"
+	var url := supabase_url + "/rest/v1/profiles"
 	var headers := _supabase_headers(PackedStringArray([
 		"Authorization: Bearer " + access_token,
 		"Prefer: return=representation",
@@ -204,7 +251,7 @@ func update_profile(display_name: String) -> void:
 	var http := HTTPRequest.new()
 	add_child(http)
 
-	var url := SUPABASE_URL + "/rest/v1/profiles?id=eq." + current_user_id
+	var url := supabase_url + "/rest/v1/profiles?id=eq." + current_user_id
 	var headers := _supabase_headers(PackedStringArray([
 		"Authorization: Bearer " + access_token,
 		"Prefer: return=representation",
@@ -237,7 +284,7 @@ func get_my_profile() -> void:
 	var http := HTTPRequest.new()
 	add_child(http)
 
-	var url := SUPABASE_URL + "/rest/v1/profiles?id=eq." + current_user_id + "&select=*"
+	var url := supabase_url + "/rest/v1/profiles?id=eq." + current_user_id + "&select=*"
 	var headers := _supabase_headers(PackedStringArray([
 		"Authorization: Bearer " + access_token,
 	]))
@@ -275,7 +322,7 @@ func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_
 	var http := HTTPRequest.new()
 	add_child(http)
 
-	var url := SUPABASE_URL + "/rest/v1/runs"
+	var url := supabase_url + "/rest/v1/runs"
 	var headers := _supabase_headers(PackedStringArray([
 		"Authorization: Bearer " + access_token,
 		"Prefer: return=representation",
@@ -321,9 +368,9 @@ func get_top_10() -> void:
 	var http := HTTPRequest.new()
 	add_child(http)
 
-	var url := SUPABASE_URL + "/rest/v1/rpc/get_top_10_normal"
+	var url := supabase_url + "/rest/v1/rpc/get_top_10_normal"
 	var headers := _supabase_headers(PackedStringArray([
-		"Authorization: Bearer " + SUPABASE_ANON_KEY,
+		"Authorization: Bearer " + supabase_anon_key,
 	]))
 
 	var body := "{}"
@@ -358,9 +405,9 @@ func get_top_10_endless() -> void:
 	var http := HTTPRequest.new()
 	add_child(http)
 
-	var url := SUPABASE_URL + "/rest/v1/rpc/get_top_10_endless"
+	var url := supabase_url + "/rest/v1/rpc/get_top_10_endless"
 	var headers := _supabase_headers(PackedStringArray([
-		"Authorization: Bearer " + SUPABASE_ANON_KEY,
+		"Authorization: Bearer " + supabase_anon_key,
 	]))
 
 	var body := "{}"
@@ -404,7 +451,7 @@ func get_personal_best(is_endless_mode: bool) -> void:
 	var http := HTTPRequest.new()
 	add_child(http)
 
-	var url := SUPABASE_URL + "/rest/v1/rpc/get_personal_best"
+	var url := supabase_url + "/rest/v1/rpc/get_personal_best"
 	var headers := _supabase_headers(PackedStringArray([
 		"Authorization: Bearer " + access_token,
 	]))

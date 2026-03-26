@@ -1,3 +1,6 @@
+# Local secrets (loaded at runtime by scripts/Backend/backend.gd)
+.env
+
 # Godot 4+ specific ignores
 .godot/
 /android/
