@@ -32,6 +32,7 @@ concurrency:
 
 env:
   GODOT_VERSION: "4.6"
+  APP_VERSION: "V1.1.2"
 
 jobs:
   export-and-deploy:
@@ -53,8 +54,7 @@ jobs:
       - name: Generate build version metadata
         shell: bash
         run: |
-          SHORT_SHA="$(echo "$GITHUB_SHA" | cut -c1-7)"
-          printf 'extends RefCounted\n\n# CI-generated build identifier for UI.\nconst VERSION := "web-%s"\n' "$SHORT_SHA" > farming-game/scripts/build_info.gd
+          printf 'extends RefCounted\n\n# CI-generated build identifier for UI.\nconst VERSION := "%s"\n' "$APP_VERSION" > farming-game/scripts/build_info.gd
 
       - name: Optional Supabase config for web export
         shell: bash
