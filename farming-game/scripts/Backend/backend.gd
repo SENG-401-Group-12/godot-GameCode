@@ -67,6 +67,10 @@ func _load_supabase_config() -> void:
 		key = str(from_public_cfg.get("SUPABASE_ANON_KEY", "")).strip_edges()
 	if key.is_empty():
 		key = from_embedded_key
+	if url.begins_with("\"") and url.ends_with("\"") and url.length() >= 2:
+		url = url.substr(1, url.length() - 2)
+	if key.begins_with("\"") and key.ends_with("\"") and key.length() >= 2:
+		key = key.substr(1, key.length() - 2)
 	supabase_url = url
 	supabase_anon_key = key
 	if supabase_url.is_empty() or supabase_anon_key.is_empty():
@@ -74,6 +78,8 @@ func _load_supabase_config() -> void:
 			"Backend: Missing Supabase config. Set SUPABASE_URL and SUPABASE_ANON_KEY in the system environment "
 			+ "or create farming-game/.env (copy from .env.example). Auth and leaderboards will fail until set."
 		)
+	elif OS.has_feature("web") and not supabase_url.begins_with("https://"):
+		push_error("Backend: SUPABASE_URL must start with https:// for web builds.")
 
 
 func _parse_dotenv_file(path: String) -> Dictionary:
@@ -117,6 +123,10 @@ func _supabase_headers(extra: PackedStringArray = PackedStringArray()) -> Packed
 
 func _has_supabase_config() -> bool:
 	return not supabase_url.is_empty() and not supabase_anon_key.is_empty()
+
+
+func _network_error_text(prefix: String, result: int) -> String:
+	return "%s (%s: %d)." % [prefix, error_string(result), result]
 
 
 func continue_as_guest() -> void:
@@ -248,7 +258,7 @@ func signup(email: String, password: String) -> void:
 
 	var req_err := http.request(url, headers, HTTPClient.METHOD_POST, body)
 	if req_err != OK:
-		signup_failed.emit("Could not start signup request (%s)." % error_string(req_err))
+		signup_failed.emit(_network_error_text("Could not start signup request", req_err))
 		http.queue_free()
 
 func login(email: String, password: String) -> void:
@@ -303,7 +313,7 @@ func login(email: String, password: String) -> void:
 
 	var req_err := http.request(url, headers, HTTPClient.METHOD_POST, body)
 	if req_err != OK:
-		login_failed.emit("Could not start login request (%s)." % error_string(req_err))
+		login_failed.emit(_network_error_text("Could not start login request", req_err))
 		http.queue_free()
 	
 func create_profile(display_name: String) -> void:
@@ -395,7 +405,7 @@ func get_my_profile() -> void:
 		var data = JSON.parse_string(text)
 
 		if result != HTTPRequest.RESULT_SUCCESS:
-			profile_lookup_failed.emit("Network error while checking profile.")
+			profile_lookup_failed.emit(_network_error_text("Network error while checking profile", result))
 			http.queue_free()
 			return
 
@@ -415,7 +425,7 @@ func get_my_profile() -> void:
 
 	var req_err := http.request(url, headers, HTTPClient.METHOD_GET)
 	if req_err != OK:
-		profile_lookup_failed.emit("Could not start profile request (%s)." % error_string(req_err))
+		profile_lookup_failed.emit(_network_error_text("Could not start profile request", req_err))
 		http.queue_free()
 
 func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_fed: int, total_missed: int, is_endless_mode: bool) -> void:
@@ -489,7 +499,7 @@ func get_top_10() -> void:
 
 	http.request_completed.connect(func(result, response_code, response_headers, response_body):
 		if result != HTTPRequest.RESULT_SUCCESS:
-			leaderboard_failed.emit("Network error — check connection.")
+			leaderboard_failed.emit(_network_error_text("Network error", result))
 			http.queue_free()
 			return
 		var text: String = response_body.get_string_from_utf8()
@@ -512,7 +522,7 @@ func get_top_10() -> void:
 
 	var req_err := http.request(url, headers, HTTPClient.METHOD_POST, body)
 	if req_err != OK:
-		leaderboard_failed.emit("Could not start leaderboard request (%s)." % error_string(req_err))
+		leaderboard_failed.emit(_network_error_text("Could not start leaderboard request", req_err))
 		http.queue_free()
 
 
@@ -532,7 +542,7 @@ func get_top_10_endless() -> void:
 
 	http.request_completed.connect(func(result, response_code, response_headers, response_body):
 		if result != HTTPRequest.RESULT_SUCCESS:
-			leaderboard_endless_failed.emit("Network error — check connection.")
+			leaderboard_endless_failed.emit(_network_error_text("Network error", result))
 			http.queue_free()
 			return
 		var text: String = response_body.get_string_from_utf8()
@@ -561,7 +571,7 @@ func get_top_10_endless() -> void:
 
 	var req_err := http.request(url, headers, HTTPClient.METHOD_POST, body)
 	if req_err != OK:
-		leaderboard_endless_failed.emit("Could not start endless request (%s)." % error_string(req_err))
+		leaderboard_endless_failed.emit(_network_error_text("Could not start endless request", req_err))
 		http.queue_free()
 
 func get_personal_best(is_endless_mode: bool) -> void:
