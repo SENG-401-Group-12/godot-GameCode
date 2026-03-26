@@ -26,6 +26,11 @@ func unregister_area(area: InteractionArea):
 		active_areas.remove_at(index)
 		
 func _process(_delta: float) -> void:
+	# Since InteractionManager is an autoload, this script can sometimes load before the player node
+	# This can result in player being null. This check prevents keeping a null instance
+	if player == null:
+		player = get_tree().get_first_node_in_group("Player")
+		
 	if active_areas.size() > 0 && can_interact: # If the player is in an interactable area
 		active_areas.sort_custom(_sort_by_distance_to_player) # prioritize the closer interaction area
 		var area := active_areas[0]
