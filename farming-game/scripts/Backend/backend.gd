@@ -23,8 +23,9 @@ signal profile_updated(data)
 signal profile_lookup_succeeded(data)
 signal profile_lookup_failed(reason: String)
 
-const SUPABASE_URL := "https://ugxkrdofwrgsefbssxoy.supabase.co"
-const SUPABASE_ANON_KEY := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVneGtyZG9md3Jnc2VmYnNzeG95Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA3NzM0MjMsImV4cCI6MjA4NjM0OTQyM30.tsaSJRKUwECkpKjzK230u0HpyyjyU6DT9ctbIMJx1tE"
+## Filled from OS env (SUPABASE_URL, SUPABASE_ANON_KEY) and/or res://.env — see .env.example (never commit .env).
+var supabase_url: String = ""
+var supabase_anon_key: String = ""
 
 var access_token: String = ""
 var refresh_token: String = ""
@@ -33,9 +34,71 @@ var current_email: String = ""
 var current_display_name: String = ""
 var guest_mode := true
 
+## Last finished run as guest: uploaded automatically after sign-in (see try_submit_pending_run_after_auth).
+const PENDING_RUN_SAVE_PATH := "user://pending_guest_run.json"
+var _pending_run_upload_in_progress := false
+
+
+func _init() -> void:
+	_load_supabase_config()
+
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+
+
+func _load_supabase_config() -> void:
+	var url := OS.get_environment("SUPABASE_URL").strip_edges()
+	var key := OS.get_environment("SUPABASE_ANON_KEY").strip_edges()
+	var from_file := _parse_dotenv_file("res://.env")
+	if url.is_empty():
+		url = str(from_file.get("SUPABASE_URL", "")).strip_edges()
+	if key.is_empty():
+		key = str(from_file.get("SUPABASE_ANON_KEY", "")).strip_edges()
+	supabase_url = url
+	supabase_anon_key = key
+	if supabase_url.is_empty() or supabase_anon_key.is_empty():
+		push_error(
+			"Backend: Missing Supabase config. Set SUPABASE_URL and SUPABASE_ANON_KEY in the system environment "
+			+ "or create farming-game/.env (copy from .env.example). Auth and leaderboards will fail until set."
+		)
+
+
+func _parse_dotenv_file(path: String) -> Dictionary:
+	var out: Dictionary = {}
+	if not FileAccess.file_exists(path):
+		return out
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		push_warning("Backend: could not open %s for reading." % path)
+		return out
+	var content := f.get_as_text()
+	f.close()
+	for raw_line in content.split("\n"):
+		var line := raw_line.replace("\r", "").strip_edges()
+		if line.is_empty() or line.begins_with("#"):
+			continue
+		var eq := line.find("=")
+		if eq <= 0:
+			continue
+		var k := line.substr(0, eq).strip_edges()
+		var v := line.substr(eq + 1).strip_edges()
+		if v.length() >= 2 and ((v.begins_with("\"") and v.ends_with("\"")) or (v.begins_with("'") and v.ends_with("'"))):
+			v = v.substr(1, v.length() - 2)
+		out[k] = v
+	return out
+
+
+## Supabase may gzip JSON; Godot Web's HTTP stack often cannot decode gzip. Ask for identity encoding.
+func _supabase_headers(extra: PackedStringArray = PackedStringArray()) -> PackedStringArray:
+	var h := PackedStringArray([
+		"apikey: " + supabase_anon_key,
+		"Content-Type: application/json",
+		"Accept-Encoding: identity",
+	])
+	for s in extra:
+		h.append(s)
+	return h
 
 
 func continue_as_guest() -> void:
@@ -55,15 +118,73 @@ func logout() -> void:
 	continue_as_guest()
 
 
+func save_pending_run_if_guest(
+	score_total: int,
+	duration_ms: int,
+	waves_completed: int,
+	total_fed: int,
+	total_missed: int,
+	is_endless_mode: bool
+) -> void:
+	if is_logged_in():
+		return
+	var payload := {
+		"score_total": score_total,
+		"duration_ms": duration_ms,
+		"waves_completed": waves_completed,
+		"total_fed": total_fed,
+		"total_missed": total_missed,
+		"is_endless_mode": is_endless_mode,
+	}
+	var f := FileAccess.open(PENDING_RUN_SAVE_PATH, FileAccess.WRITE)
+	if f == null:
+		push_warning("Backend: could not write pending guest run file.")
+		return
+	f.store_string(JSON.stringify(payload))
+	f.close()
+
+
+func _erase_pending_run_file() -> void:
+	if not FileAccess.file_exists(PENDING_RUN_SAVE_PATH):
+		return
+	var abs_path := ProjectSettings.globalize_path(PENDING_RUN_SAVE_PATH)
+	DirAccess.remove_absolute(abs_path)
+
+
+## Call after login or signup when a session exists so a guest run can be uploaded retroactively.
+func try_submit_pending_run_after_auth() -> void:
+	if not is_logged_in():
+		return
+	if _pending_run_upload_in_progress:
+		return
+	if not FileAccess.file_exists(PENDING_RUN_SAVE_PATH):
+		return
+	var f := FileAccess.open(PENDING_RUN_SAVE_PATH, FileAccess.READ)
+	if f == null:
+		return
+	var text := f.get_as_text()
+	f.close()
+	var parsed = JSON.parse_string(text)
+	if typeof(parsed) != TYPE_DICTIONARY:
+		_erase_pending_run_file()
+		return
+	var d: Dictionary = parsed
+	var score := int(d.get("score_total", 0))
+	var dur := int(d.get("duration_ms", 0))
+	var waves := int(d.get("waves_completed", 0))
+	var fed := int(d.get("total_fed", 0))
+	var missed := int(d.get("total_missed", 0))
+	var endless := bool(d.get("is_endless_mode", false))
+	_pending_run_upload_in_progress = true
+	submit_run(score, dur, waves, fed, missed, endless)
+
+
 func signup(email: String, password: String) -> void:
 	var http := HTTPRequest.new()
 	add_child(http)
 
-	var url := SUPABASE_URL + "/auth/v1/signup"
-	var headers := [
-		"apikey: " + SUPABASE_ANON_KEY,
-		"Content-Type: application/json"
-	]
+	var url := supabase_url + "/auth/v1/signup"
+	var headers := _supabase_headers()
 
 	var body_dict := {
 		"email": email,
@@ -87,6 +208,8 @@ func signup(email: String, password: String) -> void:
 					current_email = str(user.get("email", ""))
 					guest_mode = false
 
+			if is_logged_in():
+				call_deferred(&"try_submit_pending_run_after_auth")
 			signup_succeeded.emit("Signup successful. Check email confirmation if required.")
 		else:
 			var msg := "Signup failed."
@@ -108,11 +231,8 @@ func login(email: String, password: String) -> void:
 	var http := HTTPRequest.new()
 	add_child(http)
 
-	var url := SUPABASE_URL + "/auth/v1/token?grant_type=password"
-	var headers := [
-		"apikey: " + SUPABASE_ANON_KEY,
-		"Content-Type: application/json"
-	]
+	var url := supabase_url + "/auth/v1/token?grant_type=password"
+	var headers := _supabase_headers()
 
 	var body_dict := {
 		"email": email,
@@ -135,6 +255,7 @@ func login(email: String, password: String) -> void:
 					current_email = str(user.get("email", ""))
 					guest_mode = false
 					login_succeeded.emit(current_user_id)
+					call_deferred(&"try_submit_pending_run_after_auth")
 				else:
 					login_failed.emit("Login succeeded, but no user data was returned.")
 			else:
@@ -163,13 +284,11 @@ func create_profile(display_name: String) -> void:
 	var http := HTTPRequest.new()
 	add_child(http)
 
-	var url := SUPABASE_URL + "/rest/v1/profiles"
-	var headers := [
-		"apikey: " + SUPABASE_ANON_KEY,
+	var url := supabase_url + "/rest/v1/profiles"
+	var headers := _supabase_headers(PackedStringArray([
 		"Authorization: Bearer " + access_token,
-		"Content-Type: application/json",
-		"Prefer: return=representation"
-	]
+		"Prefer: return=representation",
+	]))
 
 	var body_dict := {
 		"id": current_user_id,
@@ -200,13 +319,11 @@ func update_profile(display_name: String) -> void:
 	var http := HTTPRequest.new()
 	add_child(http)
 
-	var url := SUPABASE_URL + "/rest/v1/profiles?id=eq." + current_user_id
-	var headers := [
-		"apikey: " + SUPABASE_ANON_KEY,
+	var url := supabase_url + "/rest/v1/profiles?id=eq." + current_user_id
+	var headers := _supabase_headers(PackedStringArray([
 		"Authorization: Bearer " + access_token,
-		"Content-Type: application/json",
-		"Prefer: return=representation"
-	]
+		"Prefer: return=representation",
+	]))
 
 	var body_dict := {
 		"display_name": display_name
@@ -235,12 +352,10 @@ func get_my_profile() -> void:
 	var http := HTTPRequest.new()
 	add_child(http)
 
-	var url := SUPABASE_URL + "/rest/v1/profiles?id=eq." + current_user_id + "&select=*"
-	var headers := [
-		"apikey: " + SUPABASE_ANON_KEY,
+	var url := supabase_url + "/rest/v1/profiles?id=eq." + current_user_id + "&select=*"
+	var headers := _supabase_headers(PackedStringArray([
 		"Authorization: Bearer " + access_token,
-		"Content-Type: application/json"
-	]
+	]))
 
 	http.request_completed.connect(func(result, response_code, response_headers, response_body):
 		var text: String = response_body.get_string_from_utf8()
@@ -275,13 +390,11 @@ func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_
 	var http := HTTPRequest.new()
 	add_child(http)
 
-	var url := SUPABASE_URL + "/rest/v1/runs"
-	var headers := [
-		"apikey: " + SUPABASE_ANON_KEY,
+	var url := supabase_url + "/rest/v1/runs"
+	var headers := _supabase_headers(PackedStringArray([
 		"Authorization: Bearer " + access_token,
-		"Content-Type: application/json",
-		"Prefer: return=representation"
-	]
+		"Prefer: return=representation",
+	]))
 
 	var body_dict := {
 		"user_id": current_user_id,
@@ -299,10 +412,15 @@ func submit_run(score_total: int, duration_ms: int, waves_completed: int, total_
 		var data = JSON.parse_string(text)
 
 		if response_code >= 200 and response_code < 300:
+			if _pending_run_upload_in_progress:
+				_pending_run_upload_in_progress = false
+				_erase_pending_run_file()
 			run_submitted.emit(data)
 			if is_logged_in():
 				get_personal_best(is_endless_mode)
 		else:
+			if _pending_run_upload_in_progress:
+				_pending_run_upload_in_progress = false
 			var err := "Could not save score."
 			if typeof(data) == TYPE_DICTIONARY:
 				if data.has("message"):
@@ -323,12 +441,10 @@ func get_top_10() -> void:
 	var http := HTTPRequest.new()
 	add_child(http)
 
-	var url := SUPABASE_URL + "/rest/v1/rpc/get_top_10_normal"
-	var headers := [
-		"apikey: " + SUPABASE_ANON_KEY,
-		"Authorization: Bearer " + SUPABASE_ANON_KEY,
-		"Content-Type: application/json"
-	]
+	var url := supabase_url + "/rest/v1/rpc/get_top_10_normal"
+	var headers := _supabase_headers(PackedStringArray([
+		"Authorization: Bearer " + supabase_anon_key,
+	]))
 
 	var body := "{}"
 
@@ -362,12 +478,10 @@ func get_top_10_endless() -> void:
 	var http := HTTPRequest.new()
 	add_child(http)
 
-	var url := SUPABASE_URL + "/rest/v1/rpc/get_top_10_endless"
-	var headers := [
-		"apikey: " + SUPABASE_ANON_KEY,
-		"Authorization: Bearer " + SUPABASE_ANON_KEY,
-		"Content-Type: application/json"
-	]
+	var url := supabase_url + "/rest/v1/rpc/get_top_10_endless"
+	var headers := _supabase_headers(PackedStringArray([
+		"Authorization: Bearer " + supabase_anon_key,
+	]))
 
 	var body := "{}"
 
@@ -410,12 +524,10 @@ func get_personal_best(is_endless_mode: bool) -> void:
 	var http := HTTPRequest.new()
 	add_child(http)
 
-	var url := SUPABASE_URL + "/rest/v1/rpc/get_personal_best"
-	var headers := [
-		"apikey: " + SUPABASE_ANON_KEY,
+	var url := supabase_url + "/rest/v1/rpc/get_personal_best"
+	var headers := _supabase_headers(PackedStringArray([
 		"Authorization: Bearer " + access_token,
-		"Content-Type: application/json"
-	]
+	]))
 
 	var body_dict := {
 		"p_user_id": current_user_id,
