@@ -58,9 +58,15 @@ jobs:
             exit 0
           fi
           printf 'SUPABASE_URL=%s\nSUPABASE_ANON_KEY=%s\n' "$URL" "$KEY" > farming-game/supabase_web.cfg
+          echo "Generated farming-game/supabase_web.cfg"
         env:
           URL: ${{ secrets.SUPABASE_URL }}
           KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+      - name: Require backend config on production deploys
+        if: github.event_name != 'pull_request'
+        run: |
+          test -s farming-game/supabase_web.cfg || (echo "Missing SUPABASE_URL / SUPABASE_ANON_KEY for production deploy." && exit 1)
 
       - name: Export Web (preset name must match export_presets.cfg)
         run: |
