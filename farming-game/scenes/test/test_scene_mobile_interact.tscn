@@ -129,7 +129,7 @@ offset_bottom = 16.0
 theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("7_lyhax")
 theme_override_font_sizes/font_size = 8
-text = "Selected seed:"
+text = "Selected crop:"
 
 [node name="SummaryLabel" type="Label" parent="HUD/CropPanel" unique_id=1463750698]
 layout_mode = 0

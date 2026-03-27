@@ -38,7 +38,7 @@ func _ready() -> void:
 	_refresh_crop_ui()
 	_on_selected_crop_changed(PlayerData.get_selected_crop_name())
 	_update_status()
-	_show_message("Feed the town: click a crop, plant an empty plot, harvest it, then press E on a customer.")
+	_show_message("Feed the town: click a crop, plant an empty plot, harvest it, then interact with a customer to feed them.")
 	_start_next_wave()
 
 func _build_crop_buttons() -> void:
@@ -78,7 +78,7 @@ func _refresh_crop_ui() -> void:
 	summary_label.text = "Stored crops: %d" % total_inventory
 
 func _on_selected_crop_changed(crop_name: String) -> void:
-	selected_crop_label.text = "Selected seed: %s" % crop_name
+	selected_crop_label.text = "Selected crop: %s" % crop_name
 	_refresh_crop_ui()
 
 func _start_next_wave() -> void:
