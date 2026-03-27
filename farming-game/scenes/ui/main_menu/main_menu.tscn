@@ -177,7 +177,7 @@ offset_top = -26.0
 offset_right = -28.0
 offset_bottom = -10.0
 theme_override_font_sizes/font_size = 8
-text = "V1.1.2"
+text = "V1.2.1"
 horizontal_alignment = 2
 
 [node name="CreditsButton" type="Button" parent="FooterLayer"]
