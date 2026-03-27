@@ -7,20 +7,22 @@ const UI_FONT := preload("res://assets/game/ui/fonts/PixelOperator8.ttf")
 @onready var card_container: HBoxContainer = $MarginContainer/RootVBox/CardContainer
 @onready var main_hud: Control = $"../InGameUI"
 @onready var shop = $"../../Shop"
-@onready var currency_label: Label = $MarginContainer/RootVBox/TopRow/CurrencyLabel
-@onready var reroll_button: Button = $MarginContainer/RootVBox/TopRow/RerollButton
-@onready var hint_label: Label = $MarginContainer/RootVBox/HintLabel
+@onready var currency_label: Label = $MarginContainer/RootVBox/HeaderPanel/HeaderVBox/TopRow/CurrencyLabel
+@onready var reroll_button: Button = $MarginContainer/RootVBox/HeaderPanel/HeaderVBox/TopRow/RerollButton
+@onready var hint_label: Label = $MarginContainer/RootVBox/HeaderPanel/HeaderVBox/HintLabel
 @onready var buy_button: Button = $MarginContainer/RootVBox/Footer/BuyButton
 @onready var back_button: Button = $MarginContainer/RootVBox/Footer/BackButton
 
 const UpgradeCard = preload("res://scenes/ui/game/shop/upgrade_card.tscn")
-const REROLL_COST := 12
+const REROLL_BASE_COST := 12
 
 var _current_choices: Array[CropUpgrade] = []
 var _use_costs: bool = true
 var _allow_reroll: bool = true
 var _shop_opened_from_stall: bool = true
 var _selected_upgrade: CropUpgrade = null
+## Rerolls already paid for this shop visit; next reroll costs REROLL_BASE_COST * 2^depth. Resets when shop closes.
+var _reroll_depth: int = 0
 
 
 func _ready() -> void:
@@ -40,6 +42,7 @@ func open_shop() -> void:
 	_allow_reroll = not GameProgress.tutorial_mode
 	_shop_opened_from_stall = true
 	_selected_upgrade = null
+	_reroll_depth = 0
 	shop.set_opened(true)
 	Music.enter_shop()
 	_set_hud_hidden_for_shop(true)
@@ -105,6 +108,7 @@ func _on_back_pressed() -> void:
 
 func close_shop() -> void:
 	_selected_upgrade = null
+	_reroll_depth = 0
 	for child in card_container.get_children():
 		child.queue_free()
 	hide()
@@ -132,9 +136,11 @@ func _set_hud_hidden_for_shop(hidden: bool) -> void:
 func _on_reroll_pressed() -> void:
 	if not _allow_reroll:
 		return
-	if not PlayerData.spend_currency(REROLL_COST):
+	var cost := _reroll_cost_next()
+	if not PlayerData.spend_currency(cost):
 		_refresh_currency_ui()
 		return
+	_reroll_depth += 1
 	populate_upgrades(_generate_shop_choices())
 
 
@@ -147,9 +153,10 @@ func _refresh_currency_ui() -> void:
 		currency_label.text = "Seeds: %d" % PlayerData.run_currency
 	if reroll_button:
 		reroll_button.visible = _allow_reroll
-		reroll_button.disabled = not PlayerData.can_afford(REROLL_COST)
+		var next_cost := _reroll_cost_next()
+		reroll_button.disabled = not PlayerData.can_afford(next_cost)
 		if _allow_reroll:
-			reroll_button.text = "Reroll (%d)" % REROLL_COST
+			reroll_button.text = "Reroll (%d)" % next_cost
 	_refresh_all_cards()
 	_update_buy_button()
 
@@ -175,6 +182,10 @@ func _update_buy_button() -> void:
 
 func _generate_shop_choices() -> Array[CropUpgrade]:
 	return UpgradeManager.generate_upgrade_choices()
+
+
+func _reroll_cost_next() -> int:
+	return REROLL_BASE_COST * (1 << _reroll_depth)
 
 
 func _apply_pixel_font_recursive(node: Node) -> void:

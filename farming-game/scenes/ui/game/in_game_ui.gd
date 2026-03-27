@@ -7,6 +7,7 @@ const TYPE_BLIP_PATH := "res://assets/audio/sfx/ui_type_blip.wav"
 const TUTORIAL_CHARS_PER_SECOND := 38.0
 const TUTORIAL_PROMPT_TYPING := "Click here or press Space to show the full message."
 const TUTORIAL_PROMPT_WAIT := "Click this box to hide. Use the Tutorial button to bring it back."
+const ENDLESS_MAX_MISSES := 10
 
 @onready var wave_label: Label = $MarginContainer/HBoxContainer/StatusPanel/MarginContainer/VBoxContainer/WaveLabel
 @onready var progress_label: Label = $MarginContainer/HBoxContainer/StatusPanel/MarginContainer/VBoxContainer/ProgressLabel
@@ -66,7 +67,7 @@ func _ready() -> void:
 	PlayerData.selected_crop_changed.connect(_on_selected_crop_changed)
 	_refresh_crop_ui()
 	_on_selected_crop_changed(PlayerData.get_selected_crop_name())
-	_update_status(0, 0, 0, 0, 0, 0)
+	_update_status(0, 0, 0, 0, 0, 0, 0)
 	if ResourceLoader.exists(TYPE_BLIP_PATH):
 		_type_blip_stream = load(TYPE_BLIP_PATH) as AudioStream
 	if GameProgress.tutorial_mode:
@@ -385,11 +386,11 @@ func clear_tutorial_objective() -> void:
 	_tutorial_prompt = null
 	_tutorial_toggle_button = null
 	status_panel.visible = true
-	_update_status(0, 0, 0, 0, 0, 0)
+	_update_status(0, 0, 0, 0, 0, 0, 0)
 	message_label.modulate = Color(1, 1, 1, 1)
 
 
-func _update_status(current_wave, fed_count, fed_target, missed_count, allowed_misses, active_customer_count) -> void:
+func _update_status(current_wave, fed_count, fed_target, missed_count, allowed_misses, active_customer_count, total_missed_run: int = 0) -> void:
 	if GameProgress.tutorial_mode:
 		wave_label.text = ""
 		progress_label.text = ""
@@ -398,7 +399,12 @@ func _update_status(current_wave, fed_count, fed_target, missed_count, allowed_m
 		return
 	wave_label.text = "Wave %d" % current_wave
 	progress_label.text = "Fed: %d / %d" % [fed_count, fed_target]
-	missed_label.text = "Missed: %d / %d" % [missed_count, allowed_misses]
+	if GameProgress.endless_mode:
+		missed_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		missed_label.text = "Run total: %d/%d" % [total_missed_run, ENDLESS_MAX_MISSES]
+	else:
+		missed_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		missed_label.text = "Missed: %d / %d" % [missed_count, allowed_misses]
 	active_label.text = "Waiting now: %d" % active_customer_count
 
 

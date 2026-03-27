@@ -1,7 +1,23 @@
-[gd_scene format=3 uid="uid://bslw2wobhrnmv"]
+[gd_scene load_steps=3 format=3 uid="uid://bslw2wobhrnmv"]
 
 [ext_resource type="PackedScene" uid="uid://3rpky562qwkn" path="res://scenes/ui/game/shop/upgrade_card.tscn" id="1_86bn8"]
 [ext_resource type="Script" uid="uid://vwm0u76libss" path="res://scenes/ui/game/shop/shop_ui.gd" id="1_we3u1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_shop_header"]
+bg_color = Color(0.14, 0.14, 0.16, 0.88)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.28, 0.28, 0.32, 0.95)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 8
+content_margin_top = 8
+content_margin_right = 8
+content_margin_bottom = 8
 
 [node name="ShopUI" type="Control" unique_id=110660899]
 layout_mode = 3
@@ -26,24 +42,33 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 theme_override_constants/separation = 8
 
-[node name="TopRow" type="HBoxContainer" parent="MarginContainer/RootVBox"]
+[node name="HeaderPanel" type="PanelContainer" parent="MarginContainer/RootVBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_shop_header")
+
+[node name="HeaderVBox" type="VBoxContainer" parent="MarginContainer/RootVBox/HeaderPanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="TopRow" type="HBoxContainer" parent="MarginContainer/RootVBox/HeaderPanel/HeaderVBox"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="CurrencyLabel" type="Label" parent="MarginContainer/RootVBox/TopRow"]
+[node name="CurrencyLabel" type="Label" parent="MarginContainer/RootVBox/HeaderPanel/HeaderVBox/TopRow"]
 custom_minimum_size = Vector2(220, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Seeds: 0"
 
-[node name="RerollButton" type="Button" parent="MarginContainer/RootVBox/TopRow"]
+[node name="RerollButton" type="Button" parent="MarginContainer/RootVBox/HeaderPanel/HeaderVBox/TopRow"]
 custom_minimum_size = Vector2(110, 28)
 layout_mode = 2
 text = "Reroll (12)"
 
-[node name="HintLabel" type="Label" parent="MarginContainer/RootVBox"]
+[node name="HintLabel" type="Label" parent="MarginContainer/RootVBox/HeaderPanel/HeaderVBox"]
 layout_mode = 2
 text = "Choose one upgrade."
+autowrap_mode = 2
 
 [node name="CardContainer" type="HBoxContainer" parent="MarginContainer/RootVBox" unique_id=1941996475]
 layout_mode = 2

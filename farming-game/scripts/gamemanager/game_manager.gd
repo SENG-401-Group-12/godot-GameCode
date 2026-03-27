@@ -45,12 +45,14 @@ var _mutator_amount_mult: float = 1.0
 var _mutator_reward_mult: float = 1.0
 var _mutator_shop_cooldown_mult: float = 1.0
 
-const STARTING_SEEDS := 22
+const STARTING_SEEDS := 0
 const COMBO_WINDOW_MSEC := 6000
 const COMBO_BONUS_MAX := 3
 ## Seed multiplier from how fast you fed them: ratio = time_left / order_time. Lerp between these.
 const FEED_SPEED_MULT_MIN := 0.5
 const FEED_SPEED_MULT_MAX := 1.35
+## Endless only: lose the run after this many missed customers total (across all waves).
+const ENDLESS_MAX_TOTAL_MISSES := 10
 
 
 func _max_misses_before_fail() -> int:
@@ -246,7 +248,7 @@ func _start_game() -> void:
 		PlayerData.add_currency(STARTING_SEEDS)
 	var intro := "Hungry customers will be coming in %d seconds! Prepare your crops before they show up!" % [start_time_buffer]
 	if _endless_run:
-		intro = "Endless mode — survive as many waves as you can.\nMutator: %s\n\n%s" % [_endless_mutator_name, intro]
+		intro = "Endless mode — survive as many waves as you can.\nYou can miss at most %d customers total this run.\nMutator: %s\n\n%s" % [ENDLESS_MAX_TOTAL_MISSES, _endless_mutator_name, intro]
 	game_ui._show_message(intro)
 	while start_time_buffer >= 0:
 		await get_tree().create_timer(1.0, false).timeout
@@ -297,14 +299,15 @@ func _start_next_wave() -> void:
 		configs.append(config.duplicate())
 	customer_spawner.queue_customers(configs)
 	_wave_advance_in_progress = false
-	game_ui._update_status(current_wave, wave_fed_count, wave_customer_count, wave_missed_count, _max_misses_before_fail(), customer_spawner.get_active_customer_count())
+	game_ui._update_status(current_wave, wave_fed_count, wave_customer_count, wave_missed_count, _max_misses_before_fail(), customer_spawner.get_active_customer_count(), total_missed_count)
 	game_ui._show_message("Wave %d started. %d hungry customers are waiting." % [current_wave, wave_customer_count], 3.0)
 
 
 func _check_wave_complete() -> void:
 	if game_finished or _wave_advance_in_progress:
 		return
-	if wave_missed_count > allowed_misses:
+	# Endless uses only the global 10-miss cap; per-wave miss limit does not end the run.
+	if not _endless_run and wave_missed_count > allowed_misses:
 		game_finished = true
 		game_ui._show_message("Wave failed - too many hungry customers left.", 5.0)
 		_finalize_loss()
@@ -351,13 +354,13 @@ func _on_customer_served(customer: Node2D = null) -> void:
 	var speed_mult: float = lerpf(FEED_SPEED_MULT_MIN, FEED_SPEED_MULT_MAX, speed_ratio)
 	# Seed income vs upgrade costs (see CropUpgrade.get_cost): wave + combo + feed speed.
 	var wave_part: int = (current_wave + 1) / 3
-	var combo_part: int = mini(combo_bonus, COMBO_BONUS_MAX)
+	var combo_part: int = mini(combo_bonus, COMBO_BONUS_MAX) / 3
 	var base_seeds: int = 2 + wave_part + combo_part
 	var mutator_seed_tint: float = 1.0 + (_mutator_reward_mult - 1.0) * 0.35
 	var seeds_earned: int = maxi(1, int(round(float(base_seeds) * mutator_seed_tint * speed_mult)))
 	PlayerData.add_currency(seeds_earned)
 	if combo_bonus > 0:
-		_combo_bonus_score += combo_bonus * 25
+		_combo_bonus_score += combo_bonus * 6
 		game_ui._show_message("Combo x%d! +%d seeds" % [_combo_streak, seeds_earned], 1.2)
 	elif speed_ratio >= 0.65:
 		game_ui._show_message("+%d seeds (quick serve)" % seeds_earned, 1.0)
@@ -372,11 +375,16 @@ func _on_customer_expired() -> void:
 	wave_missed_count += 1
 	_combo_streak = 0
 	_refresh_ui_status()
+	if _endless_run and total_missed_count >= ENDLESS_MAX_TOTAL_MISSES:
+		game_finished = true
+		game_ui._show_message("Endless run over — %d misses total (no more allowed)." % ENDLESS_MAX_TOTAL_MISSES, 5.0)
+		_finalize_loss()
+		return
 	_check_wave_complete()
 
 
 func _refresh_ui_status() -> void:
-	game_ui._update_status(current_wave, wave_fed_count, wave_customer_count, wave_missed_count, _max_misses_before_fail(), customer_spawner.get_active_customer_count())
+	game_ui._update_status(current_wave, wave_fed_count, wave_customer_count, wave_missed_count, _max_misses_before_fail(), customer_spawner.get_active_customer_count(), total_missed_count)
 
 
 func _compute_score() -> int:
