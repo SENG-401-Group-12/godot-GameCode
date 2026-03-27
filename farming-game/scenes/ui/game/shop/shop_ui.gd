@@ -313,21 +313,21 @@ func _crop_shop_preview_text(crop: CropData, u: CropUpgrade) -> String:
 			var d_y: float = Globals.base_yield_upgrade * float(u.tier)
 			var h_now: int = roundi(float(tiles_now) * y_mult)
 			var h_new: int = roundi(float(tiles_now) * (y_mult + d_y))
-			return "%s\n\nIf bought: harvest %d → %d" % [current_block, h_now, h_new]
+			return "%s\n\nIf bought: harvest %d -> %d" % [current_block, h_now, h_new]
 		CropUpgrade.UpgradeType.GROWTH_SPEED:
 			var d_g: float = CropUpgrade.growth_speed_bonus_delta_for_upgrade(u)
 			var stage_now: float = maxf(0.08, crop.growth_time_per_stage - g_bonus)
 			var stage_new: float = maxf(0.08, crop.growth_time_per_stage - (g_bonus + d_g))
 			var t_now: float = float(n_stages) * stage_now
 			var t_new: float = float(n_stages) * stage_new
-			return "%s\n\nIf bought: grow %.1fs → %.1fs" % [current_block, t_now, t_new]
+			return "%s\n\nIf bought: grow %.1fs -> %.1fs" % [current_block, t_now, t_new]
 		CropUpgrade.UpgradeType.FARM_SIZE:
 			var add: Vector2i = Globals.base_farm_size_upgrade
 			var sz_new: Vector2i = size_bonus + add
 			var tiles_new: int = (base_tiles.x + sz_new.x) * (base_tiles.y + sz_new.y)
 			var h_now: int = roundi(float(tiles_now) * y_mult)
 			var h_new: int = roundi(float(tiles_new) * y_mult)
-			return "%s\n\nIf bought: %d → %d tiles, harvest %d → %d" % [
+			return "%s\n\nIf bought: %d -> %d tiles, harvest %d -> %d" % [
 				current_block, tiles_now, tiles_new, h_now, h_new,
 			]
 	return current_block
@@ -359,7 +359,7 @@ func _crop_stat_tooltip_text(crop: CropData) -> String:
 	var base_growth_total := float(stage_count) * crop.growth_time_per_stage
 	var stage_after_bonus := maxf(0.08, crop.growth_time_per_stage - PlayerData.get_growth_speed_bonus(crop.crop_name))
 	var current_growth_total := float(stage_count) * stage_after_bonus
-	return "%s\nHarvest (tiles × yield): %d → %d\nGrow time (total): %.1fs → %.1fs" % [
+	return "%s\nHarvest (tiles x yield): %d -> %d\nGrow time (total): %.1fs -> %.1fs" % [
 		crop.crop_name,
 		base_harvest,
 		current_harvest,

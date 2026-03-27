@@ -123,7 +123,7 @@ func _ready() -> void:
 	if GameProgress.tutorial_mode:
 		begin_tutorial_hud()
 	else:
-		_show_message("Tip: pick a crop → plant → harvest → interact with customers to feed them. Feed quickly (more time left on their timer) to earn more seeds.")
+		_show_message("Tip: pick a crop -> plant -> harvest -> interact with customers to feed them. Feed quickly (more time left on their timer) to earn more seeds.")
 	set_process(false)
 
 
@@ -301,9 +301,9 @@ func _crop_upgrade_tooltip(crop_name: String) -> String:
 	var lines: PackedStringArray = []
 	lines.append(crop_name)
 	if st.get("yield_multiplier", 1.0) > 1.001:
-		lines.append("Yield: ×%.2f" % float(st.yield_multiplier))
+		lines.append("Yield: %.2fx" % float(st.yield_multiplier))
 	if st.get("growth_speed_bonus", 0.0) > 0.001:
-		lines.append("Growth: −%.2fs" % float(st.growth_speed_bonus))
+		lines.append("Growth: -%.2fs" % float(st.growth_speed_bonus))
 	var sb: Vector2i = st.get("size_bonus", Vector2i.ZERO)
 	if sb != Vector2i.ZERO:
 		var base_tiles: Vector2i = Globals.default_farm_size
