@@ -142,6 +142,9 @@ func _is_touch_device() -> bool:
 func _setup_mobile_text_input() -> void:
 	if not _is_touch_device():
 		return
+	_email.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_EMAIL_ADDRESS
+	_password.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_PASSWORD
+	_profile_name.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_DEFAULT
 	for e in [_email, _password, _profile_name]:
 		if e == null:
 			continue
@@ -168,30 +171,8 @@ func _on_mobile_lineedit_gui_input(event: InputEvent, field: LineEdit) -> void:
 		return
 	if event is InputEventScreenTouch and event.pressed:
 		field.grab_focus()
-		_mobile_prompt_fill_lineedit(field)
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		field.grab_focus()
-		_mobile_prompt_fill_lineedit(field)
-
-
-func _mobile_prompt_fill_lineedit(field: LineEdit) -> void:
-	if not OS.has_feature("web"):
-		return
-	if not _is_touch_device():
-		return
-	var prompt_label := field.placeholder_text if not field.placeholder_text.is_empty() else "Enter text"
-	var current := field.text
-	var escaped_label := JSON.stringify(prompt_label)
-	var escaped_current := JSON.stringify(current)
-	var js := (
-		"(function(){try{var v=window.prompt(%s,%s);if(v===null){return '__cancel__';}return String(v);}catch(e){return '__cancel__';}})();"
-		% [escaped_label, escaped_current]
-	)
-	var result := str(JavaScriptBridge.eval(js, true))
-	if result == "__cancel__":
-		return
-	field.text = result
-	field.caret_column = field.text.length()
 
 
 func _request_mobile_web_fullscreen() -> void:

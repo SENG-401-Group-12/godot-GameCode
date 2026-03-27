@@ -110,11 +110,17 @@ func _apply_mobile_layout() -> void:
 		var tex_size := interact_touch_button.texture_normal.get_size() * interact_touch_button.scale
 		var right_margin := 12.0
 		var bottom_margin := 14.0
-		interact_button_node.position = Vector2(vp.x - tex_size.x - right_margin, vp.y - tex_size.y - bottom_margin)
+		var panel_left := crop_panel_frame.global_position.x if crop_panel_frame != null else (vp.x - 170.0)
+		var desired_x := panel_left - tex_size.x - 8.0
+		var min_x := vp.x * 0.55
+		var max_x := vp.x - tex_size.x - right_margin
+		interact_button_node.position = Vector2(clampf(desired_x, min_x, max_x), vp.y - tex_size.y - bottom_margin)
 	if joystick_node != null:
 		joystick_node.position = Vector2(84.0, vp.y - 84.0)
 	if mobile_pause_button != null:
-		mobile_pause_button.position = Vector2(vp.x - 28.0, 28.0)
+		mobile_pause_button.position = Vector2(32.0, 28.0)
+		mobile_pause_button.scale = Vector2(1.2, 1.2)
+		mobile_pause_button.modulate = Color(1.0, 1.0, 1.0, 1.0)
 	if upgrade_dock != null:
 		upgrade_dock.offset_right = -96.0
 		upgrade_dock.offset_left = -340.0
