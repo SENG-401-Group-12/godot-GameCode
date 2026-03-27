@@ -54,6 +54,7 @@ var _tutorial_is_typing: bool = false
 var crop_button_nodes: Array[Button] = []
 var _upgrade_tooltip_panel: PanelContainer = null
 var _upgrade_tooltip_label: Label = null
+var _mobile_tutorial_button_relocated := false
 
 func _is_touch_device() -> bool:
 	if OS.has_feature("mobile") or OS.has_feature("web_android") or OS.has_feature("web_ios"):
@@ -115,8 +116,8 @@ func _apply_mobile_layout() -> void:
 	if mobile_pause_button != null:
 		mobile_pause_button.position = Vector2(vp.x - 28.0, 28.0)
 	if upgrade_dock != null:
-		upgrade_dock.offset_right = -88.0
-		upgrade_dock.offset_left = -310.0
+		upgrade_dock.offset_right = -96.0
+		upgrade_dock.offset_left = -340.0
 
 
 func _try_unlock_mobile_audio() -> void:
@@ -440,6 +441,22 @@ func _ensure_tutorial_overlay() -> void:
 	_tutorial_toggle_button.offset_bottom = -8
 	_tutorial_toggle_button.pressed.connect(_on_tutorial_toggle_pressed)
 	_tutorial_root.add_child(_tutorial_toggle_button)
+	_reposition_tutorial_button_for_mobile()
+
+
+func _reposition_tutorial_button_for_mobile() -> void:
+	if _mobile_tutorial_button_relocated:
+		return
+	if not _is_touch_device():
+		return
+	if _tutorial_toggle_button == null:
+		return
+	# Keep tutorial button away from bottom-left joystick area on phones.
+	_tutorial_toggle_button.offset_left = 108
+	_tutorial_toggle_button.offset_right = 192
+	_tutorial_toggle_button.offset_top = -34
+	_tutorial_toggle_button.offset_bottom = -8
+	_mobile_tutorial_button_relocated = true
 
 
 func _on_tutorial_panel_gui_input(event: InputEvent) -> void:

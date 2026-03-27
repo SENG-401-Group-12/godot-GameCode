@@ -9,6 +9,7 @@ const _SEC := "settings"
 
 var master_linear: float = 1.0
 var music_linear: float = 0.75
+var gameplay_music_linear: float = 0.75
 var sfx_linear: float = 0.75
 var fullscreen: bool = false
 var vsync_enabled: bool = true
@@ -26,6 +27,7 @@ func load_from_disk() -> void:
 		return
 	master_linear = clampf(float(cf.get_value(_SEC, "master_linear", 1.0)), 0.0, 1.0)
 	music_linear = clampf(float(cf.get_value(_SEC, "music_linear", 0.75)), 0.0, 1.0)
+	gameplay_music_linear = clampf(float(cf.get_value(_SEC, "gameplay_music_linear", 0.75)), 0.0, 1.0)
 	sfx_linear = clampf(float(cf.get_value(_SEC, "sfx_linear", 0.75)), 0.0, 1.0)
 	fullscreen = bool(cf.get_value(_SEC, "fullscreen", false))
 	vsync_enabled = bool(cf.get_value(_SEC, "vsync", true))
@@ -36,6 +38,7 @@ func save_to_disk() -> void:
 	cf.load(_CFG_PATH)
 	cf.set_value(_SEC, "master_linear", master_linear)
 	cf.set_value(_SEC, "music_linear", music_linear)
+	cf.set_value(_SEC, "gameplay_music_linear", gameplay_music_linear)
 	cf.set_value(_SEC, "sfx_linear", sfx_linear)
 	cf.set_value(_SEC, "fullscreen", fullscreen)
 	cf.set_value(_SEC, "vsync", vsync_enabled)
@@ -46,6 +49,7 @@ func save_to_disk() -> void:
 func _reset_defaults() -> void:
 	master_linear = 1.0
 	music_linear = 0.75
+	gameplay_music_linear = 0.75
 	sfx_linear = 0.75
 	fullscreen = false
 	vsync_enabled = true
@@ -66,6 +70,15 @@ func get_music_volume_db() -> float:
 	return linear_to_db(get_music_linear())
 
 
+## Combined linear gain specifically for base gameplay BGM (game + tension).
+func get_gameplay_music_linear() -> float:
+	return clampf(master_linear * music_linear * gameplay_music_linear, 0.0001, 1.0)
+
+
+func get_gameplay_music_volume_db() -> float:
+	return linear_to_db(get_gameplay_music_linear())
+
+
 func get_sfx_linear() -> float:
 	return clampf(master_linear * sfx_linear, 0.0001, 1.0)
 
@@ -80,6 +93,14 @@ func apply_display_settings() -> void:
 	# Web canvas should track browser viewport; forcing desktop 1280x720 here causes
 	# input/canvas scale mismatch (quarter-screen clicks) on some hosts.
 	if OS.has_feature("web"):
+		# On touch browsers, fill the viewport without preserving fixed desktop aspect.
+		# This removes side gutters/bars and matches touch coordinates better.
+		if OS.has_feature("web_android") or OS.has_feature("web_ios"):
+			w.content_scale_mode = Window.CONTENT_SCALE_MODE_CANVAS_ITEMS
+			w.content_scale_aspect = Window.CONTENT_SCALE_ASPECT_IGNORE
+		else:
+			w.content_scale_mode = Window.CONTENT_SCALE_MODE_CANVAS_ITEMS
+			w.content_scale_aspect = Window.CONTENT_SCALE_ASPECT_EXPAND
 		if fullscreen:
 			w.mode = Window.MODE_FULLSCREEN
 		else:

@@ -97,6 +97,12 @@ func _peak_db() -> float:
 	return GameSettings.get_music_volume_db()
 
 
+func _peak_db_for_key(key: String) -> float:
+	if key == "gameplay" or key == "tension":
+		return GameSettings.get_gameplay_music_volume_db()
+	return _peak_db()
+
+
 func _on_game_settings_changed() -> void:
 	_stinger.volume_db = _peak_db()
 	if _fade_tween != null and _fade_tween.is_valid():
@@ -318,7 +324,7 @@ func _crossfade_to(key: String, stream: AudioStream) -> void:
 	_set_bgm_loop(stream)
 	_apply_bgm_pitch_for_key(key)
 	var duration := 0.35
-	var peak := _peak_db()
+	var peak := _peak_db_for_key(key)
 	_kill_fade()
 	if not _bgm.playing or _bgm.stream == null:
 		_bgm.stream = stream
@@ -332,7 +338,7 @@ func _crossfade_to(key: String, stream: AudioStream) -> void:
 	_fade_tween.tween_property(_bgm, "volume_db", peak - 50.0, duration * 0.45).set_ease(Tween.EASE_IN)
 	_fade_tween.tween_callback(
 		func() -> void:
-			var p := _peak_db()
+			var p := _peak_db_for_key(key)
 			_apply_bgm_pitch_for_key(key)
 			_bgm.stream = stream
 			_bgm.volume_db = p - 50.0

@@ -93,6 +93,28 @@ custom_minimum_size = Vector2(44, 0)
 layout_mode = 2
 text = "75%"
 
+[node name="GameplayMusicRow" type="HBoxContainer" parent="Margin/RootVBox/Scroll/ScrollVBox"]
+layout_mode = 2
+
+[node name="LblGameplay" type="Label" parent="Margin/RootVBox/Scroll/ScrollVBox/GameplayMusicRow"]
+custom_minimum_size = Vector2(96, 0)
+layout_mode = 2
+text = "Base game"
+
+[node name="GameplayMusicSlider" type="HSlider" parent="Margin/RootVBox/Scroll/ScrollVBox/GameplayMusicRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(100, 22)
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 100.0
+step = 1.0
+value = 75.0
+
+[node name="GameplayMusicValue" type="Label" parent="Margin/RootVBox/Scroll/ScrollVBox/GameplayMusicRow"]
+custom_minimum_size = Vector2(44, 0)
+layout_mode = 2
+text = "75%"
+
 [node name="SfxRow" type="HBoxContainer" parent="Margin/RootVBox/Scroll/ScrollVBox"]
 layout_mode = 2
 

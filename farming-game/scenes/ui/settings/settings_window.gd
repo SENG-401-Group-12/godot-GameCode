@@ -4,9 +4,11 @@ const UI_FONT = preload("res://assets/game/ui/fonts/PixelOperator8.ttf")
 
 @onready var _master_slider: HSlider = $Margin/RootVBox/Scroll/ScrollVBox/MasterRow/MasterSlider
 @onready var _music_slider: HSlider = $Margin/RootVBox/Scroll/ScrollVBox/MusicRow/MusicSlider
+@onready var _gameplay_music_slider: HSlider = $Margin/RootVBox/Scroll/ScrollVBox/GameplayMusicRow/GameplayMusicSlider
 @onready var _sfx_slider: HSlider = $Margin/RootVBox/Scroll/ScrollVBox/SfxRow/SfxSlider
 @onready var _master_value: Label = $Margin/RootVBox/Scroll/ScrollVBox/MasterRow/MasterValue
 @onready var _music_value: Label = $Margin/RootVBox/Scroll/ScrollVBox/MusicRow/MusicValue
+@onready var _gameplay_music_value: Label = $Margin/RootVBox/Scroll/ScrollVBox/GameplayMusicRow/GameplayMusicValue
 @onready var _sfx_value: Label = $Margin/RootVBox/Scroll/ScrollVBox/SfxRow/SfxValue
 @onready var _fullscreen: CheckButton = $Margin/RootVBox/Scroll/ScrollVBox/FullscreenCheck
 @onready var _vsync: CheckButton = $Margin/RootVBox/Scroll/ScrollVBox/VsyncCheck
@@ -20,6 +22,7 @@ func _ready() -> void:
 	_apply_fonts(self)
 	_master_slider.value_changed.connect(_on_master_changed)
 	_music_slider.value_changed.connect(_on_music_changed)
+	_gameplay_music_slider.value_changed.connect(_on_gameplay_music_changed)
 	_sfx_slider.value_changed.connect(_on_sfx_changed)
 	_fullscreen.toggled.connect(_on_fullscreen_toggled)
 	_vsync.toggled.connect(_on_vsync_toggled)
@@ -41,16 +44,19 @@ func open_settings() -> void:
 func _sync_from_settings() -> void:
 	_master_slider.set_block_signals(true)
 	_music_slider.set_block_signals(true)
+	_gameplay_music_slider.set_block_signals(true)
 	_sfx_slider.set_block_signals(true)
 	_fullscreen.set_block_signals(true)
 	_vsync.set_block_signals(true)
 	_master_slider.value = int(round(GameSettings.master_linear * 100.0))
 	_music_slider.value = int(round(GameSettings.music_linear * 100.0))
+	_gameplay_music_slider.value = int(round(GameSettings.gameplay_music_linear * 100.0))
 	_sfx_slider.value = int(round(GameSettings.sfx_linear * 100.0))
 	_fullscreen.button_pressed = GameSettings.fullscreen
 	_vsync.button_pressed = GameSettings.vsync_enabled
 	_master_slider.set_block_signals(false)
 	_music_slider.set_block_signals(false)
+	_gameplay_music_slider.set_block_signals(false)
 	_sfx_slider.set_block_signals(false)
 	_fullscreen.set_block_signals(false)
 	_vsync.set_block_signals(false)
@@ -60,6 +66,7 @@ func _sync_from_settings() -> void:
 func _refresh_labels() -> void:
 	_master_value.text = "%d%%" % int(_master_slider.value)
 	_music_value.text = "%d%%" % int(_music_slider.value)
+	_gameplay_music_value.text = "%d%%" % int(_gameplay_music_slider.value)
 	_sfx_value.text = "%d%%" % int(_sfx_slider.value)
 
 
@@ -71,6 +78,12 @@ func _on_master_changed(v: float) -> void:
 
 func _on_music_changed(v: float) -> void:
 	GameSettings.music_linear = clampf(v / 100.0, 0.0, 1.0)
+	GameSettings.save_to_disk()
+	_refresh_labels()
+
+
+func _on_gameplay_music_changed(v: float) -> void:
+	GameSettings.gameplay_music_linear = clampf(v / 100.0, 0.0, 1.0)
 	GameSettings.save_to_disk()
 	_refresh_labels()
 

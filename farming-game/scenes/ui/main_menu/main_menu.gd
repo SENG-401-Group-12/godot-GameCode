@@ -61,6 +61,7 @@ var _auth_reset_mode := false
 var _forgot_password_retry_until_unix: int = 0
 var _forgot_password_timer: Timer
 var _mobile_audio_unlock_done := false
+var _mobile_fullscreen_requested := false
 
 func _ready() -> void:
 	get_tree().paused = false
@@ -167,8 +168,48 @@ func _on_mobile_lineedit_gui_input(event: InputEvent, field: LineEdit) -> void:
 		return
 	if event is InputEventScreenTouch and event.pressed:
 		field.grab_focus()
+		_mobile_prompt_fill_lineedit(field)
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		field.grab_focus()
+		_mobile_prompt_fill_lineedit(field)
+
+
+func _mobile_prompt_fill_lineedit(field: LineEdit) -> void:
+	if not OS.has_feature("web"):
+		return
+	if not _is_touch_device():
+		return
+	var prompt_label := field.placeholder_text if not field.placeholder_text.is_empty() else "Enter text"
+	var current := field.text
+	var escaped_label := JSON.stringify(prompt_label)
+	var escaped_current := JSON.stringify(current)
+	var js := (
+		"(function(){try{var v=window.prompt(%s,%s);if(v===null){return '__cancel__';}return String(v);}catch(e){return '__cancel__';}})();"
+		% [escaped_label, escaped_current]
+	)
+	var result := str(JavaScriptBridge.eval(js, true))
+	if result == "__cancel__":
+		return
+	field.text = result
+	field.caret_column = field.text.length()
+
+
+func _request_mobile_web_fullscreen() -> void:
+	if _mobile_fullscreen_requested:
+		return
+	if not OS.has_feature("web"):
+		return
+	if not _is_touch_device():
+		return
+	_mobile_fullscreen_requested = true
+	# iOS Safari may ignore full-screen for arbitrary pages; Android browsers usually allow this on gesture.
+	JavaScriptBridge.eval(
+		"(function(){try{var d=document.documentElement;if(!document.fullscreenElement){"
+		+ "if(d.requestFullscreen){d.requestFullscreen();}else if(d.webkitRequestFullscreen){d.webkitRequestFullscreen();}}"
+		+ "if(screen.orientation&&screen.orientation.lock){screen.orientation.lock('landscape').catch(function(){});}"
+		+ "}catch(e){}})();",
+		true
+	)
 
 
 func _try_unlock_mobile_audio() -> void:
@@ -510,6 +551,7 @@ func _set_mode_pick_open(open: bool) -> void:
 
 func _on_play_pressed() -> void:
 	_try_unlock_mobile_audio()
+	_request_mobile_web_fullscreen()
 	GameProgress.tutorial_mode = false
 	GameProgress.exit_tutorial_to_main_menu = false
 	_leaderboard_layer.visible = false
