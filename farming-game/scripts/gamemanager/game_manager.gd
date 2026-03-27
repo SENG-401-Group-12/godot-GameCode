@@ -147,7 +147,7 @@ func _start_tutorial_game() -> void:
 	_tutorial_step = TutorialStep.PLANT
 	_set_tutorial_objective(
 		"Welcome to Harvest For All!",
-		"This game is about Zero Hunger (UN SDG 2): you grow food and help feed people who need it.\n\nStep 1 - Plant: On the RIGHT, click a crop to choose your seed. Walk onto the brown farm plot and press E to plant. Go at your own pace - the next message waits until you finish this step."
+		"SDG #2: Zero Hunger\n\nWe can help solve this by growing food and feeding others!\n\nStep 1 - Plant: choose a crop on the right, stand on soil, interact to plant."
 	)
 
 
@@ -156,7 +156,7 @@ func _on_tutorial_crop_planted(_crop_name: String) -> void:
 		_tutorial_step = TutorialStep.HARVEST
 		_set_tutorial_objective(
 			"Help someone eat today",
-			"Step 2 - Grow food: Wait on the plot until your crop is ready. Press E on the plot again to harvest. That food is what you will share with someone who is hungry. There is no timer pressure here."
+			"Step 2 - Harvest: wait for the crop, then interact with the plot to harvest."
 		)
 
 
@@ -167,7 +167,7 @@ func _on_tutorial_crop_harvested(crop_name: String) -> void:
 	_spawn_tutorial_customer(crop_name)
 	_set_tutorial_objective(
 		"Share your harvest",
-		"Step 3 - Feed them: A hungry visitor wants the crop you grew. Walk up to them and press E to give them food from your stash.\n\nSeeds: the faster you feed them (more time left on their timer), the more seeds you earn for the shop. Slow feeds still pay, but quick serves pay best.\n\nCombos: if you serve customers quickly one after another, you build a combo streak and get bonus seeds."
+		"Step 3 - Feed: stand near the visitor and interact to feed them.\n\nThe faster you feed them, the more seeds you earn.\nQuick back-to-back feeds build combos for extra seeds."
 	)
 
 
@@ -196,7 +196,7 @@ func _on_tutorial_customer_served(_c: Node2D) -> void:
 	_tutorial_step = TutorialStep.SHOP
 	_set_tutorial_objective(
 		"Grow more, grow faster",
-		"Great work - you helped feed someone!\n\nStep 4 - Shop: Walk to the shop stall and press E to open it. Pick one upgrade - a bigger garden or faster crops - so you can grow more food for more people later."
+		"Step 4 - Shop: interact with the stall to open it, then buy one upgrade.\nBigger farm/faster growth helps you feed more people."
 	)
 
 
@@ -207,7 +207,7 @@ func _on_tutorial_upgrade_bought() -> void:
 	_tutorial_waiting_for_exit_click = true
 	_set_tutorial_objective(
 		"Tutorial complete",
-		"You planted food, shared it with someone who was hungry, and saw how upgrades help you feed even more people.\n\nTip: your active upgrades are shown as icons at the bottom right. Hover them to see details.\n\nClick this tutorial box once to continue."
+		"You planted, harvested, fed, and upgraded.\nTip: feed early + chain combos to earn more seeds.\n\nClick this box to continue."
 	)
 
 

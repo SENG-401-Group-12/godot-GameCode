@@ -7,7 +7,33 @@ const TYPE_BLIP_PATH := "res://assets/audio/sfx/ui_type_blip.wav"
 const TUTORIAL_CHARS_PER_SECOND := 38.0
 const TUTORIAL_PROMPT_TYPING := "Click here or press Space to show the full message."
 const TUTORIAL_PROMPT_WAIT := "Click this box to hide. Use the Tutorial button to bring it back."
+const TUTORIAL_BODY_CONTINUE_MARK := "Click this box to continue."
+## Feed step: body and/or title we use to dock the panel away from the visitor.
+const TUTORIAL_BODY_STEP3_FEED_MARK := "Step 3 - Feed:"
+const TUTORIAL_TITLE_STEP3_FEED := "Share your harvest"
+## Shop tutorial (field): wide strip close to crop UI before stall is opened.
+const TUTORIAL_BODY_STEP4_SHOP_MARK := "Step 4 - Shop:"
+const TUTORIAL_TITLE_STEP4_SHOP := "Grow more, grow faster"
+## Min horizontal gap between tutorial panel and crop column (avoids crowding / visual bleed).
+const TUTORIAL_CLEARANCE_FROM_CROP_PX := 34.0
+## Step 3 only: a bit tighter — lots of clear space; buys width for less line-wrapping.
+const TUTORIAL_FEED_CLEARANCE_FROM_CROP_PX := 5.0
+## Step 4 in the field: hug crop menu a bit more than default top-left clearance.
+const TUTORIAL_SHOP_FIELD_CLEARANCE_FROM_CROP_PX := 18.0
+## Shop open: symmetric inset from viewport edges; inner chrome = margin container + panel style margins.
+const TUTORIAL_FULL_TOP_H_INSET := 6.0
+const TUTORIAL_FULL_TOP_LABEL_CHROME_X := 36.0
 const ENDLESS_MAX_MISSES := 10
+
+enum TutorialPanelDock {
+	TOP_LEFT,
+	## Top of screen, right-aligned in the playfield strip just left of stored crops (e.g. feed step).
+	TOP_RIGHT_BEFORE_CROPS,
+	## Step 4 before shop opens: wide bar near crop column (same anchor style as feed).
+	SHOP_STEP_FIELD,
+	## Step 4 with shop UI open: full-width top banner.
+	SHOP_STEP_FULL_TOP,
+}
 
 @onready var wave_label: Label = $MarginContainer/HBoxContainer/StatusPanel/MarginContainer/VBoxContainer/WaveLabel
 @onready var progress_label: Label = $MarginContainer/HBoxContainer/StatusPanel/MarginContainer/VBoxContainer/ProgressLabel
@@ -50,11 +76,14 @@ var _tutorial_title_text: String = ""
 var _tutorial_body_text: String = ""
 var _tutorial_visible_chars: int = 0
 var _tutorial_is_typing: bool = false
+var _tutorial_panel_dock: TutorialPanelDock = TutorialPanelDock.TOP_LEFT
+var _tutorial_shop_ui_open: bool = false
 
 var crop_button_nodes: Array[Button] = []
 var _upgrade_tooltip_panel: PanelContainer = null
 var _upgrade_tooltip_label: Label = null
 var _mobile_tutorial_button_relocated := false
+var _tutorial_upgrade_dock_offset_top_saved: float = NAN
 
 func _is_touch_device() -> bool:
 	if OS.has_feature("mobile") or OS.has_feature("web_android") or OS.has_feature("web_ios"):
@@ -67,7 +96,9 @@ func _ready() -> void:
 	if _is_touch_device():
 		_apply_mobile_layout()
 		get_viewport().size_changed.connect(_apply_mobile_layout)
+		get_viewport().size_changed.connect(_on_viewport_size_for_tutorial_fit)
 	else:
+		get_viewport().size_changed.connect(_on_viewport_size_for_tutorial_fit)
 		$Joystick.queue_free()
 		$InteractButton.queue_free()
 		$MobilePauseButton.queue_free()
@@ -92,7 +123,7 @@ func _ready() -> void:
 	if GameProgress.tutorial_mode:
 		begin_tutorial_hud()
 	else:
-		_show_message("Tip: pick a crop → plant → harvest → feed customers with E. Feed quickly (more time left on their timer) to earn more seeds.")
+		_show_message("Tip: pick a crop → plant → harvest → interact with customers to feed them. Feed quickly (more time left on their timer) to earn more seeds.")
 	set_process(false)
 
 
@@ -103,6 +134,8 @@ func _apply_mobile_layout() -> void:
 	if crop_panel_frame != null:
 		crop_panel_frame.custom_minimum_size.x = clampf(vp.x * 0.24, 130.0, 160.0)
 		crop_panel_frame.custom_minimum_size.y = clampf(vp.y - 52.0, 220.0, 320.0)
+	if GameProgress.tutorial_mode:
+		call_deferred("_fit_tutorial_panel_layout_sync")
 	if interact_touch_button != null:
 		var scale_factor := clampf(vp.y / 720.0, 0.58, 0.78)
 		interact_touch_button.scale = Vector2(scale_factor, scale_factor)
@@ -148,6 +181,7 @@ func _on_tutorial_type_timer_timeout() -> void:
 	var ch: String = _tutorial_target_text[_tutorial_visible_chars]
 	_tutorial_visible_chars += 1
 	_tutorial_main.text = _tutorial_target_text.substr(0, _tutorial_visible_chars)
+	_fit_tutorial_panel_layout_sync()
 	if _should_play_blip_for_char(ch) and (_tutorial_visible_chars % 2 == 0):
 		_play_type_blip()
 	if _tutorial_visible_chars >= _tutorial_target_text.length():
@@ -170,14 +204,23 @@ func _play_type_blip() -> void:
 	_type_player.play()
 
 
+func _tutorial_skip_footer_prompt() -> bool:
+	# Final screen already says "Click this box to continue." in the main text — hide the extra footer line.
+	return _tutorial_target_text.contains(TUTORIAL_BODY_CONTINUE_MARK)
+
+
 func _finish_tutorial_typing() -> void:
 	_tutorial_is_typing = false
 	_stop_tutorial_typing_timer()
 	if is_instance_valid(_tutorial_main):
 		_tutorial_main.text = _tutorial_target_text
 	if is_instance_valid(_tutorial_prompt):
-		_tutorial_prompt.text = TUTORIAL_PROMPT_WAIT
-		_tutorial_prompt.visible = true
+		if _tutorial_skip_footer_prompt():
+			_tutorial_prompt.visible = false
+		else:
+			_tutorial_prompt.text = TUTORIAL_PROMPT_WAIT
+			_tutorial_prompt.visible = true
+	_fit_tutorial_panel_layout_sync()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -263,7 +306,9 @@ func _crop_upgrade_tooltip(crop_name: String) -> String:
 		lines.append("Growth: −%.2fs" % float(st.growth_speed_bonus))
 	var sb: Vector2i = st.get("size_bonus", Vector2i.ZERO)
 	if sb != Vector2i.ZERO:
-		lines.append("Farm size: +%d × %d" % [sb.x, sb.y])
+		var base_tiles: Vector2i = Globals.default_farm_size
+		var now_tiles := base_tiles + sb
+		lines.append("Farm tiles: %dx%d (from %dx%d)" % [now_tiles.x, now_tiles.y, base_tiles.x, base_tiles.y])
 	return "\n".join(lines)
 
 
@@ -316,7 +361,7 @@ func _refresh_upgrade_hud() -> void:
 
 
 func _on_selected_crop_changed(crop_name: String) -> void:
-	selected_crop_label.text = "Selected seed:\n%s" % crop_name
+	selected_crop_label.text = "Selected crop:\n%s" % crop_name
 	if selected_crop_icon:
 		var tex: Texture2D = null
 		for c in Globals.game_crops:
@@ -352,6 +397,8 @@ func begin_tutorial_hud() -> void:
 	if _tutorial_layer:
 		_tutorial_layer.visible = true
 	_refresh_upgrade_hud()
+	if is_instance_valid(_tutorial_panel):
+		_fit_tutorial_panel_layout_sync()
 
 
 func _ensure_tutorial_overlay() -> void:
@@ -381,8 +428,10 @@ func _ensure_tutorial_overlay() -> void:
 	_tutorial_layer.add_child(_tutorial_type_timer)
 
 	_tutorial_panel = PanelContainer.new()
-	_tutorial_panel.visible = true
+	_tutorial_panel.visible = false
 	_tutorial_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	_tutorial_panel.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_tutorial_panel.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	var panel_bg := StyleBoxFlat.new()
 	panel_bg.bg_color = Color(0.02, 0.02, 0.06, 0.92)
 	panel_bg.set_corner_radius_all(6)
@@ -392,13 +441,13 @@ func _ensure_tutorial_overlay() -> void:
 	panel_bg.content_margin_bottom = 4
 	_tutorial_panel.add_theme_stylebox_override("panel", panel_bg)
 	_tutorial_root.add_child(_tutorial_panel)
-	_tutorial_panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	_tutorial_panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
 	_tutorial_panel.offset_left = 6
 	_tutorial_panel.offset_top = 6
-	_tutorial_panel.offset_right = -6
-	_tutorial_panel.offset_bottom = 140
 
 	var margin := MarginContainer.new()
+	margin.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	margin.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	margin.add_theme_constant_override("margin_left", 12)
 	margin.add_theme_constant_override("margin_top", 8)
 	margin.add_theme_constant_override("margin_right", 12)
@@ -406,6 +455,8 @@ func _ensure_tutorial_overlay() -> void:
 	_tutorial_panel.add_child(margin)
 
 	var vbox := VBoxContainer.new()
+	vbox.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	vbox.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	vbox.add_theme_constant_override("separation", 10)
 	margin.add_child(vbox)
 
@@ -416,12 +467,15 @@ func _ensure_tutorial_overlay() -> void:
 	_tutorial_main.add_theme_color_override("font_outline_color", Color(0.04, 0.04, 0.08))
 	_tutorial_main.add_theme_constant_override("outline_size", 3)
 	_tutorial_main.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_tutorial_main.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_tutorial_main.custom_minimum_size = Vector2(0, 70)
+	_tutorial_main.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_tutorial_main.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	_tutorial_main.custom_minimum_size = Vector2(0, 0)
 	_tutorial_main.text = ""
 	vbox.add_child(_tutorial_main)
 
 	_tutorial_prompt = Label.new()
+	_tutorial_prompt.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_tutorial_prompt.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	_tutorial_prompt.add_theme_font_override("font", UI_FONT)
 	_tutorial_prompt.add_theme_font_size_override("font_size", 8)
 	_tutorial_prompt.add_theme_color_override("font_color", Color(0.72, 0.82, 1.0))
@@ -448,6 +502,190 @@ func _ensure_tutorial_overlay() -> void:
 	_tutorial_toggle_button.pressed.connect(_on_tutorial_toggle_pressed)
 	_tutorial_root.add_child(_tutorial_toggle_button)
 	_reposition_tutorial_button_for_mobile()
+	var mw0 := _compute_tutorial_panel_max_width()
+	_tutorial_main.custom_minimum_size = Vector2(mw0, 0)
+	_tutorial_prompt.custom_minimum_size.x = mw0
+	_apply_tutorial_panel_size_from_content()
+
+
+func _on_viewport_size_for_tutorial_fit() -> void:
+	if not GameProgress.tutorial_mode:
+		return
+	_fit_tutorial_panel_layout_sync()
+
+
+func _active_tutorial_dock() -> TutorialPanelDock:
+	if _tutorial_panel_dock == TutorialPanelDock.SHOP_STEP_FIELD and _tutorial_shop_ui_open:
+		return TutorialPanelDock.SHOP_STEP_FULL_TOP
+	return _tutorial_panel_dock
+
+
+func _compute_tutorial_panel_max_width() -> float:
+	var vp := get_viewport_rect().size
+	var panel_left := 6.0
+	var dock := _active_tutorial_dock()
+
+	if dock == TutorialPanelDock.SHOP_STEP_FULL_TOP:
+		var vr := get_viewport().get_visible_rect()
+		var w_avail := vr.size.x - 2.0 * TUTORIAL_FULL_TOP_H_INSET
+		return clampf(w_avail - TUTORIAL_FULL_TOP_LABEL_CHROME_X, 200.0, w_avail)
+
+	if crop_panel_frame != null and crop_panel_frame.is_visible_in_tree():
+		var crop_left: float = crop_panel_frame.global_position.x
+		# Keep the tutorial box strictly left of the crop column with visible air.
+		var w: float = crop_left - TUTORIAL_CLEARANCE_FROM_CROP_PX - panel_left
+		if dock == TutorialPanelDock.TOP_RIGHT_BEFORE_CROPS:
+			var strip_right: float = crop_left - TUTORIAL_FEED_CLEARANCE_FROM_CROP_PX
+			var visitor_left_clear: float = maxf(172.0, vp.x * 0.28)
+			w = minf(w, strip_right - panel_left)
+			w = minf(w, vp.x * 0.58 - panel_left)
+			w = minf(w, strip_right - visitor_left_clear)
+		elif dock == TutorialPanelDock.SHOP_STEP_FIELD:
+			var strip_right_s := crop_left - TUTORIAL_SHOP_FIELD_CLEARANCE_FROM_CROP_PX
+			var left_reserve := maxf(28.0, vp.x * 0.025)
+			w = minf(w, strip_right_s - panel_left)
+			w = minf(w, vp.x * 0.94 - panel_left)
+			w = minf(w, strip_right_s - left_reserve)
+		return clampf(w, 100.0, vp.x - 16.0)
+
+	if dock == TutorialPanelDock.TOP_RIGHT_BEFORE_CROPS:
+		return clampf(minf(vp.x * 0.58 - panel_left, vp.x * 0.55), 180.0, vp.x - 16.0)
+	if dock == TutorialPanelDock.SHOP_STEP_FIELD:
+		return clampf(vp.x * 0.93 - panel_left, 220.0, vp.x - 16.0)
+	return clampf(vp.x * 0.55, 200.0, vp.x - 16.0)
+
+
+func _apply_tutorial_panel_size_from_content() -> void:
+	if not is_instance_valid(_tutorial_panel):
+		return
+	_tutorial_panel.reset_size()
+	var sz: Vector2 = _tutorial_panel.get_combined_minimum_size()
+	_tutorial_panel.size = sz
+	_apply_tutorial_panel_dock_position(sz)
+
+
+func _apply_tutorial_panel_dock_position(sz: Vector2) -> void:
+	if not is_instance_valid(_tutorial_panel):
+		return
+	const margin := 6.0
+	match _active_tutorial_dock():
+		TutorialPanelDock.TOP_RIGHT_BEFORE_CROPS:
+			_apply_tutorial_panel_dock_top_right_before_crops(sz, margin)
+		TutorialPanelDock.SHOP_STEP_FIELD:
+			_apply_tutorial_dock_shop_step_field(sz, margin)
+		TutorialPanelDock.SHOP_STEP_FULL_TOP:
+			_apply_tutorial_panel_dock_full_width_top(sz, margin)
+		_:
+			_apply_tutorial_panel_dock_top_left(sz, margin)
+
+
+func _apply_tutorial_panel_dock_top_right_before_crops(sz: Vector2, margin: float) -> void:
+	var crop_left: float = get_viewport_rect().size.x
+	if crop_panel_frame != null and crop_panel_frame.is_visible_in_tree():
+		crop_left = crop_panel_frame.global_position.x
+	var right_edge := crop_left - TUTORIAL_FEED_CLEARANCE_FROM_CROP_PX
+	var x := right_edge - sz.x
+	x = maxf(margin, x)
+	_tutorial_panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	_tutorial_panel.offset_left = x
+	_tutorial_panel.offset_top = margin
+	_tutorial_panel.size = sz
+
+
+func _apply_tutorial_dock_shop_step_field(sz: Vector2, margin: float) -> void:
+	var crop_left: float = get_viewport_rect().size.x
+	if crop_panel_frame != null and crop_panel_frame.is_visible_in_tree():
+		crop_left = crop_panel_frame.global_position.x
+	var right_edge := crop_left - TUTORIAL_SHOP_FIELD_CLEARANCE_FROM_CROP_PX
+	var x := right_edge - sz.x
+	x = maxf(margin, x)
+	_tutorial_panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	_tutorial_panel.offset_left = x
+	_tutorial_panel.offset_top = margin
+	_tutorial_panel.size = sz
+
+
+func _apply_tutorial_panel_dock_full_width_top(sz: Vector2, margin: float) -> void:
+	var vr := get_viewport().get_visible_rect()
+	var h_inset := TUTORIAL_FULL_TOP_H_INSET
+	var full_w := maxf(120.0, vr.size.x - 2.0 * h_inset)
+	_tutorial_panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	_tutorial_panel.offset_left = vr.position.x + h_inset
+	_tutorial_panel.offset_top = vr.position.y + margin
+	_tutorial_panel.size = Vector2(full_w, sz.y)
+
+
+func _apply_tutorial_panel_dock_top_left(sz: Vector2, margin: float) -> void:
+	_tutorial_panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	var x := margin
+	if crop_panel_frame != null and crop_panel_frame.is_visible_in_tree():
+		var crop_left: float = crop_panel_frame.global_position.x
+		var right_limit := crop_left - TUTORIAL_CLEARANCE_FROM_CROP_PX
+		if x + sz.x > right_limit:
+			x = maxf(margin, right_limit - sz.x)
+	_tutorial_panel.offset_left = x
+	_tutorial_panel.offset_top = margin
+	_tutorial_panel.size = sz
+
+
+func _fit_tutorial_panel_layout_sync() -> void:
+	if not GameProgress.tutorial_mode:
+		return
+	if not is_instance_valid(_tutorial_panel) or not is_instance_valid(_tutorial_main):
+		return
+	var max_w := _compute_tutorial_panel_max_width()
+	_tutorial_main.custom_minimum_size = Vector2(max_w, 0)
+	if is_instance_valid(_tutorial_prompt):
+		_tutorial_prompt.custom_minimum_size.x = max_w
+	_apply_tutorial_panel_size_from_content()
+	_refresh_shop_tutorial_inset_if_open()
+
+
+func is_tutorial_banner_visible() -> bool:
+	return is_instance_valid(_tutorial_panel) and _tutorial_panel.visible and is_instance_valid(_tutorial_layer) and _tutorial_layer.visible
+
+
+## Target ShopUI margin_top (viewport pixels) so content clears the tutorial banner — not additive with base margin.
+func get_shop_top_inset_for_tutorial_shop() -> float:
+	var slack := 5.0 if _is_touch_device() else 8.0
+	if not GameProgress.tutorial_mode or not is_tutorial_banner_visible():
+		# Fail-safe: small gap only (avoid huge empty strip before layout).
+		return 72.0 if _is_touch_device() else 80.0
+	var r := _tutorial_panel.get_global_rect()
+	if r.size.y < 2.0:
+		return 84.0 if _is_touch_device() else 92.0
+	return r.position.y + r.size.y + slack
+
+
+func set_tutorial_shop_upgrade_dock_pushed(pushed: bool) -> void:
+	if upgrade_dock == null:
+		return
+	if not GameProgress.tutorial_mode:
+		pushed = false
+	# Smaller nudge on mobile — dock shares the bottom corner with the interact button.
+	var delta := 12.0 if _is_touch_device() else 22.0
+	if pushed:
+		if is_nan(_tutorial_upgrade_dock_offset_top_saved):
+			_tutorial_upgrade_dock_offset_top_saved = upgrade_dock.offset_top
+		upgrade_dock.offset_top = _tutorial_upgrade_dock_offset_top_saved + delta
+	else:
+		if not is_nan(_tutorial_upgrade_dock_offset_top_saved):
+			upgrade_dock.offset_top = _tutorial_upgrade_dock_offset_top_saved
+		_tutorial_upgrade_dock_offset_top_saved = NAN
+
+
+func _refresh_shop_tutorial_inset_if_open() -> void:
+	if not GameProgress.tutorial_mode:
+		return
+	var su := get_node_or_null("../ShopUI")
+	if su != null and su.has_method("refresh_tutorial_top_inset"):
+		su.refresh_tutorial_top_inset()
+
+
+func refresh_tutorial_layout_for_shop(shop_open: bool) -> void:
+	_tutorial_shop_ui_open = shop_open
+	if GameProgress.tutorial_mode and is_instance_valid(_tutorial_panel):
+		_fit_tutorial_panel_layout_sync()
 
 
 func _reposition_tutorial_button_for_mobile() -> void:
@@ -471,6 +709,7 @@ func _on_tutorial_panel_gui_input(event: InputEvent) -> void:
 			_tutorial_advance()
 		elif _tutorial_panel:
 			_tutorial_panel.visible = false
+			_refresh_shop_tutorial_inset_if_open()
 			tutorial_box_hidden.emit()
 
 
@@ -491,14 +730,19 @@ func _on_tutorial_toggle_pressed() -> void:
 	if _tutorial_panel.visible:
 		_tutorial_panel.visible = false
 		return
-	_tutorial_panel.visible = true
 	_tutorial_is_typing = false
 	_stop_tutorial_typing_timer()
 	if is_instance_valid(_tutorial_main):
 		_tutorial_main.text = _tutorial_target_text
 	if is_instance_valid(_tutorial_prompt):
-		_tutorial_prompt.text = TUTORIAL_PROMPT_WAIT
-		_tutorial_prompt.visible = true
+		if _tutorial_skip_footer_prompt():
+			_tutorial_prompt.visible = false
+		else:
+			_tutorial_prompt.text = TUTORIAL_PROMPT_WAIT
+			_tutorial_prompt.visible = true
+	_fit_tutorial_panel_layout_sync()
+	_tutorial_panel.visible = true
+	_refresh_shop_tutorial_inset_if_open()
 
 
 func set_tutorial_objective(title: String, body: String) -> void:
@@ -509,14 +753,21 @@ func set_tutorial_objective(title: String, body: String) -> void:
 		_tutorial_layer.visible = true
 	_tutorial_title_text = title
 	_tutorial_body_text = body
+	if body.contains(TUTORIAL_BODY_STEP3_FEED_MARK) or title == TUTORIAL_TITLE_STEP3_FEED:
+		_tutorial_panel_dock = TutorialPanelDock.TOP_RIGHT_BEFORE_CROPS
+	elif body.contains(TUTORIAL_BODY_STEP4_SHOP_MARK) or title == TUTORIAL_TITLE_STEP4_SHOP:
+		_tutorial_panel_dock = TutorialPanelDock.SHOP_STEP_FIELD
+	else:
+		_tutorial_panel_dock = TutorialPanelDock.TOP_LEFT
 	_tutorial_target_text = "%s\n\n%s" % [title, body]
 	_tutorial_visible_chars = 0
 	_stop_tutorial_typing_timer()
-	_tutorial_panel.visible = true
 	_tutorial_main.text = ""
 	if is_instance_valid(_tutorial_prompt):
 		_tutorial_prompt.text = TUTORIAL_PROMPT_TYPING
 		_tutorial_prompt.visible = true
+	_fit_tutorial_panel_layout_sync()
+	_tutorial_panel.visible = true
 	_tutorial_is_typing = true
 	if is_instance_valid(_tutorial_type_timer):
 		_tutorial_type_timer.start()
@@ -528,6 +779,10 @@ func set_tutorial_objective(title: String, body: String) -> void:
 func clear_tutorial_objective() -> void:
 	_tutorial_is_typing = false
 	_stop_tutorial_typing_timer()
+	_tutorial_shop_ui_open = false
+	var su := get_node_or_null("../ShopUI")
+	if su != null and su.has_method("clear_tutorial_top_inset"):
+		su.clear_tutorial_top_inset()
 	process_mode = Node.PROCESS_MODE_INHERIT
 	if is_instance_valid(_tutorial_layer):
 		_tutorial_layer.queue_free()

@@ -171,7 +171,7 @@ layout_mode = 2
 theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("1_455v0")
 theme_override_font_sizes/font_size = 8
-text = "Selected seed:
+text = "Selected crop:
 Turnip
 "
 horizontal_alignment = 1

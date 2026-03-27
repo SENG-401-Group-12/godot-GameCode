@@ -46,13 +46,13 @@ func _set_step(s: int) -> void:
 	_step = s
 	match s:
 		Step.PLANT:
-			step_label.text = "Pick a crop on the right, stand on the soil, then press E (or Interact) to plant."
+			step_label.text = "Pick a seed, stand on soil, then interact to plant."
 		Step.HARVEST:
-			step_label.text = "Wait for it to grow, then harvest the same plot. A visitor will show up wanting that crop."
+			step_label.text = "Wait for growth, then interact with the plot to harvest."
 		Step.FEED:
-			step_label.text = "Stand next to the visitor and press E to hand over what they asked for."
+			step_label.text = "Stand by the visitor and interact to feed. Faster serve = more seeds."
 		Step.SHOP:
-			step_label.text = "Open the shop when the timer hits 0 and buy one upgrade."
+			step_label.text = "Open shop and buy one upgrade."
 		Step.DONE:
 			step_label.text = "All set!"
 
