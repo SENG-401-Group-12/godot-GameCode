@@ -171,8 +171,33 @@ func _on_mobile_lineedit_gui_input(event: InputEvent, field: LineEdit) -> void:
 		return
 	if event is InputEventScreenTouch and event.pressed:
 		field.grab_focus()
+		_mobile_prompt_fill_lineedit(field)
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		field.grab_focus()
+		_mobile_prompt_fill_lineedit(field)
+
+
+func _mobile_prompt_fill_lineedit(field: LineEdit) -> void:
+	if not OS.has_feature("web"):
+		return
+	if not _is_touch_device():
+		return
+	var prompt_label := field.placeholder_text if not field.placeholder_text.is_empty() else "Enter text"
+	var current := field.text
+	var escaped_label := JSON.stringify(prompt_label)
+	var escaped_current := JSON.stringify(current)
+	var js := (
+		"(function(){try{var v=window.prompt(%s,%s);if(v===null){return '__cancel__';}return String(v);}catch(e){return '__cancel__';}})();"
+		% [escaped_label, escaped_current]
+	)
+	var result := str(JavaScriptBridge.eval(js, true))
+	if result == "__cancel__":
+		return
+	# Email should never be capitalized by mobile keyboard autocorrect.
+	if field == _email:
+		result = result.to_lower()
+	field.text = result
+	field.caret_column = field.text.length()
 
 
 func _request_mobile_web_fullscreen() -> void:
@@ -621,7 +646,7 @@ func _on_login_pressed() -> void:
 		_auth_status.text = "Saving new password..."
 		Backend.change_password(new_password)
 		return
-	var em := _email.text.strip_edges()
+	var em := _email.text.strip_edges().to_lower()
 	if not _email_is_valid_format(em):
 		_auth_status.text = "Enter a valid email (needs @ and a domain like .com or .ca)."
 		return
@@ -631,7 +656,7 @@ func _on_login_pressed() -> void:
 
 func _on_signup_pressed() -> void:
 	_try_unlock_mobile_audio()
-	var em := _email.text.strip_edges()
+	var em := _email.text.strip_edges().to_lower()
 	if not _email_is_valid_format(em):
 		_auth_status.text = "Enter a valid email (needs @ and a domain like .com or .ca)."
 		return
@@ -644,7 +669,7 @@ func _on_forgot_password_pressed() -> void:
 	if _forgot_password_seconds_left() > 0:
 		_auth_status.text = "Too many reset requests. Wait %ds and try again." % _forgot_password_seconds_left()
 		return
-	var em := _email.text.strip_edges()
+	var em := _email.text.strip_edges().to_lower()
 	if not _email_is_valid_format(em):
 		_auth_status.text = "Enter your account email first."
 		return

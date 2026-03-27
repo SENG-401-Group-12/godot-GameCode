@@ -458,10 +458,10 @@ func _reposition_tutorial_button_for_mobile() -> void:
 	if _tutorial_toggle_button == null:
 		return
 	# Keep tutorial button away from bottom-left joystick area on phones.
-	_tutorial_toggle_button.offset_left = 108
-	_tutorial_toggle_button.offset_right = 192
-	_tutorial_toggle_button.offset_top = -34
-	_tutorial_toggle_button.offset_bottom = -8
+	_tutorial_toggle_button.offset_left = 132
+	_tutorial_toggle_button.offset_right = 216
+	_tutorial_toggle_button.offset_top = -40
+	_tutorial_toggle_button.offset_bottom = -14
 	_mobile_tutorial_button_relocated = true
 
 
