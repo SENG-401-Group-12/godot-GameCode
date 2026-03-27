@@ -121,16 +121,22 @@ func close_shop() -> void:
 
 ## During tutorial the objective panel lives under InGameUI; hiding the whole control removed it. Only hide gameplay chrome.
 func _set_hud_hidden_for_shop(hidden: bool) -> void:
-	if GameProgress.tutorial_mode:
-		main_hud.get_node("MarginContainer").visible = not hidden
-		var joy := main_hud.get_node_or_null("Joystick")
-		if joy:
-			joy.visible = not hidden
-		var ib := main_hud.get_node_or_null("InteractButton")
-		if ib:
-			ib.visible = not hidden
-	else:
-		main_hud.visible = not hidden
+	var hud_margin := main_hud.get_node_or_null("MarginContainer")
+	if hud_margin:
+		hud_margin.visible = not hidden
+	var joy := main_hud.get_node_or_null("Joystick")
+	if joy:
+		joy.visible = not hidden
+	var ib := main_hud.get_node_or_null("InteractButton")
+	if ib:
+		ib.visible = not hidden
+	# Keep upgrade dock visible so players can inspect active perks while shopping.
+	var upgrade_dock := main_hud.get_node_or_null("UpgradeDock")
+	if upgrade_dock:
+		upgrade_dock.visible = true
+		upgrade_dock.process_mode = Node.PROCESS_MODE_ALWAYS
+		upgrade_dock.z_index = 350
+		upgrade_dock.mouse_filter = Control.MOUSE_FILTER_PASS
 
 
 func _on_reroll_pressed() -> void:

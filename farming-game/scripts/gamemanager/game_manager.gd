@@ -246,10 +246,16 @@ func _start_game() -> void:
 	game_finished = false
 	if not _tutorial_mode:
 		PlayerData.add_currency(STARTING_SEEDS)
+	if game_ui and game_ui.has_method(&"set_mutator_name"):
+		var mutator_short := _endless_mutator_name
+		var paren_idx := mutator_short.find(" (")
+		if paren_idx >= 0:
+			mutator_short = mutator_short.substr(0, paren_idx)
+		game_ui.set_mutator_name(mutator_short if _endless_run else "")
 	var intro := "Hungry customers will be coming in %d seconds! Prepare your crops before they show up!" % [start_time_buffer]
 	if _endless_run:
 		intro = "Endless mode — survive as many waves as you can.\nYou can miss at most %d customers total this run.\nMutator: %s\n\n%s" % [ENDLESS_MAX_TOTAL_MISSES, _endless_mutator_name, intro]
-	game_ui._show_message(intro)
+	game_ui._show_message(intro, 6.0 if _endless_run else 2.2)
 	while start_time_buffer >= 0:
 		await get_tree().create_timer(1.0, false).timeout
 		start_time_buffer -= 1

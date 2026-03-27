@@ -10,10 +10,13 @@ const TUTORIAL_PROMPT_WAIT := "Click this box to hide. Use the Tutorial button t
 const ENDLESS_MAX_MISSES := 10
 
 @onready var wave_label: Label = $MarginContainer/HBoxContainer/StatusPanel/MarginContainer/VBoxContainer/WaveLabel
+@onready var mutator_label: Label = $MarginContainer/HBoxContainer/StatusPanel/MarginContainer/VBoxContainer/MutatorLabel
 @onready var progress_label: Label = $MarginContainer/HBoxContainer/StatusPanel/MarginContainer/VBoxContainer/ProgressLabel
 @onready var missed_label: Label = $MarginContainer/HBoxContainer/StatusPanel/MarginContainer/VBoxContainer/MissedLabel
 @onready var active_label: Label = $MarginContainer/HBoxContainer/StatusPanel/MarginContainer/VBoxContainer/ActiveLabel
 @onready var status_panel: Control = $MarginContainer/HBoxContainer/StatusPanel
+@onready var upgrade_dock: Control = $UpgradeDock
+@onready var upgrade_circles_host: HBoxContainer = $UpgradeDock/UpgradeCircles
 @onready var selected_crop_icon: TextureRect = $MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer/SelectedCropIconWrap/SelectedCropIcon
 @onready var selected_crop_label: Label = $MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer/SelectedCropLabel
 @onready var summary_label: Label = $MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer/SummaryLabel
@@ -43,6 +46,9 @@ var _tutorial_visible_chars: int = 0
 var _tutorial_is_typing: bool = false
 
 var crop_button_nodes: Array[Button] = []
+var _mutator_name: String = ""
+var _upgrade_tooltip_panel: PanelContainer = null
+var _upgrade_tooltip_label: Label = null
 
 func _is_touch_device() -> bool:
 	if OS.has_feature("mobile") or OS.has_feature("web_android") or OS.has_feature("web_ios"):
@@ -59,11 +65,17 @@ func _ready() -> void:
 		$InteractButton.queue_free()
 		$MobilePauseButton.queue_free()
 	game_over_layer.visible = false
+	upgrade_dock.process_mode = Node.PROCESS_MODE_ALWAYS
+	upgrade_dock.mouse_filter = Control.MOUSE_FILTER_PASS
+	upgrade_dock.top_level = true
+	upgrade_dock.z_index = 350
+	_ensure_upgrade_tooltip_ui()
 	game_over_menu_button.pressed.connect(_on_game_over_menu_pressed)
 	get_parent().show()
 	_build_crop_buttons()
 	PlayerData.inventory_changed.connect(_refresh_crop_ui)
 	PlayerData.currency_changed.connect(func(_amt): _refresh_crop_ui())
+	PlayerData.farm_size_changed.connect(func(_crop: String): _refresh_upgrade_hud())
 	PlayerData.selected_crop_changed.connect(_on_selected_crop_changed)
 	_refresh_crop_ui()
 	_on_selected_crop_changed(PlayerData.get_selected_crop_name())
@@ -176,6 +188,81 @@ func _refresh_crop_ui() -> void:
 		button.modulate = Color(1.0, 0.95, 0.75) if is_selected else Color(0.85, 0.85, 0.85)
 
 	summary_label.text = "Stored crops: %d | Seeds: %d" % [total_inventory, PlayerData.run_currency]
+	_refresh_upgrade_hud()
+
+
+func _has_nondefault_crop_upgrades(st: Dictionary) -> bool:
+	if st.get("yield_multiplier", 1.0) > 1.001:
+		return true
+	if st.get("growth_speed_bonus", 0.0) > 0.001:
+		return true
+	if st.get("size_bonus", Vector2i.ZERO) != Vector2i.ZERO:
+		return true
+	return false
+
+
+func _crop_upgrade_tooltip(crop_name: String) -> String:
+	var st: Dictionary = PlayerData.crop_upgrades.get(crop_name)
+	if st == null:
+		return crop_name
+	var lines: PackedStringArray = []
+	lines.append(crop_name)
+	if st.get("yield_multiplier", 1.0) > 1.001:
+		lines.append("Yield: ×%.2f" % float(st.yield_multiplier))
+	if st.get("growth_speed_bonus", 0.0) > 0.001:
+		lines.append("Growth: −%.2fs" % float(st.growth_speed_bonus))
+	var sb: Vector2i = st.get("size_bonus", Vector2i.ZERO)
+	if sb != Vector2i.ZERO:
+		lines.append("Farm size: +%d × %d" % [sb.x, sb.y])
+	return "\n".join(lines)
+
+
+func _refresh_upgrade_hud() -> void:
+	if not is_instance_valid(upgrade_circles_host):
+		return
+	_hide_upgrade_tooltip()
+	for child in upgrade_circles_host.get_children():
+		child.queue_free()
+	if GameProgress.tutorial_mode:
+		upgrade_dock.visible = false
+		return
+	var placed := false
+	for crop in Globals.game_crops:
+		if crop == null:
+			continue
+		var st: Dictionary = PlayerData.crop_upgrades.get(crop.crop_name)
+		if st == null or not _has_nondefault_crop_upgrades(st):
+			continue
+		placed = true
+		var slot := Panel.new()
+		slot.custom_minimum_size = Vector2(18, 18)
+		slot.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		slot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		slot.mouse_filter = Control.MOUSE_FILTER_STOP
+		var tooltip_text := _crop_upgrade_tooltip(crop.crop_name)
+		slot.mouse_entered.connect(func():
+			_show_upgrade_tooltip(tooltip_text)
+		)
+		slot.mouse_exited.connect(_hide_upgrade_tooltip)
+		var bg := StyleBoxFlat.new()
+		bg.bg_color = Color(0.08, 0.08, 0.1, 0.62)
+		bg.border_width_left = 1
+		bg.border_width_top = 1
+		bg.border_width_right = 1
+		bg.border_width_bottom = 1
+		bg.border_color = Color(1, 1, 1, 0.24)
+		bg.set_corner_radius_all(9)
+		slot.add_theme_stylebox_override(&"panel", bg)
+		var icon := TextureRect.new()
+		icon.texture = crop.get_item_icon()
+		icon.custom_minimum_size = Vector2(14, 14)
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
+		icon.position = Vector2(2, 2)
+		slot.add_child(icon)
+		upgrade_circles_host.add_child(slot)
+	upgrade_dock.visible = placed
 
 
 func _on_selected_crop_changed(crop_name: String) -> void:
@@ -214,6 +301,7 @@ func begin_tutorial_hud() -> void:
 	_ensure_tutorial_overlay()
 	if _tutorial_layer:
 		_tutorial_layer.visible = true
+	_refresh_upgrade_hud()
 
 
 func _ensure_tutorial_overlay() -> void:
@@ -387,25 +475,96 @@ func clear_tutorial_objective() -> void:
 	_tutorial_toggle_button = null
 	status_panel.visible = true
 	_update_status(0, 0, 0, 0, 0, 0, 0)
+	_refresh_upgrade_hud()
 	message_label.modulate = Color(1, 1, 1, 1)
 
 
 func _update_status(current_wave, fed_count, fed_target, missed_count, allowed_misses, active_customer_count, total_missed_run: int = 0) -> void:
 	if GameProgress.tutorial_mode:
 		wave_label.text = ""
+		mutator_label.text = ""
 		progress_label.text = ""
 		missed_label.text = ""
 		active_label.text = ""
 		return
 	wave_label.text = "Wave %d" % current_wave
+	if GameProgress.endless_mode and _mutator_name != "":
+		mutator_label.text = "Mutator: %s" % _mutator_name
+	else:
+		mutator_label.text = ""
 	progress_label.text = "Fed: %d / %d" % [fed_count, fed_target]
 	if GameProgress.endless_mode:
 		missed_label.autowrap_mode = TextServer.AUTOWRAP_OFF
-		missed_label.text = "Run total: %d/%d" % [total_missed_run, ENDLESS_MAX_MISSES]
+		missed_label.text = "Total miss: %d/%d" % [total_missed_run, ENDLESS_MAX_MISSES]
 	else:
 		missed_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 		missed_label.text = "Missed: %d / %d" % [missed_count, allowed_misses]
 	active_label.text = "Waiting now: %d" % active_customer_count
+
+
+func set_mutator_name(name: String) -> void:
+	_mutator_name = name.strip_edges()
+	if GameProgress.endless_mode and _mutator_name != "":
+		mutator_label.text = "Mutator: %s" % _mutator_name
+	else:
+		mutator_label.text = ""
+
+
+func _ensure_upgrade_tooltip_ui() -> void:
+	if is_instance_valid(_upgrade_tooltip_panel):
+		return
+	_upgrade_tooltip_panel = PanelContainer.new()
+	_upgrade_tooltip_panel.visible = false
+	_upgrade_tooltip_panel.top_level = true
+	_upgrade_tooltip_panel.z_index = 500
+	_upgrade_tooltip_panel.process_mode = Node.PROCESS_MODE_ALWAYS
+	_upgrade_tooltip_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(0.05, 0.05, 0.08, 0.9)
+	bg.set_corner_radius_all(6)
+	bg.content_margin_left = 6
+	bg.content_margin_top = 5
+	bg.content_margin_right = 6
+	bg.content_margin_bottom = 5
+	_upgrade_tooltip_panel.add_theme_stylebox_override("panel", bg)
+	add_child(_upgrade_tooltip_panel)
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 6)
+	margin.add_theme_constant_override("margin_top", 5)
+	margin.add_theme_constant_override("margin_right", 6)
+	margin.add_theme_constant_override("margin_bottom", 5)
+	_upgrade_tooltip_panel.add_child(margin)
+
+	_upgrade_tooltip_label = Label.new()
+	_upgrade_tooltip_label.add_theme_font_override("font", UI_FONT)
+	_upgrade_tooltip_label.add_theme_font_size_override("font_size", 7)
+	_upgrade_tooltip_label.add_theme_constant_override("outline_size", 3)
+	_upgrade_tooltip_label.add_theme_color_override("font_color", Color(0.95, 0.95, 0.95))
+	_upgrade_tooltip_label.add_theme_color_override("font_outline_color", Color(0.02, 0.02, 0.02))
+	_upgrade_tooltip_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	margin.add_child(_upgrade_tooltip_label)
+
+
+func _show_upgrade_tooltip(text: String) -> void:
+	if not is_instance_valid(_upgrade_tooltip_panel) or not is_instance_valid(_upgrade_tooltip_label):
+		return
+	_upgrade_tooltip_label.text = text
+	_upgrade_tooltip_panel.reset_size()
+	var min_size := _upgrade_tooltip_panel.get_combined_minimum_size()
+	_upgrade_tooltip_panel.size = min_size
+	var mouse := get_viewport().get_mouse_position()
+	var pos := mouse + Vector2(8, -_upgrade_tooltip_panel.size.y - 6)
+	var visible := get_viewport_rect().size
+	pos.x = clampf(pos.x, 4.0, maxf(4.0, visible.x - _upgrade_tooltip_panel.size.x - 4.0))
+	pos.y = clampf(pos.y, 4.0, maxf(4.0, visible.y - _upgrade_tooltip_panel.size.y - 4.0))
+	_upgrade_tooltip_panel.position = pos
+	_upgrade_tooltip_panel.visible = true
+
+
+func _hide_upgrade_tooltip() -> void:
+	if is_instance_valid(_upgrade_tooltip_panel):
+		_upgrade_tooltip_panel.visible = false
 
 
 func show_game_over(body_text: String, submit_status: String) -> void:
