@@ -60,6 +60,7 @@ var _auth_reset_mode := false
 
 var _forgot_password_retry_until_unix: int = 0
 var _forgot_password_timer: Timer
+var _mobile_audio_unlock_done := false
 
 func _ready() -> void:
 	get_tree().paused = false
@@ -125,6 +126,56 @@ func _ready() -> void:
 	_credits_text.text = "Credits\nNathan - Software Engineer\nMujtaba - Game Designer\nMykola - Database Engineer\nChristian - Requirements Analyst\nRodney - Test Engineer\nYassin - Project Manager\n\nMusic credits: Undertale - Toby Fox"
 
 	Music.play_menu()
+	_setup_mobile_text_input()
+	_apply_mobile_web_canvas_css()
+
+
+func _is_touch_device() -> bool:
+	if OS.has_feature("mobile") or OS.has_feature("web_android") or OS.has_feature("web_ios"):
+		return true
+	if OS.has_feature("web"):
+		return JavaScriptBridge.eval("('ontouchstart' in window) || (navigator.maxTouchPoints > 0)", true)
+	return false
+
+
+func _setup_mobile_text_input() -> void:
+	if not _is_touch_device():
+		return
+	for e in [_email, _password, _profile_name]:
+		if e == null:
+			continue
+		(e as LineEdit).virtual_keyboard_enabled = true
+		(e as LineEdit).selecting_enabled = true
+		(e as LineEdit).focus_mode = Control.FOCUS_ALL
+		(e as LineEdit).gui_input.connect(_on_mobile_lineedit_gui_input.bind(e))
+
+
+func _apply_mobile_web_canvas_css() -> void:
+	if not OS.has_feature("web"):
+		return
+	JavaScriptBridge.eval(
+		"(function(){try{document.documentElement.style.margin='0';document.documentElement.style.padding='0';"
+		+ "document.documentElement.style.background='#000';document.body.style.margin='0';document.body.style.padding='0';"
+		+ "document.body.style.background='#000';document.body.style.overflow='hidden';"
+		+ "const c=document.querySelector('canvas');if(c){c.style.width='100vw';c.style.height='100vh';c.style.display='block';}}catch(e){}})();",
+		true
+	)
+
+
+func _on_mobile_lineedit_gui_input(event: InputEvent, field: LineEdit) -> void:
+	if not _is_touch_device():
+		return
+	if event is InputEventScreenTouch and event.pressed:
+		field.grab_focus()
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		field.grab_focus()
+
+
+func _try_unlock_mobile_audio() -> void:
+	if _mobile_audio_unlock_done:
+		return
+	_mobile_audio_unlock_done = true
+	Music.ensure_web_audio_unlocked()
 
 
 func _load_menu_background_texture() -> void:
@@ -458,6 +509,7 @@ func _set_mode_pick_open(open: bool) -> void:
 
 
 func _on_play_pressed() -> void:
+	_try_unlock_mobile_audio()
 	GameProgress.tutorial_mode = false
 	GameProgress.exit_tutorial_to_main_menu = false
 	_leaderboard_layer.visible = false
@@ -515,6 +567,7 @@ func _on_quit_pressed() -> void:
 
 
 func _on_account_button_pressed() -> void:
+	_try_unlock_mobile_audio()
 	if Backend.is_logged_in():
 		if _account_panel.visible:
 			_set_account_open(false)
@@ -536,6 +589,7 @@ func _on_close_auth_pressed() -> void:
 
 
 func _on_login_pressed() -> void:
+	_try_unlock_mobile_audio()
 	if _auth_reset_mode:
 		var new_password := _password.text.strip_edges()
 		if new_password.length() < 6:
@@ -553,6 +607,7 @@ func _on_login_pressed() -> void:
 
 
 func _on_signup_pressed() -> void:
+	_try_unlock_mobile_audio()
 	var em := _email.text.strip_edges()
 	if not _email_is_valid_format(em):
 		_auth_status.text = "Enter a valid email (needs @ and a domain like .com or .ca)."
@@ -562,6 +617,7 @@ func _on_signup_pressed() -> void:
 
 
 func _on_forgot_password_pressed() -> void:
+	_try_unlock_mobile_audio()
 	if _forgot_password_seconds_left() > 0:
 		_auth_status.text = "Too many reset requests. Wait %ds and try again." % _forgot_password_seconds_left()
 		return

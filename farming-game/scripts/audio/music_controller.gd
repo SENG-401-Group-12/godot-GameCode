@@ -43,6 +43,7 @@ var _xfade_lerp_to: float = 0.0
 var _bgm_paused_for_stinger := false
 ## When the current stinger ends, unpause BGM (wave clears). False for victory/loss/menu.
 var _resume_bgm_after_stinger := false
+var _web_audio_unlocked := false
 
 
 func _ready() -> void:
@@ -58,6 +59,26 @@ func _ready() -> void:
 	add_child(_stinger)
 	_stinger.finished.connect(_on_stinger_finished)
 	GameSettings.settings_changed.connect(_on_game_settings_changed)
+
+
+func ensure_web_audio_unlocked() -> void:
+	if not OS.has_feature("web"):
+		return
+	if _web_audio_unlocked:
+		return
+	_web_audio_unlocked = true
+	# Browsers block autoplay until a gesture; resume any known audio contexts once the
+	# user taps/clicks, then re-trigger the active BGM route.
+	JavaScriptBridge.eval(
+		"(function(){try{if(window.godotAudioContext&&window.godotAudioContext.state!=='running'){window.godotAudioContext.resume();}"
+		+ "if(window.AudioContext){if(!window.__hfa_ctx){window.__hfa_ctx=new AudioContext();}"
+		+ "if(window.__hfa_ctx.state!=='running'){window.__hfa_ctx.resume();}}}catch(e){}})();",
+		true
+	)
+	if _context == "menu":
+		play_menu()
+	elif _context == "game":
+		_play_gameplay_bgm(_urgent_count > 0)
 
 
 func _streams_same_resource(a: AudioStream, b: AudioStream) -> bool:

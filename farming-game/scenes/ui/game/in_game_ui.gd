@@ -27,6 +27,11 @@ const ENDLESS_MAX_MISSES := 10
 @onready var game_over_personal_best: Label = $GameOverLayer/CenterContainer/Panel/Margin/VBox/PersonalBestLabel
 @onready var game_over_submit: Label = $GameOverLayer/CenterContainer/Panel/Margin/VBox/SubmitStatusLabel
 @onready var game_over_menu_button: Button = $GameOverLayer/CenterContainer/Panel/Margin/VBox/MenuButton
+@onready var crop_panel_frame: NinePatchRect = $MarginContainer/HBoxContainer/CropPanelFrame
+@onready var joystick_node: Control = $Joystick
+@onready var interact_button_node: Node2D = $InteractButton
+@onready var interact_touch_button: TouchScreenButton = $InteractButton/TouchScreenButton
+@onready var mobile_pause_button: Control = $MobilePauseButton
 
 var _message_tween: Tween = null
 var _tutorial_layer: CanvasLayer
@@ -38,6 +43,7 @@ var _tutorial_toggle_button: Button
 var _tutorial_type_timer: Timer
 var _type_player: AudioStreamPlayer
 var _type_blip_stream: AudioStream
+var _mobile_audio_unlock_done := false
 
 var _tutorial_target_text: String = ""
 var _tutorial_title_text: String = ""
@@ -58,7 +64,8 @@ func _is_touch_device() -> bool:
 
 func _ready() -> void:
 	if _is_touch_device():
-		pass
+		_apply_mobile_layout()
+		get_viewport().size_changed.connect(_apply_mobile_layout)
 	else:
 		$Joystick.queue_free()
 		$InteractButton.queue_free()
@@ -86,6 +93,37 @@ func _ready() -> void:
 	else:
 		_show_message("Tip: pick a crop → plant → harvest → feed customers with E. Feed quickly (more time left on their timer) to earn more seeds.")
 	set_process(false)
+
+
+func _apply_mobile_layout() -> void:
+	if not _is_touch_device():
+		return
+	var vp := get_viewport_rect().size
+	if crop_panel_frame != null:
+		crop_panel_frame.custom_minimum_size.x = clampf(vp.x * 0.24, 130.0, 160.0)
+		crop_panel_frame.custom_minimum_size.y = clampf(vp.y - 52.0, 220.0, 320.0)
+	if interact_touch_button != null:
+		var scale_factor := clampf(vp.y / 720.0, 0.58, 0.78)
+		interact_touch_button.scale = Vector2(scale_factor, scale_factor)
+	if interact_button_node != null and interact_touch_button != null:
+		var tex_size := interact_touch_button.texture_normal.get_size() * interact_touch_button.scale
+		var right_margin := 12.0
+		var bottom_margin := 14.0
+		interact_button_node.position = Vector2(vp.x - tex_size.x - right_margin, vp.y - tex_size.y - bottom_margin)
+	if joystick_node != null:
+		joystick_node.position = Vector2(84.0, vp.y - 84.0)
+	if mobile_pause_button != null:
+		mobile_pause_button.position = Vector2(vp.x - 28.0, 28.0)
+	if upgrade_dock != null:
+		upgrade_dock.offset_right = -88.0
+		upgrade_dock.offset_left = -310.0
+
+
+func _try_unlock_mobile_audio() -> void:
+	if _mobile_audio_unlock_done:
+		return
+	_mobile_audio_unlock_done = true
+	Music.ensure_web_audio_unlocked()
 
 
 func _stop_tutorial_typing_timer() -> void:
@@ -136,6 +174,11 @@ func _finish_tutorial_typing() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if _is_touch_device():
+		if event is InputEventScreenTouch and event.pressed:
+			_try_unlock_mobile_audio()
+		elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			_try_unlock_mobile_audio()
 	if not GameProgress.tutorial_mode or not is_instance_valid(_tutorial_layer) or not _tutorial_layer.visible:
 		return
 	if not _tutorial_is_typing:
