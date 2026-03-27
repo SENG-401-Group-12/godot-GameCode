@@ -37,7 +37,7 @@ layout_mode = 2
 theme_override_constants/separation = 10
 
 [node name="StatusPanel" type="ColorRect" parent="MarginContainer/HBoxContainer" unique_id=1782126048]
-custom_minimum_size = Vector2(128, 64)
+custom_minimum_size = Vector2(128, 56)
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
@@ -66,15 +66,6 @@ theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("1_455v0")
 theme_override_font_sizes/font_size = 8
 text = "Wave 0"
-vertical_alignment = 1
-
-[node name="MutatorLabel" type="Label" parent="MarginContainer/HBoxContainer/StatusPanel/MarginContainer/VBoxContainer" unique_id=1744397731]
-layout_mode = 2
-size_flags_vertical = 1
-theme_override_constants/outline_size = 4
-theme_override_fonts/font = ExtResource("1_455v0")
-theme_override_font_sizes/font_size = 8
-text = "Mutator: —"
 vertical_alignment = 1
 
 [node name="ProgressLabel" type="Label" parent="MarginContainer/HBoxContainer/StatusPanel/MarginContainer/VBoxContainer" unique_id=636518939]
@@ -197,6 +188,20 @@ text = "Stored crops: 0"
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
+
+[node name="SeedsRow" type="HBoxContainer" parent="MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer" unique_id=1408825936]
+layout_mode = 2
+size_flags_horizontal = 4
+alignment = 1
+theme_override_constants/separation = 3
+
+[node name="SeedsLabel" type="Label" parent="MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer/SeedsRow" unique_id=1408825938]
+layout_mode = 2
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("1_455v0")
+theme_override_font_sizes/font_size = 8
+text = "Seeds: 0"
+vertical_alignment = 1
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer" unique_id=1242764303]
 layout_mode = 2

@@ -10,7 +10,6 @@ const TUTORIAL_PROMPT_WAIT := "Click this box to hide. Use the Tutorial button t
 const ENDLESS_MAX_MISSES := 10
 
 @onready var wave_label: Label = $MarginContainer/HBoxContainer/StatusPanel/MarginContainer/VBoxContainer/WaveLabel
-@onready var mutator_label: Label = $MarginContainer/HBoxContainer/StatusPanel/MarginContainer/VBoxContainer/MutatorLabel
 @onready var progress_label: Label = $MarginContainer/HBoxContainer/StatusPanel/MarginContainer/VBoxContainer/ProgressLabel
 @onready var missed_label: Label = $MarginContainer/HBoxContainer/StatusPanel/MarginContainer/VBoxContainer/MissedLabel
 @onready var active_label: Label = $MarginContainer/HBoxContainer/StatusPanel/MarginContainer/VBoxContainer/ActiveLabel
@@ -20,6 +19,7 @@ const ENDLESS_MAX_MISSES := 10
 @onready var selected_crop_icon: TextureRect = $MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer/SelectedCropIconWrap/SelectedCropIcon
 @onready var selected_crop_label: Label = $MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer/SelectedCropLabel
 @onready var summary_label: Label = $MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer/SummaryLabel
+@onready var seeds_label: Label = $MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer/SeedsRow/SeedsLabel
 @onready var crop_buttons: VBoxContainer = $MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer/ScrollContainer/CropButtonsMargin/CropButtons
 @onready var message_label: Label = $MarginContainer/HBoxContainer/CenterMessage
 @onready var game_over_layer: ColorRect = $GameOverLayer
@@ -46,7 +46,6 @@ var _tutorial_visible_chars: int = 0
 var _tutorial_is_typing: bool = false
 
 var crop_button_nodes: Array[Button] = []
-var _mutator_name: String = ""
 var _upgrade_tooltip_panel: PanelContainer = null
 var _upgrade_tooltip_label: Label = null
 
@@ -187,7 +186,8 @@ func _refresh_crop_ui() -> void:
 		button.text = "%s\n%d" % [crop.crop_name, amount]
 		button.modulate = Color(1.0, 0.95, 0.75) if is_selected else Color(0.85, 0.85, 0.85)
 
-	summary_label.text = "Stored crops: %d | Seeds: %d" % [total_inventory, PlayerData.run_currency]
+	summary_label.text = "Stored crops: %d" % total_inventory
+	seeds_label.text = "Seeds: %d" % PlayerData.run_currency
 	_refresh_upgrade_hud()
 
 
@@ -482,16 +482,11 @@ func clear_tutorial_objective() -> void:
 func _update_status(current_wave, fed_count, fed_target, missed_count, allowed_misses, active_customer_count, total_missed_run: int = 0) -> void:
 	if GameProgress.tutorial_mode:
 		wave_label.text = ""
-		mutator_label.text = ""
 		progress_label.text = ""
 		missed_label.text = ""
 		active_label.text = ""
 		return
 	wave_label.text = "Wave %d" % current_wave
-	if GameProgress.endless_mode and _mutator_name != "":
-		mutator_label.text = "Mutator: %s" % _mutator_name
-	else:
-		mutator_label.text = ""
 	progress_label.text = "Fed: %d / %d" % [fed_count, fed_target]
 	if GameProgress.endless_mode:
 		missed_label.autowrap_mode = TextServer.AUTOWRAP_OFF
@@ -500,15 +495,6 @@ func _update_status(current_wave, fed_count, fed_target, missed_count, allowed_m
 		missed_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 		missed_label.text = "Missed: %d / %d" % [missed_count, allowed_misses]
 	active_label.text = "Waiting now: %d" % active_customer_count
-
-
-func set_mutator_name(name: String) -> void:
-	_mutator_name = name.strip_edges()
-	if GameProgress.endless_mode and _mutator_name != "":
-		mutator_label.text = "Mutator: %s" % _mutator_name
-	else:
-		mutator_label.text = ""
-
 
 func _ensure_upgrade_tooltip_ui() -> void:
 	if is_instance_valid(_upgrade_tooltip_panel):

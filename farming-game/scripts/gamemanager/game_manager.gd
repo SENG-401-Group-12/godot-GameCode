@@ -38,12 +38,6 @@ var _difficulty_bias: float = 0.0
 var _combo_streak: int = 0
 var _combo_bonus_score: int = 0
 var _last_serve_msec: int = -999999
-var _endless_mutator_name: String = ""
-var _mutator_customer_mult: float = 1.0
-var _mutator_time_mult: float = 1.0
-var _mutator_amount_mult: float = 1.0
-var _mutator_reward_mult: float = 1.0
-var _mutator_shop_cooldown_mult: float = 1.0
 
 const STARTING_SEEDS := 0
 const COMBO_WINDOW_MSEC := 6000
@@ -103,7 +97,6 @@ func _ready() -> void:
 	_endless_run = GameProgress.endless_mode and not _tutorial_mode
 	if _endless_run:
 		victory_after_wave = 0
-		_pick_endless_mutator()
 	if _tutorial_mode:
 		# Wait until the full level (farms, shop, UI) has finished _ready so frees/timer flags stick.
 		call_deferred("_bootstrap_tutorial_run")
@@ -174,7 +167,7 @@ func _on_tutorial_crop_harvested(crop_name: String) -> void:
 	_spawn_tutorial_customer(crop_name)
 	_set_tutorial_objective(
 		"Share your harvest",
-		"Step 3 - Feed them: A hungry visitor wants the crop you grew. Walk up to them and press E to give them food from your stash.\n\nSeeds: the faster you feed them (more time left on their timer), the more seeds you earn for the shop. Slow feeds still pay, but quick serves pay best."
+		"Step 3 - Feed them: A hungry visitor wants the crop you grew. Walk up to them and press E to give them food from your stash.\n\nSeeds: the faster you feed them (more time left on their timer), the more seeds you earn for the shop. Slow feeds still pay, but quick serves pay best.\n\nCombos: if you serve customers quickly one after another, you build a combo streak and get bonus seeds."
 	)
 
 
@@ -214,7 +207,7 @@ func _on_tutorial_upgrade_bought() -> void:
 	_tutorial_waiting_for_exit_click = true
 	_set_tutorial_objective(
 		"Tutorial complete",
-		"You planted food, shared it with someone who was hungry, and saw how upgrades help you feed even more people.\n\nClick this tutorial box once to continue."
+		"You planted food, shared it with someone who was hungry, and saw how upgrades help you feed even more people.\n\nTip: your active upgrades are shown as icons at the bottom right. Hover them to see details.\n\nClick this tutorial box once to continue."
 	)
 
 
@@ -246,15 +239,9 @@ func _start_game() -> void:
 	game_finished = false
 	if not _tutorial_mode:
 		PlayerData.add_currency(STARTING_SEEDS)
-	if game_ui and game_ui.has_method(&"set_mutator_name"):
-		var mutator_short := _endless_mutator_name
-		var paren_idx := mutator_short.find(" (")
-		if paren_idx >= 0:
-			mutator_short = mutator_short.substr(0, paren_idx)
-		game_ui.set_mutator_name(mutator_short if _endless_run else "")
 	var intro := "Hungry customers will be coming in %d seconds! Prepare your crops before they show up!" % [start_time_buffer]
 	if _endless_run:
-		intro = "Endless mode — survive as many waves as you can.\nYou can miss at most %d customers total this run.\nMutator: %s\n\n%s" % [ENDLESS_MAX_TOTAL_MISSES, _endless_mutator_name, intro]
+		intro = "Endless mode — survive as many waves as you can.\nYou can miss at most %d customers total this run.\n\n%s" % [ENDLESS_MAX_TOTAL_MISSES, intro]
 	game_ui._show_message(intro, 6.0 if _endless_run else 2.2)
 	while start_time_buffer >= 0:
 		await get_tree().create_timer(1.0, false).timeout
@@ -281,7 +268,7 @@ func _start_next_wave() -> void:
 		wave_customer_count = roundi(0.55 * scaled_wave + 1.0)
 	else:
 		wave_customer_count = roundi(0.4 * scaled_wave + 3.0)
-	wave_customer_count = max(1, roundi(float(wave_customer_count) * _mutator_customer_mult))
+	wave_customer_count = max(1, wave_customer_count)
 	
 	allowed_misses = clampi(int(float(wave_customer_count) / 3.5), 0, maxi(0, wave_customer_count - 1))
 	if current_wave == 1:
@@ -290,9 +277,8 @@ func _start_next_wave() -> void:
 	req_hi = max(1, req_hi)
 	var request_count := randi_range(1, req_hi)
 	var wave_time_limit := maxf(12.0, (28.0 - float(current_wave - 1) * 1.15) * (1.0 - (_difficulty_bias * 0.12)))
-	wave_time_limit *= _mutator_time_mult
-	var min_amount := maxi(1, roundi((1.2 * float(current_wave) + 1) * (1.0 + _difficulty_bias * 0.18) * _mutator_amount_mult))
-	var max_amount := maxi(min_amount + 1, roundi((1.4 * float(current_wave) + 1) * (1.0 + _difficulty_bias * 0.2) * _mutator_amount_mult))
+	var min_amount := maxi(1, roundi((1.2 * float(current_wave) + 1) * (1.0 + _difficulty_bias * 0.18)))
+	var max_amount := maxi(min_amount + 1, roundi((1.4 * float(current_wave) + 1) * (1.0 + _difficulty_bias * 0.2)))
 	var config = {
 		"wave": current_wave,
 		"request_count": request_count,
@@ -362,8 +348,7 @@ func _on_customer_served(customer: Node2D = null) -> void:
 	var wave_part: int = (current_wave + 1) / 3
 	var combo_part: int = mini(combo_bonus, COMBO_BONUS_MAX) / 3
 	var base_seeds: int = 2 + wave_part + combo_part
-	var mutator_seed_tint: float = 1.0 + (_mutator_reward_mult - 1.0) * 0.35
-	var seeds_earned: int = maxi(1, int(round(float(base_seeds) * mutator_seed_tint * speed_mult)))
+	var seeds_earned: int = maxi(1, int(round(float(base_seeds) * speed_mult)))
 	PlayerData.add_currency(seeds_earned)
 	if combo_bonus > 0:
 		_combo_bonus_score += combo_bonus * 6
@@ -526,40 +511,3 @@ func _update_adaptive_difficulty() -> void:
 	_difficulty_bias = clampf(_difficulty_bias + delta, -0.35, 0.6)
 
 
-func _pick_endless_mutator() -> void:
-	var roll := randi_range(0, 2)
-	match roll:
-		0:
-			_endless_mutator_name = "Rush Hour (+customers, shorter timers)"
-			_mutator_customer_mult = 1.3
-			_mutator_time_mult = 0.88
-			_mutator_amount_mult = 1.0
-			_mutator_reward_mult = 1.2
-			_mutator_shop_cooldown_mult = 1.0
-		1:
-			_endless_mutator_name = "Fast Fields (faster growth, tougher orders)"
-			_mutator_customer_mult = 1.15
-			_mutator_time_mult = 1.0
-			_mutator_amount_mult = 1.22
-			_mutator_reward_mult = 1.15
-			_mutator_shop_cooldown_mult = 0.85
-			_apply_growth_time_scale_to_all_farms(0.8)
-		_:
-			_endless_mutator_name = "Long Queue (more time, heavier volume)"
-			_mutator_customer_mult = 1.22
-			_mutator_time_mult = 1.24
-			_mutator_amount_mult = 1.1
-			_mutator_reward_mult = 1.05
-			_mutator_shop_cooldown_mult = 1.2
-	if is_instance_valid(shop):
-		shop.shop_timer = maxf(8.0, float(shop.shop_timer) * _mutator_shop_cooldown_mult)
-
-
-func _apply_growth_time_scale_to_all_farms(scale_mult: float) -> void:
-	var w := _world()
-	if w == null:
-		return
-	for farm_name in ["Farm", "Farm2", "Farm3"]:
-		var farm := w.get_node_or_null(farm_name)
-		if is_instance_valid(farm) and farm.has_method(&"_get_growth_time_per_stage"):
-			farm.growth_time_scale = maxf(0.25, float(farm.growth_time_scale) * scale_mult)
