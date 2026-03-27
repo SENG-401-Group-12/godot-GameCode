@@ -26,6 +26,9 @@ const _URGENT_TIME_SEC := 10.0
 var time_remaining := 0.0
 var is_resolved := false
 var _in_urgent_band := false
+## Snapshot when feed succeeds (before tween); used for seed rewards.
+var _serve_time_remaining: float = 0.0
+var _serve_time_limit: float = 1.0
 
 func _ready() -> void:
 	add_to_group(&"customers_with_order_timer")
@@ -121,6 +124,13 @@ func on_wave_reset_clear_urgency_flag() -> void:
 	_in_urgent_band = false
 
 
+## 1.0 = fed immediately (most time left), 0.0 = fed at last moment.
+func get_feed_speed_ratio() -> float:
+	if _serve_time_limit <= 0.001:
+		return 0.85
+	return clampf(_serve_time_remaining / _serve_time_limit, 0.0, 1.0)
+
+
 func choose_random_sprite() -> void:
 	if randi() % 2 == 0:
 		sprite.play("chicken_idle")
@@ -175,6 +185,9 @@ func _on_interact() -> void:
 			flash_sprite(Color.RED)
 			show_not_enough_label()
 			return
+
+	_serve_time_remaining = maxf(0.0, time_remaining)
+	_serve_time_limit = maxf(0.01, time_limit)
 
 	for item in requests:
 		PlayerData.remove_crop(item.item_name, item.amount)

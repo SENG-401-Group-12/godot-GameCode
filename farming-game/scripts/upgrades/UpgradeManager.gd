@@ -1,6 +1,6 @@
 extends Node
 
-func generate_upgrade() -> CropUpgrade:
+func generate_upgrade(min_tier: int = 1, max_tier: int = 3) -> CropUpgrade:
 	var upgrade = CropUpgrade.new()
 	
 	upgrade.crop_name = Globals.game_crops.pick_random().crop_name
@@ -14,19 +14,20 @@ func generate_upgrade() -> CropUpgrade:
 		upgrade.tier = 2
 	else:
 		upgrade.tier = 3
+	upgrade.tier = clampi(upgrade.tier, min_tier, max_tier)
 	
 	var upgrade_types = CropUpgrade.UpgradeType.values()
 	upgrade.upgrade_type = upgrade_types.pick_random()
 	
 	return upgrade
 	
-func generate_upgrade_choices(count := 3) -> Array[CropUpgrade]:
+func generate_upgrade_choices(count := 3, min_tier: int = 1, max_tier: int = 3) -> Array[CropUpgrade]:
 	var upgrades: Array[CropUpgrade] = []
 	var seen: Dictionary = {}
 	var guard := 0
 	while upgrades.size() < count and guard < 100:
 		guard += 1
-		var u := generate_upgrade()
+		var u := generate_upgrade(min_tier, max_tier)
 		if not PlayerData.can_apply_upgrade(u):
 			continue
 		var fp := PlayerData.upgrade_fingerprint(u)

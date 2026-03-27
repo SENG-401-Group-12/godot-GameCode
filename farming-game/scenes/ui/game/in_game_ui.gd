@@ -62,6 +62,7 @@ func _ready() -> void:
 	get_parent().show()
 	_build_crop_buttons()
 	PlayerData.inventory_changed.connect(_refresh_crop_ui)
+	PlayerData.currency_changed.connect(func(_amt): _refresh_crop_ui())
 	PlayerData.selected_crop_changed.connect(_on_selected_crop_changed)
 	_refresh_crop_ui()
 	_on_selected_crop_changed(PlayerData.get_selected_crop_name())
@@ -71,7 +72,7 @@ func _ready() -> void:
 	if GameProgress.tutorial_mode:
 		begin_tutorial_hud()
 	else:
-		_show_message("Tip: pick a crop → plant a plot → harvest → stand by a customer and press E to feed them.")
+		_show_message("Tip: pick a crop → plant → harvest → feed customers with E. Feed quickly (more time left on their timer) to earn more seeds.")
 	set_process(false)
 
 
@@ -173,7 +174,7 @@ func _refresh_crop_ui() -> void:
 		button.text = "%s\n%d" % [crop.crop_name, amount]
 		button.modulate = Color(1.0, 0.95, 0.75) if is_selected else Color(0.85, 0.85, 0.85)
 
-	summary_label.text = "Stored crops: %d" % total_inventory
+	summary_label.text = "Stored crops: %d | Seeds: %d" % [total_inventory, PlayerData.run_currency]
 
 
 func _on_selected_crop_changed(crop_name: String) -> void:

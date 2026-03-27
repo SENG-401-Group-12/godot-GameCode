@@ -20,11 +20,52 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="CardContainer" type="HBoxContainer" parent="MarginContainer" unique_id=1941996475]
+[node name="RootVBox" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_constants/separation = 8
+
+[node name="TopRow" type="HBoxContainer" parent="MarginContainer/RootVBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="CurrencyLabel" type="Label" parent="MarginContainer/RootVBox/TopRow"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Seeds: 0"
+
+[node name="RerollButton" type="Button" parent="MarginContainer/RootVBox/TopRow"]
+custom_minimum_size = Vector2(110, 28)
+layout_mode = 2
+text = "Reroll (12)"
+
+[node name="HintLabel" type="Label" parent="MarginContainer/RootVBox"]
+layout_mode = 2
+text = "Choose one upgrade."
+
+[node name="CardContainer" type="HBoxContainer" parent="MarginContainer/RootVBox" unique_id=1941996475]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 theme_override_constants/separation = 10
 
-[node name="UpgradeCard" parent="MarginContainer/CardContainer" unique_id=900898100 instance=ExtResource("1_86bn8")]
+[node name="Footer" type="HBoxContainer" parent="MarginContainer/RootVBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="BuyButton" type="Button" parent="MarginContainer/RootVBox/Footer"]
+custom_minimum_size = Vector2(120, 32)
+layout_mode = 2
+disabled = true
+text = "Buy"
+
+[node name="BackButton" type="Button" parent="MarginContainer/RootVBox/Footer"]
+custom_minimum_size = Vector2(120, 32)
+layout_mode = 2
+text = "Back"
+
+[node name="UpgradeCard" parent="MarginContainer/RootVBox/CardContainer" unique_id=900898100 instance=ExtResource("1_86bn8")]
 layout_mode = 2
