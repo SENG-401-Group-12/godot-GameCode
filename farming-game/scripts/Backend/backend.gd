@@ -7,6 +7,12 @@ signal login_failed(message: String)
 
 signal signup_succeeded(message: String)
 signal signup_failed(message: String)
+signal password_reset_requested(message: String)
+signal password_reset_failed(message: String)
+signal password_changed(message: String)
+signal password_change_failed(message: String)
+signal password_recovery_ready(email: String)
+signal password_recovery_failed(message: String)
 
 signal leaderboard_received(data)
 signal leaderboard_failed(reason: String)
@@ -21,6 +27,7 @@ signal personal_best_endless_failed(reason: String)
 
 signal profile_created(data)
 signal profile_updated(data)
+signal profile_update_failed(reason: String)
 signal profile_lookup_succeeded(data)
 signal profile_lookup_failed(reason: String)
 
@@ -169,6 +176,81 @@ func _new_http_request() -> HTTPRequest:
 	http.accept_gzip = false
 	add_child(http)
 	return http
+
+
+func _parse_query_string(raw: String) -> Dictionary:
+	var out: Dictionary = {}
+	if raw.is_empty():
+		return out
+	for pair in raw.split("&"):
+		if pair.is_empty():
+			continue
+		var eq := pair.find("=")
+		var k := pair
+		var v := ""
+		if eq >= 0:
+			k = pair.substr(0, eq)
+			v = pair.substr(eq + 1)
+		k = k.uri_decode().strip_edges()
+		v = v.uri_decode().strip_edges()
+		if not k.is_empty():
+			out[k] = v
+	return out
+
+
+func try_start_password_recovery_from_web_url() -> void:
+	if not OS.has_feature("web"):
+		return
+	var hash_raw := str(JavaScriptBridge.eval("window.location.hash || ''", true)).strip_edges()
+	if hash_raw.is_empty():
+		return
+	var hash := hash_raw
+	if hash.begins_with("#"):
+		hash = hash.substr(1)
+	var params := _parse_query_string(hash)
+	var has_recovery := str(params.get("type", "")) == "recovery"
+	var has_error := params.has("error_description")
+	if not has_recovery and not has_error:
+		return
+	JavaScriptBridge.eval("if (window.history && window.history.replaceState) { window.history.replaceState({}, document.title, window.location.pathname + window.location.search); } ''", true)
+	if has_error:
+		var err := str(params.get("error_description", "Recovery link is invalid or expired."))
+		password_recovery_failed.emit(err)
+		return
+	var token := str(params.get("access_token", "")).strip_edges()
+	var refresh := str(params.get("refresh_token", "")).strip_edges()
+	if token.is_empty():
+		password_recovery_failed.emit("Recovery token missing in URL.")
+		return
+	access_token = token
+	refresh_token = refresh
+	guest_mode = false
+
+	var http := _new_http_request()
+	var url := supabase_url + "/auth/v1/user"
+	var headers := _supabase_headers(PackedStringArray([
+		"Authorization: Bearer " + access_token,
+	]))
+	http.request_completed.connect(func(result, response_code, response_headers, response_body):
+		var text: String = response_body.get_string_from_utf8()
+		var data = JSON.parse_string(text)
+		if result != HTTPRequest.RESULT_SUCCESS:
+			password_recovery_failed.emit(_network_error_text("Could not verify recovery session", result))
+			http.queue_free()
+			return
+		if response_code >= 200 and response_code < 300 and typeof(data) == TYPE_DICTIONARY:
+			var d: Dictionary = data
+			current_user_id = str(d.get("id", ""))
+			current_email = str(d.get("email", ""))
+			password_recovery_ready.emit(current_email)
+		else:
+			password_recovery_failed.emit("Recovery link is invalid or expired.")
+		http.queue_free()
+	)
+	var req_err := http.request(url, headers, HTTPClient.METHOD_GET)
+	if req_err != OK:
+		password_recovery_failed.emit(_network_error_text("Could not start recovery verification", req_err))
+		http.queue_free()
 
 
 func continue_as_guest() -> void:
@@ -355,6 +437,81 @@ func login(email: String, password: String) -> void:
 	if req_err != OK:
 		login_failed.emit(_network_error_text("Could not start login request", req_err))
 		http.queue_free()
+
+
+func request_password_reset(email: String) -> void:
+	if not _has_supabase_config():
+		password_reset_failed.emit("Backend config missing on this build. Please contact support.")
+		return
+	var http := _new_http_request()
+	var url := supabase_url + "/auth/v1/recover"
+	var headers := _supabase_headers()
+	var body := JSON.stringify({"email": email})
+	http.request_completed.connect(func(result, response_code, response_headers, response_body):
+		var text: String = response_body.get_string_from_utf8()
+		var data = JSON.parse_string(text)
+		if result != HTTPRequest.RESULT_SUCCESS:
+			password_reset_failed.emit(_network_error_text("Could not send reset email", result))
+			http.queue_free()
+			return
+		if response_code >= 200 and response_code < 300:
+			password_reset_requested.emit("If this email exists, a reset link was sent.")
+		else:
+			var msg := "Could not send reset email."
+			if typeof(data) == TYPE_DICTIONARY:
+				if data.has("msg"):
+					msg = str(data["msg"])
+				elif data.has("message"):
+					msg = str(data["message"])
+				elif data.has("error_description"):
+					msg = str(data["error_description"])
+			password_reset_failed.emit(msg)
+		http.queue_free()
+	)
+	var req_err := http.request(url, headers, HTTPClient.METHOD_POST, body)
+	if req_err != OK:
+		password_reset_failed.emit(_network_error_text("Could not start reset request", req_err))
+		http.queue_free()
+
+
+func change_password(new_password: String) -> void:
+	if access_token.strip_edges().is_empty():
+		password_change_failed.emit("No active session. Use a fresh reset link.")
+		return
+	if not _has_supabase_config():
+		password_change_failed.emit("Backend config missing on this build.")
+		return
+	var http := _new_http_request()
+	var url := supabase_url + "/auth/v1/user"
+	var headers := _supabase_headers(PackedStringArray([
+		"Authorization: Bearer " + access_token,
+	]))
+	var body := JSON.stringify({"password": new_password})
+	http.request_completed.connect(func(result, response_code, response_headers, response_body):
+		var text: String = response_body.get_string_from_utf8()
+		var data = JSON.parse_string(text)
+		if result != HTTPRequest.RESULT_SUCCESS:
+			password_change_failed.emit(_network_error_text("Could not change password", result))
+			http.queue_free()
+			return
+		if response_code >= 200 and response_code < 300:
+			password_changed.emit("Password updated.")
+		else:
+			var msg := "Could not change password."
+			if typeof(data) == TYPE_DICTIONARY:
+				if data.has("msg"):
+					msg = str(data["msg"])
+				elif data.has("message"):
+					msg = str(data["message"])
+				elif data.has("error_description"):
+					msg = str(data["error_description"])
+			password_change_failed.emit(msg)
+		http.queue_free()
+	)
+	var req_err := http.request(url, headers, HTTPClient.METHOD_PUT, body)
+	if req_err != OK:
+		password_change_failed.emit(_network_error_text("Could not start password change request", req_err))
+		http.queue_free()
 	
 func create_profile(display_name: String) -> void:
 	if !is_logged_in():
@@ -415,6 +572,17 @@ func update_profile(display_name: String) -> void:
 		if response_code >= 200 and response_code < 300:
 			profile_updated.emit(data)
 		else:
+			var msg := "Could not update username."
+			if typeof(data) == TYPE_DICTIONARY:
+				if data.has("message"):
+					msg = str(data["message"])
+				elif data.has("msg"):
+					msg = str(data["msg"])
+				elif data.has("hint"):
+					msg = str(data["hint"])
+			elif text.length() > 0 and text.length() < 220:
+				msg = text
+			profile_update_failed.emit(msg)
 			print("Update profile failed: ", text)
 
 		http.queue_free()

@@ -373,6 +373,12 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "Sign up"
 
+[node name="ForgotPasswordButton" type="Button" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Forgot password"
+
 [node name="CloseAuthButton" type="Button" parent="AuthLayer/AuthCenter/AuthPanel/Margin/VBox" unique_id=1320209025]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
@@ -638,6 +644,78 @@ size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 9
 autowrap_mode = 2
 
+[node name="AccountLayer" type="CanvasLayer" parent="." unique_id=1998830000]
+layer = 21
+
+[node name="AccountBackdrop" type="ColorRect" parent="AccountLayer" unique_id=1998830001]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.88)
+
+[node name="AccountCenter" type="CenterContainer" parent="AccountLayer" unique_id=1998830002]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="AccountPanel" type="PanelContainer" parent="AccountLayer/AccountCenter" unique_id=1998830003]
+visible = false
+custom_minimum_size = Vector2(360, 0)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="AccountLayer/AccountCenter/AccountPanel" unique_id=1998830004]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="AccountLayer/AccountCenter/AccountPanel/Margin" unique_id=1998830005]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="AccountTitle" type="Label" parent="AccountLayer/AccountCenter/AccountPanel/Margin/VBox" unique_id=1998830006]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Account"
+horizontal_alignment = 1
+
+[node name="ChangeUsernameButton" type="Button" parent="AccountLayer/AccountCenter/AccountPanel/Margin/VBox" unique_id=1998830007]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Change username"
+
+[node name="ChangePasswordButton" type="Button" parent="AccountLayer/AccountCenter/AccountPanel/Margin/VBox" unique_id=1998830008]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Change password"
+
+[node name="SignOutButton" type="Button" parent="AccountLayer/AccountCenter/AccountPanel/Margin/VBox" unique_id=1998830009]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Sign out"
+
+[node name="CloseAccountButton" type="Button" parent="AccountLayer/AccountCenter/AccountPanel/Margin/VBox" unique_id=1998830010]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Back"
+
+[node name="AccountStatusLabel" type="Label" parent="AccountLayer/AccountCenter/AccountPanel/Margin/VBox" unique_id=1998830011]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 9
+autowrap_mode = 2
+
 [connection signal="pressed" from="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/PlayButton" to="." method="_on_play_pressed"]
 [connection signal="pressed" from="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/HowToPlayButton" to="." method="_on_how_to_play_pressed"]
 [connection signal="pressed" from="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/AccountButton" to="." method="_on_account_button_pressed"]
@@ -646,9 +724,14 @@ autowrap_mode = 2
 [connection signal="pressed" from="ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/QuitButton" to="." method="_on_quit_pressed"]
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/LoginButton" to="." method="_on_login_pressed"]
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/SignupButton" to="." method="_on_signup_pressed"]
+[connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/ForgotPasswordButton" to="." method="_on_forgot_password_pressed"]
 [connection signal="pressed" from="AuthLayer/AuthCenter/AuthPanel/Margin/VBox/CloseAuthButton" to="." method="_on_close_auth_pressed"]
 [connection signal="pressed" from="ModePickLayer/ModePickCenter/ModePickPanel/Margin/VBox/NormalModeButton" to="." method="_on_mode_normal_pressed"]
 [connection signal="pressed" from="ModePickLayer/ModePickCenter/ModePickPanel/Margin/VBox/EndlessModeButton" to="." method="_on_mode_endless_pressed"]
 [connection signal="pressed" from="ModePickLayer/ModePickCenter/ModePickPanel/Margin/VBox/ModePickBackButton" to="." method="_on_mode_pick_back_pressed"]
 [connection signal="pressed" from="LeaderboardLayer/LeaderboardCenter/LeaderboardPanel/Margin/VBox/BackLeaderboardButton" to="." method="_on_close_leaderboard_pressed"]
 [connection signal="pressed" from="ProfileWindow/ProfileCenter/ProfilePanel/Margin/VBox/CreateProfileButton" to="." method="_on_create_profile_pressed"]
+[connection signal="pressed" from="AccountLayer/AccountCenter/AccountPanel/Margin/VBox/ChangeUsernameButton" to="." method="_on_change_username_pressed"]
+[connection signal="pressed" from="AccountLayer/AccountCenter/AccountPanel/Margin/VBox/ChangePasswordButton" to="." method="_on_change_password_pressed"]
+[connection signal="pressed" from="AccountLayer/AccountCenter/AccountPanel/Margin/VBox/SignOutButton" to="." method="_on_sign_out_pressed"]
+[connection signal="pressed" from="AccountLayer/AccountCenter/AccountPanel/Margin/VBox/CloseAccountButton" to="." method="_on_close_account_pressed"]

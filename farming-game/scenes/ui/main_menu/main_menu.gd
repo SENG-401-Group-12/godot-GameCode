@@ -22,6 +22,9 @@ const MENU_BG_PATHS: PackedStringArray = [
 @onready var _password: LineEdit = $AuthLayer/AuthCenter/AuthPanel/Margin/VBox/PasswordEdit
 @onready var _auth_status: Label = $AuthLayer/AuthCenter/AuthPanel/Margin/VBox/AuthStatusLabel
 @onready var _auth_title: Label = $AuthLayer/AuthCenter/AuthPanel/Margin/VBox/AuthTitle
+@onready var _login_button: Button = $AuthLayer/AuthCenter/AuthPanel/Margin/VBox/LoginButton
+@onready var _signup_button: Button = $AuthLayer/AuthCenter/AuthPanel/Margin/VBox/SignupButton
+@onready var _forgot_password_button: Button = $AuthLayer/AuthCenter/AuthPanel/Margin/VBox/ForgotPasswordButton
 @onready var _account_button: Button = $ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/AccountButton
 @onready var _user_line: Label = $ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/UserLine
 @onready var _title_label: Label = $ContentMargin/MenuVBox/MenuCenterContainer/MainColumn/Title
@@ -43,12 +46,17 @@ const MENU_BG_PATHS: PackedStringArray = [
 @onready var _mode_pick_backdrop: ColorRect = $ModePickLayer/ModePickBackdrop
 
 var _leaderboard_pending: int = 0
+var _profile_is_edit_mode := false
+var _auth_reset_mode := false
 
 @onready var _profile_backdrop: ColorRect = $ProfileWindow/ProfileBackdrop
 @onready var _profile_panel: PanelContainer = $ProfileWindow/ProfileCenter/ProfilePanel
 @onready var _profile_name: LineEdit = $ProfileWindow/ProfileCenter/ProfilePanel/Margin/VBox/ProfileNameEdit
 @onready var _profile_status: Label = $ProfileWindow/ProfileCenter/ProfilePanel/Margin/VBox/ProfileStatusLabel
 @onready var _profile_title: Label = $ProfileWindow/ProfileCenter/ProfilePanel/Margin/VBox/ProfileTitle
+@onready var _account_backdrop: ColorRect = $AccountLayer/AccountBackdrop
+@onready var _account_panel: PanelContainer = $AccountLayer/AccountCenter/AccountPanel
+@onready var _account_status: Label = $AccountLayer/AccountCenter/AccountPanel/Margin/VBox/AccountStatusLabel
 
 func _ready() -> void:
 	get_tree().paused = false
@@ -56,7 +64,9 @@ func _ready() -> void:
 	_apply_font_recursive(self)
 	_fix_key_font_sizes()
 	_set_auth_open(false)
+	_set_auth_mode_reset(false)
 	_set_profile_open(false)
+	_set_account_open(false)
 	_leaderboard_layer.visible = false
 	_credits_layer.visible = false
 	_set_mode_pick_open(false)
@@ -64,6 +74,7 @@ func _ready() -> void:
 	_style_mode_pick_panel()
 	_leaderboard_backdrop.gui_input.connect(_on_leaderboard_backdrop_gui_input)
 	_mode_pick_backdrop.gui_input.connect(_on_mode_pick_backdrop_gui_input)
+	_account_backdrop.gui_input.connect(_on_account_backdrop_gui_input)
 	_credits_button.pressed.connect(_on_credits_button_pressed)
 	_credits_backdrop.gui_input.connect(_on_credits_backdrop_gui_input)
 	_close_credits_button.pressed.connect(_on_close_credits_pressed)
@@ -76,12 +87,21 @@ func _ready() -> void:
 	Backend.profile_lookup_succeeded.connect(_on_profile_lookup_succeeded)
 	Backend.profile_lookup_failed.connect(_on_profile_lookup_failed)
 	Backend.profile_created.connect(_on_profile_created)
+	Backend.profile_updated.connect(_on_profile_updated)
+	Backend.profile_update_failed.connect(_on_profile_update_failed)
+	Backend.password_reset_requested.connect(_on_password_reset_requested)
+	Backend.password_reset_failed.connect(_on_password_reset_failed)
+	Backend.password_changed.connect(_on_password_changed)
+	Backend.password_change_failed.connect(_on_password_change_failed)
+	Backend.password_recovery_ready.connect(_on_password_recovery_ready)
+	Backend.password_recovery_failed.connect(_on_password_recovery_failed)
 	Backend.leaderboard_received.connect(_on_leaderboard_received)
 	Backend.leaderboard_failed.connect(_on_leaderboard_failed)
 	Backend.leaderboard_endless_received.connect(_on_leaderboard_endless_received)
 	Backend.leaderboard_endless_failed.connect(_on_leaderboard_endless_failed)
 	Backend.run_submitted.connect(_on_menu_run_submitted_feedback)
 	Backend.run_submit_failed.connect(_on_menu_run_submit_failed)
+	Backend.try_start_password_recovery_from_web_url()
 
 	_add_menu_sparkles()
 	_style_main_buttons()
@@ -145,12 +165,17 @@ func _fix_key_font_sizes() -> void:
 	for p in [
 		$AuthLayer/AuthCenter/AuthPanel/Margin/VBox/LoginButton,
 		$AuthLayer/AuthCenter/AuthPanel/Margin/VBox/SignupButton,
+		$AuthLayer/AuthCenter/AuthPanel/Margin/VBox/ForgotPasswordButton,
 		$AuthLayer/AuthCenter/AuthPanel/Margin/VBox/CloseAuthButton,
 	]:
 		(p as Button).add_theme_font_size_override("font_size", 10)
 		
 	for p in [
 		$ProfileWindow/ProfileCenter/ProfilePanel/Margin/VBox/CreateProfileButton,
+		$AccountLayer/AccountCenter/AccountPanel/Margin/VBox/ChangeUsernameButton,
+		$AccountLayer/AccountCenter/AccountPanel/Margin/VBox/ChangePasswordButton,
+		$AccountLayer/AccountCenter/AccountPanel/Margin/VBox/SignOutButton,
+		$AccountLayer/AccountCenter/AccountPanel/Margin/VBox/CloseAccountButton,
 	]:
 		(p as Button).add_theme_font_size_override("font_size", 10)
 
@@ -325,6 +350,22 @@ func _set_auth_open(open: bool) -> void:
 		_email.grab_focus()
 
 
+func _set_auth_mode_reset(reset_mode: bool) -> void:
+	_auth_reset_mode = reset_mode
+	if reset_mode:
+		_auth_title.text = "Reset Password"
+		_login_button.text = "Save Password"
+		_signup_button.visible = false
+		_forgot_password_button.visible = false
+		_email.visible = false
+	else:
+		_auth_title.text = "Sign in"
+		_login_button.text = "Log in"
+		_signup_button.visible = true
+		_forgot_password_button.visible = true
+		_email.visible = true
+
+
 func _fit_auth_panel_to_screen() -> void:
 	var vp: Vector2 = get_tree().root.get_viewport().get_visible_rect().size
 	var max_w: int = maxi(260, int(vp.x) - 56)
@@ -349,13 +390,29 @@ func _fit_profile_panel_to_screen() -> void:
 	_profile_panel.custom_minimum_size.x = panel_w
 
 
+func _set_account_open(open: bool) -> void:
+	if open:
+		_fit_account_panel_to_screen()
+	_account_backdrop.visible = open
+	_account_panel.visible = open
+	_content_margin.visible = not open
+	if open:
+		_account_status.text = ""
+
+
+func _fit_account_panel_to_screen() -> void:
+	var vp: Vector2 = get_tree().root.get_viewport().get_visible_rect().size
+	var max_w: int = maxi(260, int(vp.x) - 56)
+	var panel_w: int = clampi(360, 280, max_w)
+	_account_panel.custom_minimum_size.x = panel_w
+
+
 func _refresh_user_line() -> void:
 	if Backend.is_logged_in():
 		_user_line.text = "Signed in as %s" % Backend.current_display_name
-		_account_button.text = "Sign out"
 	else:
 		_user_line.text = "Playing as guest (scores are local only)"
-		_account_button.text = "Account"
+	_account_button.text = "Account"
 
 
 func _on_menu_run_submitted_feedback(_data: Variant) -> void:
@@ -449,21 +506,34 @@ func _on_quit_pressed() -> void:
 
 func _on_account_button_pressed() -> void:
 	if Backend.is_logged_in():
-		Backend.logout()
-		_refresh_user_line()
-		_set_auth_open(false)
+		if _account_panel.visible:
+			_set_account_open(false)
+		else:
+			_set_auth_open(false)
+			_set_account_open(true)
 		return
 	if _auth_panel.visible:
+		_set_auth_mode_reset(false)
 		_set_auth_open(false)
 	else:
+		_set_auth_mode_reset(false)
 		_set_auth_open(true)
 
 
 func _on_close_auth_pressed() -> void:
+	_set_auth_mode_reset(false)
 	_set_auth_open(false)
 
 
 func _on_login_pressed() -> void:
+	if _auth_reset_mode:
+		var new_password := _password.text.strip_edges()
+		if new_password.length() < 6:
+			_auth_status.text = "Password must be at least 6 characters."
+			return
+		_auth_status.text = "Saving new password..."
+		Backend.change_password(new_password)
+		return
 	var em := _email.text.strip_edges()
 	if not _email_is_valid_format(em):
 		_auth_status.text = "Enter a valid email (needs @ and a domain like .com or .ca)."
@@ -479,6 +549,15 @@ func _on_signup_pressed() -> void:
 		return
 	_auth_status.text = "Creating account..."
 	Backend.signup(em, _password.text)
+
+
+func _on_forgot_password_pressed() -> void:
+	var em := _email.text.strip_edges()
+	if not _email_is_valid_format(em):
+		_auth_status.text = "Enter your account email first."
+		return
+	_auth_status.text = "Sending reset email..."
+	Backend.request_password_reset(em)
 	
 func _on_create_profile_pressed() -> void:
 	var name := _profile_name.text.strip_edges()
@@ -486,8 +565,12 @@ func _on_create_profile_pressed() -> void:
 		_profile_status.text = "Enter a profile name."
 		return
 
-	_profile_status.text = "Creating profile..."
-	Backend.create_profile(name)
+	if _profile_is_edit_mode:
+		_profile_status.text = "Updating username..."
+		Backend.update_profile(name)
+	else:
+		_profile_status.text = "Creating profile..."
+		Backend.create_profile(name)
 
 
 func _on_login_succeeded(_user_id: String) -> void:
@@ -524,9 +607,34 @@ func _on_profile_lookup_succeeded(data: Variant) -> void:
 
 func _on_profile_created(_data: Variant) -> void:
 	_profile_status.text = "Profile created!"
+	_profile_is_edit_mode = false
 	_refresh_user_line()
 	_set_profile_open(false)
 	_set_auth_open(false)
+
+
+func _on_profile_updated(data: Variant) -> void:
+	if typeof(data) == TYPE_ARRAY:
+		var rows: Array = data
+		if not rows.is_empty():
+			var row_value: Variant = rows[0]
+			if typeof(row_value) == TYPE_DICTIONARY:
+				var row: Dictionary = row_value
+				Backend.current_display_name = str(row.get("display_name", Backend.current_display_name))
+	_profile_status.text = "Username updated!"
+	_profile_is_edit_mode = false
+	_refresh_user_line()
+	_set_profile_open(false)
+	_set_account_open(true)
+
+
+func _on_profile_update_failed(reason: String) -> void:
+	var lowered := reason.to_lower()
+	if lowered.contains("duplicate") or lowered.contains("display_name_key") or lowered.contains("already"):
+		_profile_status.text = "That username is already taken. Try another one."
+	else:
+		_profile_status.text = "Could not update username. Please try again."
+
 
 func _on_profile_lookup_failed(reason: String) -> void:
 	_auth_status.text = reason
@@ -534,10 +642,81 @@ func _on_profile_lookup_failed(reason: String) -> void:
 func _show_profile_prompt() -> void:
 	_set_auth_open(false)
 	_set_profile_open(true)
+	_profile_is_edit_mode = false
 	_profile_title.text = "Create Profile"
 	_profile_status.text = "Choose a profile name to finish setup."
 	_profile_name.text = ""
 	_profile_name.grab_focus()
+
+
+func _on_change_username_pressed() -> void:
+	_set_account_open(false)
+	_set_profile_open(true)
+	_profile_is_edit_mode = true
+	_profile_title.text = "Change Username"
+	_profile_status.text = "Enter a new display name."
+	_profile_name.text = Backend.current_display_name
+	_profile_name.grab_focus()
+
+
+func _on_change_password_pressed() -> void:
+	_account_status.text = "Sending reset email..."
+	Backend.request_password_reset(Backend.current_email)
+
+
+func _on_sign_out_pressed() -> void:
+	Backend.logout()
+	_set_account_open(false)
+	_set_auth_open(false)
+	_refresh_user_line()
+
+
+func _on_close_account_pressed() -> void:
+	_set_account_open(false)
+
+
+func _on_account_backdrop_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		_set_account_open(false)
+
+
+func _on_password_reset_requested(message: String) -> void:
+	if _account_panel.visible:
+		_account_status.text = message
+	else:
+		_auth_status.text = message
+
+
+func _on_password_reset_failed(message: String) -> void:
+	if _account_panel.visible:
+		_account_status.text = message
+	else:
+		_auth_status.text = message
+
+
+func _on_password_changed(message: String) -> void:
+	_set_auth_mode_reset(false)
+	_auth_status.text = message
+
+
+func _on_password_change_failed(message: String) -> void:
+	_auth_status.text = message
+
+
+func _on_password_recovery_ready(email: String) -> void:
+	_set_account_open(false)
+	_set_auth_mode_reset(true)
+	_set_auth_open(true)
+	_email.text = email
+	_password.text = ""
+	_auth_status.text = "Enter your new password."
+	_password.grab_focus()
+
+
+func _on_password_recovery_failed(message: String) -> void:
+	_set_auth_mode_reset(false)
+	_set_auth_open(true)
+	_auth_status.text = message
 
 func _on_leaderboard_pressed() -> void:
 	_set_mode_pick_open(false)
