@@ -200,6 +200,46 @@ func _mobile_prompt_fill_lineedit(field: LineEdit) -> void:
 	field.caret_column = field.text.length()
 
 
+func _mobile_prompt_text(prompt_label: String, current: String, password_mode: bool) -> String:
+	if not OS.has_feature("web") or not _is_touch_device():
+		return current
+	var escaped_label := JSON.stringify(prompt_label)
+	var escaped_current := JSON.stringify(current)
+	var js := ""
+	if password_mode:
+		# Use an offscreen password input to reduce auto-cap/autocorrect behavior on phones.
+		js = (
+			"(function(){try{var i=document.createElement('input');i.type='password';i.autocapitalize='none';"
+			+ "i.autocorrect='off';i.spellcheck=false;i.value=%s;i.style.position='fixed';i.style.left='-9999px';"
+			+ "document.body.appendChild(i);i.focus();var v=window.prompt(%s, i.value);document.body.removeChild(i);"
+			+ "if(v===null){return '__cancel__';}return String(v);}catch(e){return '__cancel__';}})();"
+		) % [escaped_current, escaped_label]
+	else:
+		js = (
+			"(function(){try{var v=window.prompt(%s,%s);if(v===null){return '__cancel__';}return String(v);}catch(e){return '__cancel__';}})();"
+		) % [escaped_label, escaped_current]
+	var result := str(JavaScriptBridge.eval(js, true))
+	if result == "__cancel__":
+		return current
+	return result
+
+
+func _mobile_collect_auth_fields(require_password: bool) -> bool:
+	if not OS.has_feature("web") or not _is_touch_device():
+		return true
+	if _email.text.strip_edges().is_empty():
+		_email.text = _mobile_prompt_text("Enter your email", _email.text, false).strip_edges().to_lower()
+	if _email.text.strip_edges().is_empty():
+		_auth_status.text = "Email is required."
+		return false
+	if require_password and _password.text.strip_edges().is_empty():
+		_password.text = _mobile_prompt_text("Enter your password", _password.text, true)
+	if require_password and _password.text.strip_edges().is_empty():
+		_auth_status.text = "Password is required."
+		return false
+	return true
+
+
 func _request_mobile_web_fullscreen() -> void:
 	if _mobile_fullscreen_requested:
 		return
@@ -638,6 +678,8 @@ func _on_close_auth_pressed() -> void:
 
 func _on_login_pressed() -> void:
 	_try_unlock_mobile_audio()
+	if not _mobile_collect_auth_fields(true):
+		return
 	if _auth_reset_mode:
 		var new_password := _password.text.strip_edges()
 		if new_password.length() < 6:
@@ -656,6 +698,8 @@ func _on_login_pressed() -> void:
 
 func _on_signup_pressed() -> void:
 	_try_unlock_mobile_audio()
+	if not _mobile_collect_auth_fields(true):
+		return
 	var em := _email.text.strip_edges().to_lower()
 	if not _email_is_valid_format(em):
 		_auth_status.text = "Enter a valid email (needs @ and a domain like .com or .ca)."
@@ -668,6 +712,8 @@ func _on_forgot_password_pressed() -> void:
 	_try_unlock_mobile_audio()
 	if _forgot_password_seconds_left() > 0:
 		_auth_status.text = "Too many reset requests. Wait %ds and try again." % _forgot_password_seconds_left()
+		return
+	if not _mobile_collect_auth_fields(false):
 		return
 	var em := _email.text.strip_edges().to_lower()
 	if not _email_is_valid_format(em):
