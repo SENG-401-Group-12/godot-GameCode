@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3 uid="uid://bslw2wobhrnmv"]
+[gd_scene load_steps=4 format=3 uid="uid://bslw2wobhrnmv"]
 
 [ext_resource type="PackedScene" uid="uid://3rpky562qwkn" path="res://scenes/ui/game/shop/upgrade_card.tscn" id="1_86bn8"]
 [ext_resource type="Script" uid="uid://vwm0u76libss" path="res://scenes/ui/game/shop/shop_ui.gd" id="1_we3u1"]
@@ -19,6 +19,22 @@ content_margin_top = 8
 content_margin_right = 8
 content_margin_bottom = 8
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_crop_stats"]
+bg_color = Color(0.1, 0.1, 0.12, 0.88)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.26, 0.26, 0.3, 0.85)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 6
+content_margin_top = 4
+content_margin_right = 6
+content_margin_bottom = 4
+
 [node name="ShopUI" type="Control" unique_id=110660899]
 layout_mode = 3
 anchors_preset = 15
@@ -35,12 +51,36 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
 
 [node name="RootVBox" type="VBoxContainer" parent="MarginContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
+
+[node name="CropStatsPanel" type="PanelContainer" parent="MarginContainer/RootVBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_crop_stats")
+
+[node name="CropStatsInner" type="VBoxContainer" parent="MarginContainer/RootVBox/CropStatsPanel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="CropStatsTitle" type="Label" parent="MarginContainer/RootVBox/CropStatsPanel/CropStatsInner"]
+layout_mode = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 7
+text = "Hover a crop for base → current stats"
+autowrap_mode = 2
+
+[node name="CropStatsRow" type="HBoxContainer" parent="MarginContainer/RootVBox/CropStatsPanel/CropStatsInner"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 6
 
 [node name="HeaderPanel" type="PanelContainer" parent="MarginContainer/RootVBox"]
 layout_mode = 2
@@ -67,7 +107,7 @@ text = "Reroll (12)"
 
 [node name="HintLabel" type="Label" parent="MarginContainer/RootVBox/HeaderPanel/HeaderVBox"]
 layout_mode = 2
-text = "Choose one upgrade."
+text = "Select an upgrade, then tap Buy or Back."
 autowrap_mode = 2
 
 [node name="CardContainer" type="HBoxContainer" parent="MarginContainer/RootVBox" unique_id=1941996475]
