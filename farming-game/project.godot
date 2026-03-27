@@ -17,7 +17,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 config/name="Harvest For All"
 run/main_scene="uid://bqm3nmn8v0khx"
 config/features=PackedStringArray("4.6", "GL Compatibility")
-config/icon="res://icon.svg"
+config/icon="res://assets/branding/harvest-for-all-logo.png"
 
 [autoload]
 
