@@ -9,6 +9,7 @@ signal signup_succeeded(message: String)
 signal signup_failed(message: String)
 signal password_reset_requested(message: String)
 signal password_reset_failed(message: String)
+signal password_reset_rate_limited(wait_seconds: int, message: String)
 signal password_changed(message: String)
 signal password_change_failed(message: String)
 signal password_recovery_ready(email: String)
@@ -196,6 +197,35 @@ func _parse_query_string(raw: String) -> Dictionary:
 		if not k.is_empty():
 			out[k] = v
 	return out
+
+
+func _header_value(headers: PackedStringArray, name: String) -> String:
+	var wanted := name.to_lower()
+	for h in headers:
+		var line := str(h)
+		var idx := line.find(":")
+		if idx <= 0:
+			continue
+		var key := line.substr(0, idx).strip_edges().to_lower()
+		if key == wanted:
+			return line.substr(idx + 1).strip_edges()
+	return ""
+
+
+func _extract_retry_after_seconds(response_headers: PackedStringArray) -> int:
+	var retry_after_raw := _header_value(response_headers, "retry-after")
+	if not retry_after_raw.is_empty():
+		var as_int := int(retry_after_raw)
+		if as_int > 0:
+			return as_int
+	var reset_unix_raw := _header_value(response_headers, "x-ratelimit-reset")
+	if not reset_unix_raw.is_empty():
+		var reset_unix := int(reset_unix_raw)
+		var now_unix := int(Time.get_unix_time_from_system())
+		var delta := reset_unix - now_unix
+		if delta > 0:
+			return delta
+	return 0
 
 
 func try_start_password_recovery_from_web_url() -> void:
@@ -458,6 +488,7 @@ func request_password_reset(email: String) -> void:
 			password_reset_requested.emit("If this email exists, a reset link was sent.")
 		else:
 			var msg := "Could not send reset email."
+			var retry_secs := _extract_retry_after_seconds(response_headers)
 			if typeof(data) == TYPE_DICTIONARY:
 				if data.has("msg"):
 					msg = str(data["msg"])
@@ -465,6 +496,11 @@ func request_password_reset(email: String) -> void:
 					msg = str(data["message"])
 				elif data.has("error_description"):
 					msg = str(data["error_description"])
+			var lowered := msg.to_lower()
+			if retry_secs > 0 and (response_code == 429 or lowered.contains("rate") or lowered.contains("too many")):
+				password_reset_rate_limited.emit(retry_secs, msg)
+				http.queue_free()
+				return
 			password_reset_failed.emit(msg)
 		http.queue_free()
 	)

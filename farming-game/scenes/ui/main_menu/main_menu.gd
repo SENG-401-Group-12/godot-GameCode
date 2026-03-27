@@ -58,6 +58,9 @@ var _auth_reset_mode := false
 @onready var _account_panel: PanelContainer = $AccountLayer/AccountCenter/AccountPanel
 @onready var _account_status: Label = $AccountLayer/AccountCenter/AccountPanel/Margin/VBox/AccountStatusLabel
 
+var _forgot_password_retry_until_unix: int = 0
+var _forgot_password_timer: Timer
+
 func _ready() -> void:
 	get_tree().paused = false
 	_load_menu_background_texture()
@@ -91,6 +94,7 @@ func _ready() -> void:
 	Backend.profile_update_failed.connect(_on_profile_update_failed)
 	Backend.password_reset_requested.connect(_on_password_reset_requested)
 	Backend.password_reset_failed.connect(_on_password_reset_failed)
+	Backend.password_reset_rate_limited.connect(_on_password_reset_rate_limited)
 	Backend.password_changed.connect(_on_password_changed)
 	Backend.password_change_failed.connect(_on_password_change_failed)
 	Backend.password_recovery_ready.connect(_on_password_recovery_ready)
@@ -102,6 +106,12 @@ func _ready() -> void:
 	Backend.run_submitted.connect(_on_menu_run_submitted_feedback)
 	Backend.run_submit_failed.connect(_on_menu_run_submit_failed)
 	Backend.try_start_password_recovery_from_web_url()
+	_forgot_password_timer = Timer.new()
+	_forgot_password_timer.wait_time = 1.0
+	_forgot_password_timer.one_shot = false
+	_forgot_password_timer.autostart = false
+	add_child(_forgot_password_timer)
+	_forgot_password_timer.timeout.connect(_on_forgot_password_countdown_tick)
 
 	_add_menu_sparkles()
 	_style_main_buttons()
@@ -552,6 +562,9 @@ func _on_signup_pressed() -> void:
 
 
 func _on_forgot_password_pressed() -> void:
+	if _forgot_password_seconds_left() > 0:
+		_auth_status.text = "Too many reset requests. Wait %ds and try again." % _forgot_password_seconds_left()
+		return
 	var em := _email.text.strip_edges()
 	if not _email_is_valid_format(em):
 		_auth_status.text = "Enter your account email first."
@@ -681,6 +694,7 @@ func _on_account_backdrop_gui_input(event: InputEvent) -> void:
 
 
 func _on_password_reset_requested(message: String) -> void:
+	_stop_forgot_password_countdown()
 	if _account_panel.visible:
 		_account_status.text = message
 	else:
@@ -692,6 +706,49 @@ func _on_password_reset_failed(message: String) -> void:
 		_account_status.text = message
 	else:
 		_auth_status.text = message
+
+
+func _forgot_password_seconds_left() -> int:
+	return maxi(0, _forgot_password_retry_until_unix - int(Time.get_unix_time_from_system()))
+
+
+func _start_forgot_password_countdown(wait_seconds: int) -> void:
+	if wait_seconds <= 0:
+		return
+	_forgot_password_retry_until_unix = int(Time.get_unix_time_from_system()) + wait_seconds
+	_update_forgot_password_button_countdown()
+	if _forgot_password_seconds_left() > 0 and _forgot_password_timer != null and _forgot_password_timer.is_stopped():
+		_forgot_password_timer.start()
+
+
+func _stop_forgot_password_countdown() -> void:
+	_forgot_password_retry_until_unix = 0
+	_forgot_password_button.text = "Forgot password"
+	if _forgot_password_timer != null and not _forgot_password_timer.is_stopped():
+		_forgot_password_timer.stop()
+
+
+func _update_forgot_password_button_countdown() -> void:
+	var secs := _forgot_password_seconds_left()
+	if secs > 0:
+		_forgot_password_button.text = "Forgot password (%ds)" % secs
+	else:
+		_forgot_password_button.text = "Forgot password"
+
+
+func _on_forgot_password_countdown_tick() -> void:
+	_update_forgot_password_button_countdown()
+	if _forgot_password_seconds_left() <= 0 and _forgot_password_timer != null:
+		_forgot_password_timer.stop()
+
+
+func _on_password_reset_rate_limited(wait_seconds: int, _message: String) -> void:
+	_start_forgot_password_countdown(wait_seconds)
+	var line := "Too many reset requests. Wait %ds and try again." % _forgot_password_seconds_left()
+	if _account_panel.visible:
+		_account_status.text = line
+	else:
+		_auth_status.text = line
 
 
 func _on_password_changed(message: String) -> void:
