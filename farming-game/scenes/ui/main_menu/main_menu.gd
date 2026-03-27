@@ -62,6 +62,7 @@ var _forgot_password_retry_until_unix: int = 0
 var _forgot_password_timer: Timer
 var _mobile_audio_unlock_done := false
 var _mobile_fullscreen_requested := false
+var _mobile_prompt_active := false
 
 func _ready() -> void:
 	get_tree().paused = false
@@ -152,6 +153,7 @@ func _setup_mobile_text_input() -> void:
 		(e as LineEdit).selecting_enabled = true
 		(e as LineEdit).focus_mode = Control.FOCUS_ALL
 		(e as LineEdit).gui_input.connect(_on_mobile_lineedit_gui_input.bind(e))
+		(e as LineEdit).focus_entered.connect(_on_mobile_lineedit_focus_entered.bind(e))
 
 
 func _apply_mobile_web_canvas_css() -> void:
@@ -177,11 +179,22 @@ func _on_mobile_lineedit_gui_input(event: InputEvent, field: LineEdit) -> void:
 		_mobile_prompt_fill_lineedit(field)
 
 
+func _on_mobile_lineedit_focus_entered(field: LineEdit) -> void:
+	if not _is_touch_device() or not OS.has_feature("web"):
+		return
+	# Some mobile browsers focus the field but never show keyboard for canvas apps.
+	# Prompt on focus as a fallback so auth always remains usable.
+	call_deferred("_mobile_prompt_fill_lineedit", field)
+
+
 func _mobile_prompt_fill_lineedit(field: LineEdit) -> void:
 	if not OS.has_feature("web"):
 		return
 	if not _is_touch_device():
 		return
+	if _mobile_prompt_active:
+		return
+	_mobile_prompt_active = true
 	var prompt_label := field.placeholder_text if not field.placeholder_text.is_empty() else "Enter text"
 	var current := field.text
 	var escaped_label := JSON.stringify(prompt_label)
@@ -192,12 +205,14 @@ func _mobile_prompt_fill_lineedit(field: LineEdit) -> void:
 	)
 	var result := str(JavaScriptBridge.eval(js, true))
 	if result == "__cancel__":
+		_mobile_prompt_active = false
 		return
 	# Email should never be capitalized by mobile keyboard autocorrect.
 	if field == _email:
 		result = result.to_lower()
 	field.text = result
 	field.caret_column = field.text.length()
+	_mobile_prompt_active = false
 
 
 func _mobile_prompt_text(prompt_label: String, current: String, password_mode: bool) -> String:
