@@ -12,6 +12,18 @@ enum UpgradeType {
 @export var upgrade_type: UpgradeType
 @export var tier: int
 
+
+func get_cost() -> int:
+	var base := 8 + (tier * 8)
+	match upgrade_type:
+		UpgradeType.YIELD:
+			base += 4
+		UpgradeType.GROWTH_SPEED:
+			base += 5
+		UpgradeType.FARM_SIZE:
+			base += 8
+	return base
+
 func apply_upgrade() -> bool:
 	if not PlayerData.can_apply_upgrade(self):
 		return false

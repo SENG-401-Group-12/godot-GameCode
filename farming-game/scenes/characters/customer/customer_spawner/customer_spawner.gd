@@ -3,7 +3,7 @@ extends Node2D
 const CUSTOMER_SCENE = preload("res://scenes/characters/customer/customer.tscn")
 
 signal customer_spawned
-signal customer_served
+signal customer_served(customer: Node2D)
 signal customer_expired
 
 @export var slot_spacing := 80.0 # distance between customers
@@ -42,7 +42,7 @@ func try_spawn_customer(config: Dictionary) -> bool:
 	customer.expired.connect(_on_customer_done.bind(slot_index))
 	
 	# Pass signals up to GameManager
-	customer.served.connect(func(_c): customer_served.emit())
+	customer.served.connect(func(c): customer_served.emit(c))
 	customer.expired.connect(func(_c): customer_expired.emit())
 	return true
 

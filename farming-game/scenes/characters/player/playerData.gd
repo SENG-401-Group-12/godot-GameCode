@@ -3,6 +3,7 @@ extends Node
 signal farm_size_changed(crop_name)
 signal inventory_changed
 signal selected_crop_changed(crop_name)
+signal currency_changed(new_amount: int)
 
 ## Soft caps per run so the shop cannot stack the same bonus forever.
 const MAX_YIELD_MULTIPLIER := 2.2
@@ -11,6 +12,7 @@ const MAX_FARM_SIZE_BONUS_PER_AXIS := 2
 
 var inventory := {}
 var crop_upgrades := {}
+var run_currency: int = 0
 var selected_crop_index := 0
 var character_preset_index: int = 0
 const CHARACTER_PRESET_KEYS: PackedStringArray = [
@@ -141,12 +143,14 @@ func _ensure_crop_registered(crop_name: String) -> void:
 func reset_run_state() -> void:
 	inventory.clear()
 	crop_upgrades.clear()
+	run_currency = 0
 
 	for crop in Globals.game_crops:
 		_ensure_crop_registered(crop.crop_name)
 
 	selected_crop_index = clampi(selected_crop_index, 0, max(Globals.game_crops.size() - 1, 0))
 	inventory_changed.emit()
+	currency_changed.emit(run_currency)
 	selected_crop_changed.emit(get_selected_crop_name())
 
 func get_selected_crop() -> CropData:
@@ -181,6 +185,27 @@ func add_crop(crop_name: String, amount: int) -> void:
 	_ensure_crop_registered(crop_name)
 	inventory[crop_name] += amount
 	inventory_changed.emit()
+
+
+func add_currency(amount: int) -> void:
+	if amount <= 0:
+		return
+	run_currency += amount
+	currency_changed.emit(run_currency)
+
+
+func can_afford(amount: int) -> bool:
+	return run_currency >= max(0, amount)
+
+
+func spend_currency(amount: int) -> bool:
+	if amount <= 0:
+		return true
+	if run_currency < amount:
+		return false
+	run_currency -= amount
+	currency_changed.emit(run_currency)
+	return true
 
 func remove_crop(crop_name: String, amount: int) -> bool:
 	if amount <= 0:

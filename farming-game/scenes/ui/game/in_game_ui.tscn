@@ -27,8 +27,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 10
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
@@ -37,7 +37,7 @@ layout_mode = 2
 theme_override_constants/separation = 10
 
 [node name="StatusPanel" type="ColorRect" parent="MarginContainer/HBoxContainer" unique_id=1782126048]
-custom_minimum_size = Vector2(110, 50)
+custom_minimum_size = Vector2(128, 56)
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
@@ -108,7 +108,7 @@ horizontal_alignment = 1
 autowrap_mode = 2
 
 [node name="CropPanelFrame" type="NinePatchRect" parent="MarginContainer/HBoxContainer" unique_id=224634056]
-custom_minimum_size = Vector2(150, 275)
+custom_minimum_size = Vector2(150, 308)
 layout_mode = 2
 size_flags_vertical = 0
 texture = ExtResource("2_crop_frame")
@@ -189,6 +189,20 @@ horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
 
+[node name="SeedsRow" type="HBoxContainer" parent="MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer" unique_id=1408825936]
+layout_mode = 2
+size_flags_horizontal = 4
+alignment = 1
+theme_override_constants/separation = 3
+
+[node name="SeedsLabel" type="Label" parent="MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer/SeedsRow" unique_id=1408825938]
+layout_mode = 2
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("1_455v0")
+theme_override_font_sizes/font_size = 8
+text = "Seeds: 0"
+vertical_alignment = 1
+
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/HBoxContainer/CropPanelFrame/MarginContainer/CropPanelInner/InnerMargin/VBoxContainer" unique_id=1242764303]
 layout_mode = 2
 size_flags_vertical = 3
@@ -225,6 +239,33 @@ offset_bottom = 28.0
 
 [node name="InteractButton" parent="." unique_id=593256940 instance=ExtResource("4_kx3kk")]
 position = Vector2(555, 323)
+
+[node name="UpgradeDock" type="Control" parent="." unique_id=1782126049]
+layout_mode = 1
+anchors_preset = 12
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -220.0
+offset_top = -34.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 1
+
+[node name="UpgradeCircles" type="HBoxContainer" parent="UpgradeDock" unique_id=1782126050]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 8
+size_flags_vertical = 8
+alignment = 2
+theme_override_constants/separation = 6
 
 [node name="GameOverLayer" type="ColorRect" parent="." unique_id=1233865147]
 visible = false
