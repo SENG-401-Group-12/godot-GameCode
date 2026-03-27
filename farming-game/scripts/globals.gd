@@ -49,5 +49,6 @@ const default_farm_size := Vector2i(3, 5)
 
 # Crop upgrade base values
 const base_yield_upgrade := 0.1
-const base_growth_upgrade := 0.25
+## Per tier: fraction of that crop's growth_time_per_stage shaved (fast crops get smaller flat cuts).
+const base_growth_stage_fraction := 0.125
 const base_farm_size_upgrade := Vector2i(1, 1)

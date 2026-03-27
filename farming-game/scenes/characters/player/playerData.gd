@@ -279,8 +279,12 @@ func can_apply_upgrade(u: CropUpgrade) -> bool:
 			var next_mult: float = st.yield_multiplier + Globals.base_yield_upgrade * u.tier
 			return next_mult <= MAX_YIELD_MULTIPLIER + 0.001
 		CropUpgrade.UpgradeType.GROWTH_SPEED:
-			var next_bonus: float = st.growth_speed_bonus + Globals.base_growth_upgrade * u.tier
-			return next_bonus <= MAX_GROWTH_SPEED_BONUS + 0.001
+			var stage_t: float = CropUpgrade.growth_time_per_stage_for_crop_name(u.crop_name)
+			var delta: float = CropUpgrade.growth_speed_bonus_delta_for_upgrade(u)
+			var next_bonus: float = st.growth_speed_bonus + delta
+			var max_by_stage: float = maxf(0.0, stage_t - 0.08)
+			var cap: float = minf(max_by_stage, MAX_GROWTH_SPEED_BONUS)
+			return next_bonus <= cap + 0.001
 		CropUpgrade.UpgradeType.FARM_SIZE:
 			var b: Vector2i = st.size_bonus
 			return b.x < MAX_FARM_SIZE_BONUS_PER_AXIS and b.y < MAX_FARM_SIZE_BONUS_PER_AXIS
